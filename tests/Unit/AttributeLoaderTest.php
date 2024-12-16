@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Tests\Unit;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use stdClass;
 use zennit\ABAC\Models\UserAttribute;
 use zennit\ABAC\Services\AttributeLoader;
@@ -11,7 +12,10 @@ class AttributeLoaderTest extends TestCase
 {
     private AttributeLoader $loader;
 
-    protected function setUp(): void
+	/**
+	 * @throws BindingResolutionException
+	 */
+	protected function setUp(): void
     {
         parent::setUp();
         $this->loader = $this->app->make(AttributeLoader::class);
