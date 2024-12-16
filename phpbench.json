@@ -1,0 +1,11 @@
+{
+    "bootstrap": "tests/bootstrap.php",
+    "path": "tests/Benchmarks",
+    "time_unit": "milliseconds",
+    "progress": "dots",
+    "outputs": {
+        "my_output": {
+            "extends": "aggregate"
+        }
+    }
+}

@@ -50,11 +50,23 @@ jobs:
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
 
-    - name: Upload test results to Codecov
-      if: ${{ !cancelled() }}
-      uses: codecov/test-results-action@v1
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml,./junit.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
 
     - name: Run benchmarks
-      run: vendor/bin/phpbench run tests/Benchmarks --report=aggregate
+      run: vendor/bin/phpbench run --report=aggregate
+      env:
+        DB_CONNECTION: pgsql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 5432
+        DB_DATABASE: testing
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
