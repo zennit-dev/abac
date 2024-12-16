@@ -2,7 +2,8 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true">
+         colors="true"
+         cacheDirectory=".phpunit.cache">
     <testsuites>
         <testsuite name="Unit">
             <directory>./tests/Unit</directory>
@@ -11,10 +12,15 @@
             <directory>./tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory>./src</directory>
+        </include>
+    </source>
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="DB_CONNECTION" value="pgsql"/>
-        <env name="DB_HOST" value="127.0.0.1"/> 
+        <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="5432"/>
         <env name="DB_DATABASE" value="testing"/>
         <env name="DB_USERNAME" value="postgres"/>
