@@ -8,7 +8,6 @@ use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\DTO\PolicyEvaluationResult;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Logging\AuditLogger;
 use zennit\ABAC\Models\UserAttribute;
 
@@ -27,9 +26,8 @@ readonly class AbacService implements AbacServiceInterface
     }
 
     /**
-     * @throws UnsupportedOperatorException
-     * @throws ValidationException
      * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
      */
     public function evaluate(AccessContext $context): PolicyEvaluationResult
     {
@@ -49,19 +47,6 @@ readonly class AbacService implements AbacServiceInterface
                 return $result;
             }
         );
-    }
-
-    private function getSubjectAttributes($subject): AttributeCollection
-    {
-        $attributes = UserAttribute::where('subject_type', get_class($subject))
-            ->where('subject_id', $subject->id)
-            ->get()
-            ->mapWithKeys(function ($attribute) {
-                return [$attribute->attribute_name => $attribute->attribute_value];
-            })
-            ->all();
-
-        return new AttributeCollection($attributes);
     }
 
     private function withPerformanceMonitoring(callable $callback)
@@ -85,12 +70,25 @@ readonly class AbacService implements AbacServiceInterface
         return $result;
     }
 
+    private function getSubjectAttributes($subject): AttributeCollection
+    {
+        $attributes = UserAttribute::where('subject_type', get_class($subject))
+            ->where('subject_id', $subject->id)
+            ->get()
+            ->mapWithKeys(function ($attribute) {
+                return [$attribute->attribute_name => $attribute->attribute_value];
+            })
+            ->all();
+
+        return new AttributeCollection($attributes);
+    }
+
     /**
-     * @throws UnsupportedOperatorException
-     * @throws ValidationException
      * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     * @return mixed
      */
-    private function evaluateCached(AccessContext $context, AttributeCollection $attributes)
+    private function evaluateCached(AccessContext $context, AttributeCollection $attributes): PolicyEvaluationResult
     {
         $cacheKey = "policy_evaluation:{$context->resource}:{$context->operation}";
 

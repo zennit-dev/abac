@@ -68,7 +68,7 @@ class AbacServiceProvider extends ServiceProvider
             $timestamp = date('Y_m_d_His');
             
             $this->publishes([
-                __DIR__.'/../database/migrations/create_abac_tables.php' => 
+                __DIR__.'/../../database/migrations/create_abac_tables.php' =>
                     database_path("migrations/{$timestamp}_create_abac_tables.php"),
             ], 'migrations');
         }
