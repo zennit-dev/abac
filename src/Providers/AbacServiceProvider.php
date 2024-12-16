@@ -65,7 +65,12 @@ class AbacServiceProvider extends ServiceProvider
                 __DIR__ . '/../../config/abac.php' => config_path('abac.php'),
             ], 'config');
 
-            $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+            $timestamp = date('Y_m_d_His');
+            
+            $this->publishes([
+                __DIR__.'/../database/migrations/create_abac_tables.php' => 
+                    database_path("migrations/{$timestamp}_create_abac_tables.php"),
+            ], 'migrations');
         }
     }
 }
