@@ -1,0 +1,68 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        coverage: xdebug
+        extensions: pdo, pdo_pgsql
+
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Run migrations
+      run: php vendor/bin/phpunit --migrate-configuration
+      env:
+        DB_CONNECTION: pgsql
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_DATABASE: testing
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+
+    - name: Execute tests with coverage
+      run: vendor/bin/phpunit --coverage-clover=coverage.xml
+      env:
+        DB_CONNECTION: pgsql
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_DATABASE: testing
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+
+    - name: Run benchmarks
+      run: vendor/bin/phpbench run tests/Benchmarks --report=aggregate

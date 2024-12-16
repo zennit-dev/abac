@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: pint-check
+        name: Run pint check
+        entry: sh -c 'cd apps/provider/ && composer run-script pint'
+        language: system
+        pass_filenames: false
+        stages: [ pre-commit ]

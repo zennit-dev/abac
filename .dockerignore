@@ -1,0 +1,10 @@
+.git
+.idea
+.vscode
+node_modules
+vendor
+.env.example
+.gitignore
+.gitattributes
+storage
+routes/routes.txt

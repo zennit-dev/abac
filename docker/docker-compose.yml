@@ -1,0 +1,39 @@
+services:
+    abac:
+        container_name: abac
+        networks:
+            - abac-network
+        build:
+            context: ..
+            target: testing
+        volumes:
+            - ../:/var/www/html:delegated
+            - vendor:/var/www/html/vendor
+        depends_on:
+            abac-postgres:
+                condition: service_healthy
+
+    abac-postgres:
+        image: postgres:latest
+        container_name: abac_postgres
+        networks:
+            - abac-network
+        environment:
+            POSTGRES_DB: testing
+            POSTGRES_USER: testing
+            POSTGRES_PASSWORD: testing
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U testing" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes:
+            - postgres_testing:/var/lib/postgresql/data
+
+networks:
+    abac-network:
+        driver: bridge
+
+volumes:
+    vendor:
+    postgres_testing:
