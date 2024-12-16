@@ -1,11 +1,13 @@
 {
-    "bootstrap": "tests/bootstrap.php",
-    "path": "tests/Benchmarks",
-    "time_unit": "milliseconds",
-    "progress": "dots",
-    "outputs": {
-        "my_output": {
-            "extends": "aggregate"
+    "$schema": "./vendor/phpbench/phpbench/phpbench.schema.json",
+    "runner.bootstrap": "tests/bootstrap.php",
+    "runner.path": "tests/Benchmarks",
+    "runner.time_unit": "milliseconds",
+    "runner.progress": "dots",
+    "report.generators": {
+        "aggregate": {
+            "generator": "expression",
+            "cols": ["benchmark", "subject", "mean", "mode", "rstdev", "mem_peak"]
         }
     }
 }
