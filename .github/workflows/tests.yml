@@ -38,16 +38,6 @@ jobs:
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: Run migrations
-      run: php vendor/bin/phpunit --migrate-configuration
-      env:
-        DB_CONNECTION: pgsql
-        DB_HOST: localhost
-        DB_PORT: 5432
-        DB_DATABASE: testing
-        DB_USERNAME: postgres
-        DB_PASSWORD: postgres
-
     - name: Execute tests with coverage
       run: vendor/bin/phpunit --coverage-clover=coverage.xml
       env:
