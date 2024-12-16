@@ -7,12 +7,6 @@ use zennit\ABAC\Providers\AbacServiceProvider;
 
 class TestCase extends Orchestra
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->artisan('migrate', ['--database' => 'testing'])->run();
-    }
-
     protected function getPackageProviders($app): array
     {
         return [
