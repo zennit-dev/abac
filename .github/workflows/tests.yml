@@ -36,7 +36,9 @@ jobs:
         extensions: pdo, pdo_pgsql
 
     - name: Install Dependencies
-      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      run: |
+        composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        composer dump-autoload
 
     - name: Execute tests with coverage and generate test results
       run: vendor/bin/phpunit --coverage-clover=coverage.xml --log-junit junit.xml
@@ -53,13 +55,6 @@ jobs:
       uses: codecov/test-results-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        fail_ci_if_error: true
 
     - name: Run benchmarks
       run: vendor/bin/phpbench run tests/Benchmarks --report=aggregate

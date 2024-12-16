@@ -30,7 +30,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "zennit\\ABAC\\Tests\\": "tests/"
+            "zennit\\ABAC\\Tests\\": "tests/",
+            "zennit\\ABAC\\Tests\\TestHelpers\\": "tests/TestHelpers/"
         }
     },
     "extra": {

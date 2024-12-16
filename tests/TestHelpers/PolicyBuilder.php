@@ -20,10 +20,16 @@ trait PolicyBuilder
         ]);
 
         foreach ($conditions as $condition) {
-            $policy->conditions()->create([
+            $policyCondition = $policy->conditions()->create([
                 'operator' => $condition['operator'],
-                'attributes' => $condition['attributes'],
             ]);
+
+            foreach ($condition['attributes'] as $attribute) {
+                $policyCondition->attributes()->create([
+                    'attribute_name' => $attribute['attribute_name'],
+                    'attribute_value' => $attribute['attribute_value'],
+                ]);
+            }
         }
 
         return $policy;
