@@ -6,7 +6,6 @@
 composer.lock
 .idea
 .vscode
-/coverage
+coverage/
 coverage.txt
 coverage.xml
-.

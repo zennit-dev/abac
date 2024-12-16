@@ -25,7 +25,7 @@ class TestCase extends Orchestra
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
             'driver' => 'pgsql',
-            'host' => $app['config']->get('database.connections.pgsql.host', '127.0.0.1'),
+            'host' => $app['config']->get('database.connections.pgsql.host', 'abac_postgres'),
             'port' => $app['config']->get('database.connections.pgsql.port', 5432),
             'database' => $app['config']->get('database.connections.pgsql.database', 'testing'),
             'username' => $app['config']->get('database.connections.pgsql.username', 'postgres'),

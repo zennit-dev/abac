@@ -32,3 +32,5 @@ RUN pecl install xdebug \
     && echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 CMD ["tail", "-f", "/dev/null"]
+
+RUN git config --global --add safe.directory /var/www/html
