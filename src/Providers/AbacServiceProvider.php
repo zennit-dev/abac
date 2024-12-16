@@ -4,6 +4,7 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
+use zennit\ABAC\Commands\PublishAbacCommand;
 use zennit\ABAC\Contracts\AbacServiceInterface;
 use zennit\ABAC\Facades\Abac;
 use zennit\ABAC\Logging\AuditLogger;
@@ -63,9 +64,15 @@ class AbacServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../../config/abac.php' => config_path('abac.php'),
-            ], 'config');
+            ], 'abac-config');
 
-            $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+            $this->publishes([
+                __DIR__ . '/../../database/migrations' => database_path('migrations'),
+            ], 'abac-migrations');
+
+            $this->commands([
+                PublishAbacCommand::class,
+            ]);
         }
     }
 }
