@@ -3,6 +3,7 @@
 .env
 .env.backup
 .phpunit.result.cache
+.phpunit.cache
 composer.lock
 .idea
 .vscode
