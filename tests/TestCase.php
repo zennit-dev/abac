@@ -25,11 +25,11 @@ class TestCase extends Orchestra
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
             'driver' => 'pgsql',
-            'host' => 'abac-postgres',
-            'port' => 5432,
-            'database' => 'testing',
-            'username' => 'testing',
-            'password' => 'testing',
+            'host' => $app['config']->get('database.connections.pgsql.host', '127.0.0.1'),
+            'port' => $app['config']->get('database.connections.pgsql.port', 5432),
+            'database' => $app['config']->get('database.connections.pgsql.database', 'testing'),
+            'username' => $app['config']->get('database.connections.pgsql.username', 'postgres'),
+            'password' => $app['config']->get('database.connections.pgsql.password', 'postgres'),
         ]);
 
         // Load and merge ABAC config

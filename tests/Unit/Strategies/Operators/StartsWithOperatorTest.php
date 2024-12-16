@@ -2,8 +2,8 @@
 
 namespace zennit\ABAC\Tests\Unit\Strategies\Operators;
 
-use zennit\ABAC\Tests\TestCase;
 use zennit\ABAC\Strategies\Operators\StartsWithOperator;
+use zennit\ABAC\Tests\TestCase;
 
 class StartsWithOperatorTest extends TestCase
 {

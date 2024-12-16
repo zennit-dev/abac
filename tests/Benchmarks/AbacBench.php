@@ -33,7 +33,7 @@ class AbacBench
         $this->abacService = app(AbacService::class);
 
         // Create test subject
-        $this->subject = new stdClass;
+        $this->subject = new stdClass();
         $this->subject->id = 1;
 
         UserAttribute::create([

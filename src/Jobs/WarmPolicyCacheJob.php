@@ -23,10 +23,10 @@ class WarmPolicyCacheJob implements ShouldQueue
     ) {
     }
 
-	/**
-	 * @throws InvalidArgumentException
-	 */
-	public function handle(PolicyRepository $repository, CacheService $cache): void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function handle(PolicyRepository $repository, CacheService $cache): void
     {
         if ($this->resource) {
             $policies = $repository->getPoliciesFor($this->resource, 'all');

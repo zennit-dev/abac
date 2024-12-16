@@ -16,7 +16,8 @@ readonly class BatchProcessor
     public function __construct(
         private AbacService $abacService,
         private array $config
-    ) {}
+    ) {
+    }
 
     /**
      * @throws UnsupportedOperatorException

@@ -22,10 +22,10 @@ class InvalidatePolicyCacheJob implements ShouldQueue
     ) {
     }
 
-	/**
-	 * @throws InvalidArgumentException
-	 */
-	public function handle(CacheService $cache): void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function handle(CacheService $cache): void
     {
         $cache->forget("policy:{$this->policyId}");
     }

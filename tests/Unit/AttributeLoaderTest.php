@@ -12,10 +12,10 @@ class AttributeLoaderTest extends TestCase
 {
     private AttributeLoader $loader;
 
-	/**
-	 * @throws BindingResolutionException
-	 */
-	protected function setUp(): void
+    /**
+     * @throws BindingResolutionException
+     */
+    protected function setUp(): void
     {
         parent::setUp();
         $this->loader = $this->app->make(AttributeLoader::class);

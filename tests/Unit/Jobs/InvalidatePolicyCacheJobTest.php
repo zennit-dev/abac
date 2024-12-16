@@ -42,6 +42,6 @@ class InvalidatePolicyCacheJobTest extends TestCase
         $reflection = new ReflectionClass($job);
         $property = $reflection->getProperty('policyId');
 
-	    $this->assertEquals($policyId, $property->getValue($job));
+        $this->assertEquals($policyId, $property->getValue($job));
     }
 }

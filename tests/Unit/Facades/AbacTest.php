@@ -14,7 +14,7 @@ class AbacTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Ensure database is in a clean state
         $this->artisan('migrate:fresh');
     }
@@ -31,10 +31,10 @@ class AbacTest extends TestCase
         $this->assertEquals('abac', Abac::getFacadeAccessor());
     }
 
-	/**
-	 * @throws BindingResolutionException
-	 */
-	public function test_evaluate_method(): void
+    /**
+     * @throws BindingResolutionException
+     */
+    public function test_evaluate_method(): void
     {
         $subject = new stdClass();
         $subject->id = 1;
@@ -43,10 +43,10 @@ class AbacTest extends TestCase
         $this->assertNotNull($result);
     }
 
-	/**
-	 * @throws BindingResolutionException
-	 */
-	public function test_can_method(): void
+    /**
+     * @throws BindingResolutionException
+     */
+    public function test_can_method(): void
     {
         $subject = new stdClass();
         $subject->id = 1;

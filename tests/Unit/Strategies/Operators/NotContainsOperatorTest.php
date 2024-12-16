@@ -2,8 +2,8 @@
 
 namespace zennit\ABAC\Tests\Unit\Strategies\Operators;
 
-use zennit\ABAC\Tests\TestCase;
 use zennit\ABAC\Strategies\Operators\NotContainsOperator;
+use zennit\ABAC\Tests\TestCase;
 
 class NotContainsOperatorTest extends TestCase
 {

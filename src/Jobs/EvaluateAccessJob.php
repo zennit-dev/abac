@@ -26,12 +26,13 @@ class EvaluateAccessJob implements ShouldQueue
     ) {
     }
 
-	/**
-	 * @throws InvalidArgumentException
-	 * @throws UnsupportedOperatorException
-	 * @throws ValidationException
-	 */
-	public function handle(AbacService $abacService): PolicyEvaluationResult {
+    /**
+     * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     * @throws ValidationException
+     */
+    public function handle(AbacService $abacService): PolicyEvaluationResult
+    {
         return $abacService->evaluate($this->context);
     }
 }

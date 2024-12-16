@@ -2,8 +2,8 @@
 
 namespace zennit\ABAC\Tests\Unit\Models;
 
-use zennit\ABAC\Tests\TestCase;
 use zennit\ABAC\Models\UserAttribute;
+use zennit\ABAC\Tests\TestCase;
 
 class UserAttributeTest extends TestCase
 {

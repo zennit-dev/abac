@@ -25,11 +25,11 @@ class DatabaseIntegrationTest extends TestCase
 
     private CacheService $cacheService;
 
-	/**
-	 * @throws InvalidArgumentException
-	 * @throws UnsupportedOperatorException
-	 * @throws ValidationException
-	 */
+    /**
+     * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     * @throws ValidationException
+     */
     public function test_handles_concurrent_policy_updates(): void
     {
         DB::beginTransaction();

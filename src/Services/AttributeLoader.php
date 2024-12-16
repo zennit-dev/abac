@@ -13,7 +13,7 @@ class AttributeLoader implements AttributeLoaderInterface
     {
         $subjectAttrs = $this->loadSubjectAttributes($subject);
         $resourceAttrs = $this->loadResourceAttributes($resource);
-        
+
         return new AttributeCollection(array_merge($subjectAttrs, $resourceAttrs));
     }
 

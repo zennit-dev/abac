@@ -72,7 +72,7 @@ class WarmPolicyCacheJobTest extends TestCase
             ->willReturn(true);
 
         // Create and execute job
-        $job = new WarmPolicyCacheJob;
+        $job = new WarmPolicyCacheJob();
         $job->handle($repository, $cache);
     }
 }

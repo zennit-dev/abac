@@ -20,11 +20,11 @@ class BatchProcessingTest extends TestCase
 
     private BatchProcessor $batchProcessor;
 
-	/**
-	 * @throws UnsupportedOperatorException
-	 * @throws InvalidArgumentException
-	 * @throws ValidationException
-	 */
+    /**
+     * @throws UnsupportedOperatorException
+     * @throws InvalidArgumentException
+     * @throws ValidationException
+     */
     public function test_processes_multiple_contexts(): void
     {
         $this->createPolicy('posts', PermissionOperations::INDEX->value, [
@@ -42,7 +42,7 @@ class BatchProcessingTest extends TestCase
         ]);
 
         // Create a subject
-        $subject = new stdClass;
+        $subject = new stdClass();
         $subject->id = 1;
 
         // Create contexts

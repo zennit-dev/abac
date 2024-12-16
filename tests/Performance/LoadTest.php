@@ -29,11 +29,11 @@ class LoadTest extends TestCase
         $this->abacService = $this->app->make(AbacService::class);
     }
 
-	/**
-	 * @throws UnsupportedOperatorException
-	 * @throws InvalidArgumentException
-	 * @throws ValidationException
-	 */
+    /**
+     * @throws UnsupportedOperatorException
+     * @throws InvalidArgumentException
+     * @throws ValidationException
+     */
     public function test_handles_large_number_of_policies(): void
     {
         // Create 100 policies
@@ -65,11 +65,11 @@ class LoadTest extends TestCase
         $this->assertLessThan(0.1, $executionTime);
     }
 
-	/**
-	 * @throws InvalidArgumentException
-	 * @throws UnsupportedOperatorException
-	 * @throws ValidationException
-	 */
+    /**
+     * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     * @throws ValidationException
+     */
     public function test_handles_complex_nested_conditions(): void
     {
         $policy = $this->createPolicy('posts', PermissionOperations::UPDATE->value, [

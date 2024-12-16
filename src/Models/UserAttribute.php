@@ -41,7 +41,7 @@ class UserAttribute extends Model
         return config('abac.tables.user_attributes.subject_type_column', 'subject_type');
     }
 
-    public  function getMorphID(): string
+    public function getMorphID(): string
     {
         return config('abac.tables.user_attributes.subject_id_column', 'subject_id');
     }

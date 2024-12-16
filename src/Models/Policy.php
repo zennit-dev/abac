@@ -12,8 +12,8 @@ class Policy extends Model
     use HasFactory;
 
     protected $fillable = [
-		'name',
-		'permission_id',
+        'name',
+        'permission_id',
     ];
 
     public function permission(): BelongsTo

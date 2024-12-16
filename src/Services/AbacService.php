@@ -36,7 +36,7 @@ readonly class AbacService implements AbacServiceInterface
         return $this->withPerformanceMonitoring(
             function () use ($context) {
                 $attributes = $this->getSubjectAttributes($context->subject);
-                
+
                 $result = $this->config['cache']['enabled']
                     ? $this->evaluateCached($context, $attributes)
                     : $this->evaluator->evaluate($context, $attributes);

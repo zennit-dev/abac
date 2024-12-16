@@ -9,10 +9,10 @@ use zennit\ABAC\Models\Policy;
 
 class PolicyUpdatedTest extends TestCase
 {
-	/**
-	 * @throws Exception
-	 */
-	public function testEventConstruction(): void
+    /**
+     * @throws Exception
+     */
+    public function testEventConstruction(): void
     {
         $policy = $this->createMock(Policy::class);
         $event = new PolicyUpdated($policy, ['resource' => 'test']);

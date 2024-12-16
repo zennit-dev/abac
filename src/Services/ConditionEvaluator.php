@@ -28,7 +28,7 @@ readonly class ConditionEvaluator
 
         foreach ($condition->attributes as $conditionAttribute) {
             $attributeValue = $attributes->get($conditionAttribute->attribute_name);
-            
+
             if ($attributeValue === null) {
                 return false;
             }
