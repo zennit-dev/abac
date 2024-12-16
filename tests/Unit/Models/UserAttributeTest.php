@@ -7,17 +7,17 @@ use zennit\ABAC\Tests\TestCase;
 
 class UserAttributeTest extends TestCase
 {
-    public function testSubjectRelation()
+    public function test_subject_relation()
     {
-        $attr = new UserAttribute();
+        $attr = new UserAttribute;
         $subject = $attr->subject();
         $this->assertNotNull($subject);
     }
 
-    public function testGetMorphMethods()
+    public function test_get_morph_methods()
     {
-        $attr = new UserAttribute();
-        $this->assertNotNull(actual: $attr->getMorphType());
-        $this->assertNotNull(actual: $attr->getMorphID());
+        $attr = new UserAttribute;
+        $this->assertNotNull($attr->getMorphClass());
+        $this->assertNotNull($attr->getKeyName());
     }
 }

@@ -66,13 +66,18 @@ class AbacServiceProvider extends ServiceProvider
                 __DIR__ . '/../../config/abac.php' => config_path('abac.php'),
             ], 'abac-config');
 
+            // Generate timestamped migration name
+            $timestamp = date('Y_m_d_His');
             $this->publishes([
-                __DIR__ . '/../../database/migrations' => database_path('migrations'),
+                __DIR__ . '/../../database/migrations/create_abac_tables.php' 
+                    => database_path("migrations/{$timestamp}_create_abac_tables.php"),
             ], 'abac-migrations');
 
             $this->commands([
-                PublishAbacCommand::class,
+                PublishAbacCommand::class
             ]);
+
+            $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         }
     }
 }

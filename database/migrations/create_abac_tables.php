@@ -9,21 +9,15 @@ return new class () extends Migration
 {
     public function up(): void
     {
-        $config = config('abac.tables.user_attributes');
-
-        Schema::create($config['name'], function (Blueprint $table) use ($config) {
+        Schema::create('user_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->string('subject_type');
+            $table->unsignedBigInteger('subject_id');
+            $table->string('attribute_name');
+            $table->string('attribute_value');
 
-            $table->string($config['subject_type_column']);
-            $table->unsignedBigInteger($config['subject_id_column']);
-            $table->string($config['attribute_name_column']);
-            $table->string($config['attribute_value_column']);
-
-            $table->index([
-                $config['subject_type_column'],
-                $config['subject_id_column'],
-            ]);
+            $table->index(['subject_type', 'subject_id']);
         });
 
         Schema::create('permissions', function (Blueprint $table) {

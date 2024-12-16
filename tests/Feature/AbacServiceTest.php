@@ -24,7 +24,7 @@ class AbacServiceTest extends TestCase
         $subject->id = 1;
 
         // Add subject attributes
-        $userAttribute = UserAttribute::create([
+        UserAttribute::create([
             'subject_type' => get_class($subject),
             'subject_id' => $subject->id,
             'attribute_name' => 'role',
