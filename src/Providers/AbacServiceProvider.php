@@ -11,6 +11,7 @@ use zennit\ABAC\Logging\AuditLogger;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Services\BatchProcessor;
 use zennit\ABAC\Services\CacheService;
+use zennit\ABAC\Services\ConfigurationService;
 use zennit\ABAC\Services\PerformanceMonitor;
 use zennit\ABAC\Services\PolicyEvaluator;
 
@@ -25,8 +26,7 @@ class AbacServiceProvider extends ServiceProvider
         $this->app->singleton(CacheService::class, function ($app) {
             return new CacheService(
                 $app->make('cache.store'),
-                $app->make('config')->get('abac.cache.prefix', 'abac:'),
-                $app->make('config')->get('abac.cache.ttl', 3600)
+                $app->make(ConfigurationService::class)
             );
         });
 
@@ -37,15 +37,15 @@ class AbacServiceProvider extends ServiceProvider
                 $app->make(CacheService::class),
                 $app->make(AuditLogger::class),
                 $app->make(PerformanceMonitor::class),
-                $app->make('config')->get('abac', [])  // Provide default empty array if config is missing
+                $app->make(ConfigurationService::class)
             );
         });
 
         // Register BatchProcessor
         $this->app->singleton(BatchProcessor::class, function ($app) {
             return new BatchProcessor(
-                $app->make('abac'),
-                $app->make('config')->get('abac.batch', [])
+                $app->make(AbacService::class),
+                $app->make(ConfigurationService::class)
             );
         });
 
@@ -56,6 +56,18 @@ class AbacServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(AbacServiceInterface::class, AbacService::class);
+
+        $this->app->singleton(ConfigurationService::class, function ($app) {
+            return new ConfigurationService();
+        });
+
+        $this->app->singleton(AuditLogger::class, function ($app) {
+            return new AuditLogger($app->make(ConfigurationService::class));
+        });
+
+        $this->app->singleton(PerformanceMonitor::class, function ($app) {
+            return new PerformanceMonitor($app->make(ConfigurationService::class));
+        });
 
     }
 

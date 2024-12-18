@@ -22,10 +22,10 @@ class AbacTest extends TestCase
         return [AbacServiceProvider::class];
     }
 
-	/**
-	 * @throws BindingResolutionException
-	 */
-	public function test_evaluate_method(): void
+    /**
+     * @throws BindingResolutionException
+     */
+    public function test_evaluate_method(): void
     {
         $subject = new TestSubject(1);
         $context = new AccessContext($subject, 'resource', 'operation');

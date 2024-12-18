@@ -4,20 +4,34 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\PolicyOperators;
+use zennit\ABAC\Services\ConfigurationService;
 
 return new class () extends Migration
 {
     public function up(): void
     {
-        Schema::create('user_attributes', function (Blueprint $table) {
+        $config = app(ConfigurationService::class);
+        $userAttributesTable = $config->getUserAttributesTable();
+
+        Schema::create($userAttributesTable['name'], function (Blueprint $table) use ($userAttributesTable) {
             $table->id();
             $table->timestamps();
-            $table->string('subject_type');
-            $table->unsignedBigInteger('subject_id');
+            $table->string($userAttributesTable['subject_type_column']);
+            $table->unsignedBigInteger($userAttributesTable['subject_id_column']);
+            $table->string($userAttributesTable['attribute_name_column']);
+            $table->string($userAttributesTable['attribute_value_column']);
+
+            $table->index([$userAttributesTable['subject_type_column'], $userAttributesTable['subject_id_column']]);
+        });
+
+        Schema::create('resource_attributes', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+            $table->string('resource');
             $table->string('attribute_name');
             $table->string('attribute_value');
 
-            $table->index(['subject_type', 'subject_id']);
+            $table->index(['resource', 'attribute_name']);
         });
 
         Schema::create('permissions', function (Blueprint $table) {
@@ -57,26 +71,19 @@ return new class () extends Migration
             $table->string('attribute_value');
         });
 
-        Schema::create('resource_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->string('resource');
-            $table->string('attribute_name');
-            $table->string('attribute_value');
 
-            $table->index(['resource', 'attribute_name']);
-        });
     }
 
     public function down(): void
     {
-        $tables = config('abac.tables');
+        $config = app(ConfigurationService::class);
+        $userAttributesTable = $config->getUserAttributesTable();
 
-        Schema::dropIfExists($tables['resource_attributes']['name']);
+        Schema::dropIfExists($userAttributesTable['name']);
+        Schema::dropIfExists('resource_attributes');
         Schema::dropIfExists('policy_condition_attributes');
         Schema::dropIfExists('policy_conditions');
         Schema::dropIfExists('policies');
         Schema::dropIfExists('permissions');
-        Schema::dropIfExists($tables['user_attributes']['name']);
     }
 };

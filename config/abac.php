@@ -51,16 +51,5 @@ return [
             'attribute_name_column' => 'attribute_name',
             'attribute_value_column' => 'attribute_value',
         ],
-        'resource_attributes' => [
-            'name' => 'resource_attributes',
-            'resource_column' => 'resource',
-            'attribute_name_column' => 'attribute_name',
-            'attribute_value_column' => 'attribute_value',
-        ],
-    ],
-
-    'models' => [
-        'user_attribute' => \zennit\ABAC\Models\UserAttribute::class,
-        'resource_attribute' => \zennit\ABAC\Models\ResourceAttribute::class,
     ],
 ];

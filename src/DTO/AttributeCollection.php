@@ -36,4 +36,9 @@ class AttributeCollection
     {
         return $this->attributes;
     }
+
+    public function hash(): string
+    {
+        return md5(serialize($this->attributes));
+    }
 }

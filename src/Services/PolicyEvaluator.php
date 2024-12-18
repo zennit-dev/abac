@@ -12,7 +12,7 @@ readonly class PolicyEvaluator
 {
     public function __construct(
         private PolicyRepository $policyRepository,
-        private ConditionEvaluator $conditionEvaluator
+        private ConditionEvaluator $conditionEvaluator,
     ) {
     }
 
@@ -26,7 +26,7 @@ readonly class PolicyEvaluator
         if ($policies->isEmpty()) {
             return new PolicyEvaluationResult(
                 granted: false,
-                reason:  'No applicable policies found',
+                reason: 'No applicable policies found',
                 context: [
                     'resource' => $context->resource,
                     'operation' => $context->operation,
@@ -34,33 +34,48 @@ readonly class PolicyEvaluator
             );
         }
 
-        $matchedPolicies = [];
-
-        foreach ($policies as $policy) {
-            $conditions = $policy->conditions()->with('attributes')->get();
-            $allConditionsMet = true;
-
-            foreach ($conditions as $condition) {
-                if (!$this->conditionEvaluator->evaluate($condition, $attributes)) {
-                    $allConditionsMet = false;
-                    break;
-                }
-            }
-
-            if ($allConditionsMet) {
-                $matchedPolicies[] = $policy->id;
-            }
-        }
+        $matchedPolicies = $this->evaluatePolicies($policies, $attributes);
 
         return new PolicyEvaluationResult(
-            granted:         !empty($matchedPolicies),
-            reason:          !empty($matchedPolicies) ? 'Policy conditions met' : 'No matching policies found',
-            context:         [
+            granted: !empty($matchedPolicies),
+            reason: !empty($matchedPolicies) ? 'Policy conditions met' : 'No matching policies found',
+            context: [
                 'resource' => $context->resource,
                 'operation' => $context->operation,
                 'attributes' => $attributes->toArray(),
             ],
             matchedPolicies: $matchedPolicies
         );
+    }
+
+    /**
+     * @throws UnsupportedOperatorException
+     */
+    private function evaluatePolicies($policies, AttributeCollection $attributes): array
+    {
+        $matchedPolicies = [];
+
+        foreach ($policies as $policy) {
+            $conditions = $policy->conditions()->with('attributes')->get();
+            if ($this->evaluateConditions($conditions, $attributes)) {
+                $matchedPolicies[] = $policy->id;
+            }
+        }
+
+        return $matchedPolicies;
+    }
+
+    /**
+     * @throws UnsupportedOperatorException
+     */
+    private function evaluateConditions($conditions, AttributeCollection $attributes): bool
+    {
+        foreach ($conditions as $condition) {
+            if (!$this->conditionEvaluator->evaluate($condition, $attributes)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

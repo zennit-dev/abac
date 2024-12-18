@@ -14,16 +14,13 @@ use zennit\ABAC\Models\UserAttribute;
 
 readonly class AbacService implements AbacServiceInterface
 {
-    private array $config;
-
     public function __construct(
         private PolicyEvaluator $evaluator,
         private CacheService $cache,
         private AuditLogger $logger,
         private PerformanceMonitor $monitor,
-        array $config
+        private ConfigurationService $config
     ) {
-        $this->config = $config;
     }
 
     /**
@@ -33,22 +30,76 @@ readonly class AbacService implements AbacServiceInterface
      */
     public function evaluate(AccessContext $context): PolicyEvaluationResult
     {
+        if ($this->config->getStrictValidation()) {
+            $this->validateContext($context);
+        }
+
         return $this->withPerformanceMonitoring(
             function () use ($context) {
                 $attributes = $this->getSubjectAttributes($context->subject);
+                $result = $this->evaluateWithCache($context, $attributes);
 
-                $result = $this->config['cache']['enabled']
-                    ? $this->evaluateCached($context, $attributes)
-                    : $this->evaluator->evaluate($context, $attributes);
-
-                if ($this->config['logging']['enabled'] &&
-                    $this->config['logging']['events']['access_evaluated']) {
-                    $this->logger->logAccess($context, $result->granted);
-                }
+                $this->logger->logAccess($context, $result->granted);
 
                 return $result;
             }
         );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     */
+    private function evaluateWithCache(AccessContext $context, AttributeCollection $attributes): PolicyEvaluationResult
+    {
+        $cacheKey = sprintf(
+            'evaluation:%s:%s:%s',
+            $context->resource,
+            $context->operation,
+            $attributes->hash()
+        );
+
+        return $this->cache->remember(
+            $cacheKey,
+            fn () => $this->evaluator->evaluate($context, $attributes)
+        );
+    }
+
+    private function withPerformanceMonitoring(callable $callback)
+    {
+        if ($this->config->getPerformanceLoggingEnabled()) {
+            $this->monitor->start('policy_evaluation');
+        }
+
+        $result = $callback();
+
+        if ($this->config->getPerformanceLoggingEnabled()) {
+            $this->monitor->end('policy_evaluation');
+        }
+
+        return $result;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validateContext(AccessContext $context): void
+    {
+        $requiredAttributes = $this->config->getRequiredAttributes($context->resource);
+        if (empty($requiredAttributes)) {
+            return;
+        }
+
+        $subjectAttributes = $this->getSubjectAttributes($context->subject);
+        $missingAttributes = array_diff($requiredAttributes, array_keys($subjectAttributes->all()));
+
+        if (!empty($missingAttributes)) {
+            throw new ValidationException(sprintf(
+                'Missing required attributes for resource "%s": %s',
+                $context->resource,
+                implode(', ', $missingAttributes)
+            ));
+        }
     }
 
     private function getSubjectAttributes($subject): AttributeCollection
@@ -62,40 +113,5 @@ readonly class AbacService implements AbacServiceInterface
             ->all();
 
         return new AttributeCollection($attributes);
-    }
-
-    private function withPerformanceMonitoring(callable $callback)
-    {
-        if ($this->config['performance']['logging_enabled']) {
-            $this->monitor->start('policy_evaluation');
-        }
-
-        $result = $callback();
-
-        if ($this->config['performance']['logging_enabled']) {
-            $duration = $this->monitor->end('policy_evaluation');
-
-            if ($duration > $this->config['performance']['thresholds']['slow_evaluation']) {
-                $this->logger->logPerformanceIssue('Slow policy evaluation', [
-                    'duration' => $duration,
-                ]);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @throws UnsupportedOperatorException
-     * @throws ValidationException
-     * @throws InvalidArgumentException
-     */
-    private function evaluateCached(AccessContext $context, AttributeCollection $attributes)
-    {
-        $cacheKey = "policy_evaluation:{$context->resource}:{$context->operation}";
-
-        return $this->cache->remember($cacheKey, function () use ($context, $attributes) {
-            return $this->evaluator->evaluate($context, $attributes);
-        });
     }
 }

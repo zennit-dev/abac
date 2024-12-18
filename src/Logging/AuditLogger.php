@@ -4,47 +4,55 @@ namespace zennit\ABAC\Logging;
 
 use Illuminate\Support\Facades\Log;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Services\ConfigurationService;
 
-class AuditLogger
+readonly class AuditLogger
 {
-    private array $config;
-
-    public function __construct(array $config = [])
-    {
-        $this->config = array_merge([
-            'enabled' => true,
-            'channel' => 'abac',
-            'detailed' => false,
-        ], $config);
+    public function __construct(
+        private ConfigurationService $config
+    ) {
     }
 
-    public function logAccess(AccessContext $context, bool $granted, array $metadata = []): void
+    public function logAccess(AccessContext $context, bool $granted): void
     {
-        if (!$this->config['enabled']) {
+        if (!$this->config->getLoggingEnabled() ||
+            !$this->config->getEventLoggingEnabled('access_evaluated')) {
             return;
         }
 
-        $logData = [
-            'subject_id' => $context->subject->id,
-            'resource' => $context->resource,
-            'operation' => $context->operation,
-            'granted' => $granted,
-            'timestamp' => now(),
-        ];
+        $message = sprintf(
+            'Access %s for resource "%s" operation "%s"',
+            $granted ? 'granted' : 'denied',
+            $context->resource,
+            $context->operation
+        );
 
-        if ($this->config['detailed']) {
-            $logData = array_merge($logData, $metadata);
-        }
+        $logContext = $this->config->getDetailedLogging()
+            ? ['context' => $context]
+            : [];
 
-        Log::channel($this->config['channel'])->info('Access evaluation', $logData);
+        Log::channel($this->config->getLogChannel())->info($message, $logContext);
     }
 
-    public function logPerformanceIssue(string $message, array $context = []): void
+    public function logPolicyChange(string $action, array $data): void
     {
-        if (!$this->config['enabled']) {
+        if (!$this->config->getLoggingEnabled() ||
+            !$this->config->getEventLoggingEnabled('policy_changes')) {
             return;
         }
 
-        Log::channel($this->config['channel'])->warning($message, $context);
+        $logContext = $this->config->getDetailedLogging() ? $data : [];
+        Log::channel($this->config->getLogChannel())->info("Policy {$action}", $logContext);
+    }
+
+    public function logCacheOperation(string $operation, array $data = []): void
+    {
+        if (!$this->config->getLoggingEnabled() ||
+            !$this->config->getEventLoggingEnabled('cache_operations')) {
+            return;
+        }
+
+        $logContext = $this->config->getDetailedLogging() ? $data : [];
+        Log::channel($this->config->getLogChannel())->info("Cache {$operation}", $logContext);
     }
 }

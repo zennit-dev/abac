@@ -2,23 +2,36 @@
 
 namespace zennit\ABAC\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use zennit\ABAC\Services\ConfigurationService;
 
 class UserAttribute extends Model
 {
-    use HasFactory;
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
 
-    protected $fillable = [
-        'subject_type',
-        'subject_id',
-        'attribute_name',
-        'attribute_value',
-    ];
+        $config = app(ConfigurationService::class);
+        $tableConfig = $config->getUserAttributesTable();
+
+        $this->table = $tableConfig['name'];
+        $this->fillable = [
+            $tableConfig['subject_type_column'],
+            $tableConfig['subject_id_column'],
+            $tableConfig['attribute_name_column'],
+            $tableConfig['attribute_value_column'],
+        ];
+    }
 
     public function subject(): MorphTo
     {
-        return $this->morphTo();
+        $config = app(ConfigurationService::class);
+
+        return $this->morphTo(
+            'subject',
+            $config->getUserAttributesTable()['subject_type_column'],
+            $config->getUserAttributesTable()['subject_id_column']
+        );
     }
 }

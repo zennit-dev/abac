@@ -7,8 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Services\CacheService;
+use zennit\ABAC\Services\ConfigurationService;
 
 class InvalidatePolicyCacheJob implements ShouldQueue
 {
@@ -23,10 +23,19 @@ class InvalidatePolicyCacheJob implements ShouldQueue
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @param CacheService $cache
+     * @param ConfigurationService $config
      */
-    public function handle(CacheService $cache): void
+    public function handle(CacheService $cache, ConfigurationService $config): void
     {
+        if (!$config->getCacheEnabled()) {
+            return;
+        }
+
         $cache->forget("policy:{$this->policyId}");
+
+        if ($config->getEventLoggingEnabled('cache_operations')) {
+            $cache->tags(['policies'])->clear();
+        }
     }
 }

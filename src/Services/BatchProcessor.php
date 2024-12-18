@@ -15,8 +15,23 @@ readonly class BatchProcessor
 {
     public function __construct(
         private AbacService $abacService,
-        private array $config
+        private ConfigurationService $config
     ) {
+    }
+
+    /**
+     * @throws Throwable
+     * @throws ValidationException
+     * @throws InvalidArgumentException
+     * @throws UnsupportedOperatorException
+     */
+    public function evaluate(array $contexts): array
+    {
+        if ($this->config->getParallelEvaluationEnabled()) {
+            return $this->evaluateParallel($contexts);
+        }
+
+        return $this->evaluateSequential($contexts);
     }
 
     /**
@@ -24,10 +39,10 @@ readonly class BatchProcessor
      * @throws InvalidArgumentException
      * @throws ValidationException
      */
-    public function evaluate(array $contexts): array
+    private function evaluateSequential(array $contexts): array
     {
         $results = [];
-        $chunks = array_chunk($contexts, $this->config['batch_size'] ?? 1000);
+        $chunks = array_chunk($contexts, $this->config->getBatchChunkSize());
 
         foreach ($chunks as $chunk) {
             foreach ($chunk as $context) {
@@ -39,16 +54,21 @@ readonly class BatchProcessor
     }
 
     /**
-     * @throws Throwable
+     * @throws \Throwable
      */
-    public function evaluateParallel(array $contexts): array
+    private function evaluateParallel(array $contexts): array
     {
         $jobs = Collection::make($contexts)
-            ->map(fn (AccessContext $context) => new EvaluateAccessJob($context));
+            ->chunk($this->config->getBatchChunkSize())
+            ->map(function ($chunk) {
+                return $chunk->map(fn (AccessContext $context) => new EvaluateAccessJob($context));
+            })
+            ->flatten();
 
-        return Bus::batch($jobs)
+        $batch = Bus::batch($jobs)
             ->allowFailures()
-            ->dispatch()
-            ->toArray();
+            ->onQueue($this->config->getAsyncEvents() ? 'abac-evaluations' : null);
+
+        return $batch->dispatch()->toArray();
     }
 }

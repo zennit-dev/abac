@@ -6,16 +6,19 @@ use Illuminate\Support\Facades\Log;
 
 class PerformanceMonitor
 {
-    private array $config;
+    public function __construct(
+        private readonly ConfigurationService $config,
+        private array $timers = []
+    ) {
+    }
 
-    private array $timers = [];
-
-    public function __construct(array $config = [])
+    public function measure(string $operation, callable $callback)
     {
-        $this->config = array_merge([
-            'logging_enabled' => true,
-            'log_threshold' => 100, // milliseconds
-        ], $config);
+        $this->start($operation);
+        $result = $callback();
+        $this->end($operation);
+
+        return $result;
     }
 
     public function start(string $operation): void
@@ -31,21 +34,14 @@ class PerformanceMonitor
 
         $duration = (microtime(true) - $this->timers[$operation]) * 1000;
 
-        if ($this->config['logging_enabled'] && $duration > $this->config['log_threshold']) {
-            Log::warning("Performance warning: {$operation} took {$duration}ms");
+        if ($this->config->getPerformanceLoggingEnabled() &&
+            $duration > $this->config->getSlowEvaluationThreshold()) {
+            Log::channel($this->config->getLogChannel())
+                ->warning("Performance warning: {$operation} took {$duration}ms");
         }
 
         unset($this->timers[$operation]);
 
         return $duration;
-    }
-
-    public function measure(string $operation, callable $callback)
-    {
-        $this->start($operation);
-        $result = $callback();
-        $this->end($operation);
-
-        return $result;
     }
 }

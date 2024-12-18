@@ -11,7 +11,8 @@ readonly class PolicyCacheWarmer
 {
     public function __construct(
         private PolicyRepository $policyRepository,
-        private CacheService $cacheService
+        private CacheService $cacheService,
+        private ConfigurationService $config
     ) {
     }
 
@@ -20,6 +21,10 @@ readonly class PolicyCacheWarmer
      */
     public function warmAll(): void
     {
+        if (!$this->config->getCacheWarmingEnabled()) {
+            return;
+        }
+
         $startTime = microtime(true);
         $policies = $this->policyRepository->getAllPolicies();
 
@@ -31,10 +36,12 @@ readonly class PolicyCacheWarmer
             );
         }
 
-        CacheWarmed::dispatch(
-            $policies->count(),
-            microtime(true) - $startTime
-        );
+        if ($this->config->getEventsEnabled()) {
+            CacheWarmed::dispatch(
+                $policies->count(),
+                microtime(true) - $startTime
+            );
+        }
     }
 
     /**

@@ -9,14 +9,14 @@ class UserAttributeTest extends TestCase
 {
     public function test_subject_relation()
     {
-        $attr = new UserAttribute;
+        $attr = new UserAttribute();
         $subject = $attr->subject();
         $this->assertNotNull($subject);
     }
 
     public function test_get_morph_methods()
     {
-        $attr = new UserAttribute;
+        $attr = new UserAttribute();
         $this->assertNotNull($attr->getMorphClass());
         $this->assertNotNull($attr->getKeyName());
     }

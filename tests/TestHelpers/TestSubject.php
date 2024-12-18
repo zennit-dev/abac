@@ -4,5 +4,7 @@ namespace zennit\ABAC\Tests\TestHelpers;
 
 class TestSubject
 {
-    public function __construct(public int $id) {}
+    public function __construct(public int $id)
+    {
+    }
 }
