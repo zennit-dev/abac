@@ -34,16 +34,17 @@ class PublishAbacEnvCommand extends Command
     public function handle(): void
     {
         $filePath = $this->ask('Where would you like to save the environment variables? (provide full path)');
-        
+
         if (!$filePath) {
             $this->error('No file path provided. Aborting.');
+
             return;
         }
 
         try {
             $content = "# ABAC Configuration\n";
             foreach ($this->envVariables as $key => $value) {
-                $content .= "$key=\"$value\"\n";
+                $content .= "$key=$value\n";
             }
 
             if (File::exists($filePath) && !$this->option('force')) {
@@ -62,4 +63,4 @@ class PublishAbacEnvCommand extends Command
             $this->error('Failed to write environment variables: ' . $e->getMessage());
         }
     }
-} 
+}
