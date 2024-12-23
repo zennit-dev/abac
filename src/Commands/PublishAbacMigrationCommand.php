@@ -5,22 +5,14 @@ namespace zennit\ABAC\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-class PublishAbacCommand extends Command
+class PublishAbacMigrationCommand extends Command
 {
-    protected $signature = 'abac:publish {--force : Force the operation to run without confirmation}';
+    protected $signature = 'abac:publish-migration {--force : Force the operation to run without confirmation}';
 
-    protected $description = 'Publish ABAC configuration and migration files';
+    protected $description = 'Publish ABAC migration files';
 
     public function handle(): void
     {
-        if ($this->shouldPublishConfig()) {
-            $this->call('vendor:publish', [
-                '--tag' => 'abac-config',
-                '--force' => true,
-            ]);
-            $this->info('Config published successfully.');
-        }
-
         if ($this->shouldPublishMigrations()) {
             $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
             $existingFile = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
@@ -35,19 +27,6 @@ class PublishAbacCommand extends Command
             }
             $this->info('Migration published successfully.');
         }
-    }
-
-    private function shouldPublishConfig(): bool
-    {
-        if ($this->option('force')) {
-            return true;
-        }
-
-        if (File::exists(config_path('abac.php'))) {
-            return $this->confirm('Config file already exists. Do you want to overwrite it?');
-        }
-
-        return true;
     }
 
     private function shouldPublishMigrations(): bool
