@@ -47,9 +47,21 @@ class PublishAbacCommand extends Command
         }
 
         $existingMigration = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
+            ->reject(function ($file) {
+                return str_contains($file, '_backup_');
+            })
             ->first();
 
         if ($existingMigration) {
+            // Check if backup already exists
+            $backupPath = str_replace('.php', '_backup_' . date('Y_m_d_His') . '.php', $existingMigration);
+            if (File::exists($backupPath)) {
+                return $this->confirm(
+                    'A backup of the ABAC migration already exists. Do you want to update the migration anyway?',
+                    false
+                );
+            }
+
             return $this->confirm(
                 'An ABAC migration file already exists. Do you want to update it? (A backup will be created)',
                 false

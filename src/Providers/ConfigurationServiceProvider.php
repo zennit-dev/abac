@@ -25,24 +25,32 @@ class ConfigurationServiceProvider extends ServiceProvider
         }
     }
 
-    private function handleMigrations(): void
+    public function handleMigrations(): void
     {
         $migrationPath = database_path('migrations');
         $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
-
+        
         $existingFile = collect(File::glob($migrationPath . '/*_create_abac_tables.php'))
+            ->reject(function ($file) {
+                return str_contains($file, '_backup_');
+            })
             ->first();
 
         if ($existingFile) {
+            // Only create one backup with timestamp
             $backupPath = str_replace('.php', '_backup_' . date('Y_m_d_His') . '.php', $existingFile);
-            File::copy($existingFile, $backupPath);
+            
+            // Only create backup if it doesn't exist
+            if (!File::exists($backupPath)) {
+                File::copy($existingFile, $backupPath);
+            }
 
             $this->publishes([
-                $sourcePath => $existingFile,
+                $sourcePath => $existingFile
             ], 'abac-migrations');
         } else {
             $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
-
+            
             $this->publishes([
                 $sourcePath => database_path("migrations/{$newFileName}"),
             ], 'abac-migrations');
