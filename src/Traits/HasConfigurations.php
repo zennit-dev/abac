@@ -91,20 +91,4 @@ trait HasConfigurations
     {
         return config('abac.monitoring.events.async');
     }
-
-    // Database Configurations
-    public function getSubjectType(): string
-    {
-        return config('abac.database.subject_type');
-    }
-
-    public function getObjectType(): string
-    {
-        return config('abac.database.subject_type');
-    }
-
-    public function getSubjectId(): string
-    {
-        return config('abac.database.subject_id');
-    }
 }

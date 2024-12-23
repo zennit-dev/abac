@@ -16,10 +16,10 @@ readonly class AttributeLoader
     {
         $attributes = [];
 
-        // Load subject attributes
+        // Load subject attributes using polymorphic relationship
         $subjectAttributes = UserAttribute::query()
-            ->where($this->getSubjectType(), get_class($context->subject))
-            ->where($this->getSubjectId(), $context->subject->id)
+            ->where('subject_type', get_class($context->subject))
+            ->where('subject_id', $context->subject->id)
             ->get();
 
         foreach ($subjectAttributes as $attribute) {

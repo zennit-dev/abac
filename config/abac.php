@@ -32,8 +32,4 @@ return [
             'async' => env('ABAC_ASYNC_EVENTS', false),
         ],
     ],
-    'database' => [
-        'subject_type' => env('ABAC_SUBJECT_TYPE', 'users'),
-        'subject_id' => env('ABAC_SUBJECT_ID', 'id'),
-    ],
 ];

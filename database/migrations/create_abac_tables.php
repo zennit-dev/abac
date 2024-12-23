@@ -15,12 +15,12 @@ return new class () extends Migration
         Schema::create('user_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string($this->getSubjectType());
-            $table->unsignedBigInteger($this->getSubjectId());
+            $table->string('subject_type');
+            $table->unsignedBigInteger('subject_id');
             $table->string('attribute_name');
             $table->string('attribute_value');
 
-            $table->index([$this->getSubjectType(), $this->getSubjectId()]);
+            $table->index(['subject_type', 'subject_id']);
         });
 
         Schema::create('resource_attributes', function (Blueprint $table) {
