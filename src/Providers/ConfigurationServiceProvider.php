@@ -33,7 +33,7 @@ class ConfigurationServiceProvider extends ServiceProvider
 
         $migrationPath = database_path('migrations');
         $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
-        
+
         // Get existing migration, excluding backups
         $existingFile = collect(File::glob($migrationPath . '/*_create_abac_tables.php'))
             ->reject(function ($file) {
@@ -42,25 +42,16 @@ class ConfigurationServiceProvider extends ServiceProvider
             ->first();
 
         if ($existingFile) {
-            // Create unique backup name
-            $timestamp = now()->format('Y_m_d_His');
-            $backupPath = preg_replace(
-                '/\.php$/', 
-                "_backup_{$timestamp}.php",
-                $existingFile
-            );
-            
-            // Only backup and publish if the file content is different
+            // Only publish if content is different
             if (md5_file($existingFile) !== md5_file($sourcePath)) {
-                File::copy($existingFile, $backupPath);
-                
                 $this->publishes([
-                    $sourcePath => $existingFile
+                    $sourcePath => $existingFile,
                 ], 'abac-migrations');
             }
         } else {
+            // Create new migration
             $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
-            
+
             $this->publishes([
                 $sourcePath => database_path("migrations/{$newFileName}"),
             ], 'abac-migrations');

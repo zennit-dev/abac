@@ -42,33 +42,32 @@ class PublishAbacCommand extends Command
 
     private function shouldPublishMigrations(): bool
     {
-        if ($this->option('force')) {
-            return true;
-        }
+        $shouldPublish = true;
 
-        $existingMigration = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
-            ->reject(function ($file) {
-                return str_contains($file, '_backup_');
-            })
-            ->first();
+        if (!$this->option('force')) {
+            $existingMigration = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
+                ->reject(fn ($file) => str_contains($file, '_backup_'))
+                ->first();
 
-        if ($existingMigration) {
-            // Check if backup already exists
-            $backupPath = str_replace('.php', '_backup_' . date('Y_m_d_His') . '.php', $existingMigration);
-            if (File::exists($backupPath)) {
-                return $this->confirm(
-                    'A backup of the ABAC migration already exists. Do you want to update the migration anyway?',
-                    false
-                );
+            if ($existingMigration) {
+                $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
+
+                if (md5_file($existingMigration) === md5_file($sourcePath)) {
+                    $this->info('Migration file is already up to date.');
+                    $shouldPublish = false;
+                } else {
+                    $backupPath = preg_replace('/\.php$/', '_backup_' . now()->format('Y_m_d_His') . '.php', $existingMigration);
+                    File::copy($existingMigration, $backupPath);
+                    $this->info('Backup created at: ' . basename($backupPath));
+                    $shouldPublish = $this->confirm(
+                        'An ABAC migration file already exists and differs from the package version. Do you want to update it?',
+                        false
+                    );
+                }
             }
-
-            return $this->confirm(
-                'An ABAC migration file already exists. Do you want to update it? (A backup will be created)',
-                false
-            );
         }
 
-        return true;
+        return $shouldPublish;
     }
 
     private function publishConfig(): void
