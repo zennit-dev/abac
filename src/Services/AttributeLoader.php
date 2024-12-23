@@ -12,11 +12,43 @@ readonly class AttributeLoader
 {
     use HasConfigurations;
 
+    public function __construct(
+        private CacheManager $cache
+    ) {
+    }
+
     public function loadForContext(AccessContext $context): AttributeCollection
     {
-        $attributes = [];
+        $contextKey = sprintf(
+            '%s:%d:%s',
+            get_class($context->subject),
+            $context->subject->id,
+            $context->resource
+        );
 
-        // Load subject attributes using polymorphic relationship
+        return $this->cache->rememberAttributes($contextKey, function () use ($context) {
+            $attributes = [];
+
+            // Cache user attributes
+            $subjectAttributes = $this->cache->rememberUserAttributes(
+                $context->subject->id,
+                get_class($context->subject),
+                fn () => $this->loadUserAttributes($context)
+            );
+
+            // Cache resource attributes
+            $resourceAttributes = $this->cache->rememberResourceAttributes(
+                $context->resource,
+                fn () => $this->loadResourceAttributes($context)
+            );
+
+            return new AttributeCollection([...$subjectAttributes, ...$resourceAttributes]);
+        });
+    }
+
+    private function loadUserAttributes(AccessContext $context): array
+    {
+        $attributes = [];
         $subjectAttributes = UserAttribute::query()
             ->where('subject_type', get_class($context->subject))
             ->where('subject_id', $context->subject->id)
@@ -26,7 +58,12 @@ readonly class AttributeLoader
             $attributes["subject.$attribute->attribute_name"] = $attribute->attribute_value;
         }
 
-        // Load resource attributes
+        return $attributes;
+    }
+
+    private function loadResourceAttributes(AccessContext $context): array
+    {
+        $attributes = [];
         $resourceAttributes = ResourceAttribute::query()
             ->where('resource', $context->resource)
             ->get();
@@ -35,6 +72,6 @@ readonly class AttributeLoader
             $attributes["resource.$attribute->attribute_name"] = $attribute->attribute_value;
         }
 
-        return new AttributeCollection($attributes);
+        return $attributes;
     }
 }

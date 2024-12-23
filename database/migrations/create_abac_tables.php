@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('user_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('subject_type')->default(config('abac.database.user_attribute_subject_type'));
+            $table->string('subject_type')->default($this->getUserAttributeSubjectType());
             $table->unsignedBigInteger('subject_id');
             $table->string('attribute_name');
             $table->string('attribute_value');

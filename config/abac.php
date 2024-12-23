@@ -9,6 +9,7 @@ return [
         'warming' => [
             'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
             'chunk_size' => env('ABAC_CACHE_WARMING_CHUNK_SIZE', 100),
+            'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
         ],
     ],
     'evaluation' => [

@@ -35,6 +35,11 @@ trait HasConfigurations
         return config('abac.cache.warming.chunk_size');
     }
 
+    public function getCacheWarmingSchedule(): string
+    {
+        return config('abac.cache.warming.schedule');
+    }
+
     // Evaluation Configuration
     public function getParallelEvaluationEnabled(): bool
     {
