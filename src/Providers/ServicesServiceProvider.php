@@ -16,7 +16,7 @@ use zennit\ABAC\Validators\AccessContextValidator;
 
 class ServicesServiceProvider extends ServiceProvider
 {
-    private array $singletons = [
+    protected array $singletons = [
         CacheManager::class,
         PolicyEvaluator::class,
         AuditLogger::class,
