@@ -34,15 +34,12 @@ class ConfigurationServiceProvider extends ServiceProvider
         $migrationPath = database_path('migrations');
         $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
         
-        // Get existing migration
+        // Get existing migration, simpler check
         $existingFile = collect(File::glob($migrationPath . '/*_create_abac_tables.php'))
-            ->filter(function ($file) {
-                // Exclude any file that was just created (within last minute)
-                return (time() - filectime($file)) > 60;
-            })
+            ->reject(fn($file) => str_contains($file, '_backup_'))
             ->first();
 
-        // Only publish if no existing file or if forced
+        // Only publish if no existing file
         if (!$existingFile) {
             $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
             
