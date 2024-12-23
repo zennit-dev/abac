@@ -10,4 +10,11 @@ class ConfigurationServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../../config/abac.php', 'abac');
     }
+
+    public function boot(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../../config/abac.php' => config_path('abac.php'),
+        ], 'abac-config');
+    }
 }

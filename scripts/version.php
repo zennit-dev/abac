@@ -31,7 +31,7 @@ class VersionUpdater
 
         echo "Version updated to $newVersion\n";
         echo "Don't forget to push your changes:\n";
-        echo "  git push && git push --tags\n";
+        echo "    git push && git push --tags\n";
     }
 
     private function incrementVersion(string $type): string
@@ -63,15 +63,17 @@ class VersionUpdater
         // Check if we're in a git repository
         if (!is_dir(dirname(__DIR__) . '/.git')) {
             echo "Warning: Not a git repository\n";
-
             return;
         }
 
         $version = 'v' . $version;
-
+        
+        // Get the last commit message
+        $lastMessage = trim(shell_exec('git log -1 --pretty=%B'));
+        
         // Create tag locally only
         exec('git add composer.json');
-        exec('git commit -m "chore: bump version to ' . $version . '"');
+        exec('git commit -m "' . $lastMessage . '"');
         exec('git tag -a ' . $version . ' -m "Version ' . $version . '"');
     }
 }
