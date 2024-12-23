@@ -5,13 +5,16 @@ namespace zennit\ABAC\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use zennit\ABAC\Contracts\AbacServiceInterface;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Traits\HasConfigurations;
 
 readonly class EnsurePermissions
 {
+    use HasConfigurations;
+
     public function __construct(
-        private AbacServiceInterface $abac
+        protected AbacService $abac
     ) {
     }
 
@@ -21,29 +24,39 @@ readonly class EnsurePermissions
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->user()) {
-            return response()->json(['error' => 'Unauthorized, you need to sign in'], 401);
+            return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
 
         $context = new AccessContext(
             subject: $request->user(),
             resource: $this->getResourceFromPath($request->path()),
-            operation: $request->method(),
+            operation: strtolower($request->method()),
             resourceIds: []
         );
 
-        if (!$this->abac->evaluate($context)->granted) {
-            return response()->json(['error' => 'Unauthorized to perform this action.'], 401);
+        if (!$this->abac->can($context)) {
+            return $this->unauthorizedResponse('Unauthorized to access this route');
         }
 
         return $next($request);
     }
 
     /**
-     * Extract the resource name from the path.
+     * Return a standardized unauthorized response
+     */
+    private function unauthorizedResponse(string $message): Response
+    {
+        return response()->json(
+            ['error' => $message],
+            Response::HTTP_UNAUTHORIZED
+        );
+    }
+
+    /**
+     * Extract the base resource name from the path without considering IDs
      * Examples:
      * - /api/v1/posts -> posts
-     * - /api/v1/organizations/1/projects/2/task-lists/3/tasks -> tasks
-     * - /api/v1/organizations/1/projects -> projects
+     * - /api/v1/organizations/projects/tasks -> tasks
      */
     private function getResourceFromPath(string $path): string
     {
@@ -51,42 +64,30 @@ readonly class EnsurePermissions
         $segments = explode('/', trim($path, '/'));
 
         // Skip api/v1 or similar prefixes
-        if (in_array($segments[0], ['api', 'v1', 'v2'])) {
-            array_shift($segments); // Remove 'api'
-            if (!empty($segments) && in_array($segments[0], ['v1', 'v2'])) {
-                array_shift($segments); // Remove version
-            }
+        if (isset($segments[0]) && $segments[0] === 'api') {
+            array_shift($segments);
+        }
+        if (!empty($segments) && str_starts_with($segments[0], 'v')) {
+            array_shift($segments);
         }
 
-        // For paths like 'organizations/1/projects/2/task-lists/3/tasks'
-        // We want to get the last resource name (tasks)
-        $lastResource = '';
-        foreach ($segments as $i => $segment) {
-            // Skip ID segments (usually numeric or UUID)
-            if ($this->looksLikeId($segment)) {
-                continue;
-            }
-            $lastResource = $segment;
-        }
+        // Get the last non-empty segment that's not an ID
+        $segments = array_filter(
+            $segments,
+            fn ($segment) => !empty($segment) && !is_numeric($segment) && !$this->isUuid($segment)
+        );
 
-        return $lastResource;
+        return !empty($segments) ? end($segments) : '';
     }
 
     /**
-     * Check if a segment looks like an ID
+     * Check if a string is a UUID
      */
-    private function looksLikeId(string $segment): bool
+    private function isUuid(string $string): bool
     {
-        // Check for numeric IDs
-        if (is_numeric($segment)) {
-            return true;
-        }
-
-        // Check for UUID format
-        if (preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $segment)) {
-            return true;
-        }
-
-        return false;
+        return preg_match(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
+            strtolower($string)
+        ) === 1;
     }
 }

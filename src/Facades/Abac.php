@@ -2,31 +2,18 @@
 
 namespace zennit\ABAC\Facades;
 
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Facade;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\PolicyEvaluationResult;
 
+/**
+ * @method static bool can(AccessContext $context)
+ * @method static PolicyEvaluationResult evaluate(AccessContext $context)
+ */
 class Abac extends Facade
 {
-    /**
-     * @throws BindingResolutionException
-     */
-    public static function evaluate(AccessContext $context): PolicyEvaluationResult
+    protected static function getFacadeAccessor(): string
     {
-        return static::$app->make('abac')->evaluate($context);
-    }
-
-    /**
-     * @throws BindingResolutionException
-     */
-    public static function can(AccessContext $context): bool
-    {
-        return static::$app->make('abac')->evaluate($context)->granted;
-    }
-
-    public static function getFacadeAccessor(): string
-    {
-        return 'abac';
+        return 'abac.facade';
     }
 }

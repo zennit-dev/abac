@@ -2,6 +2,17 @@
 
 A flexible and powerful Attribute-Based Access Control system for Laravel applications.
 
+## Features
+
+- 🚀 Fast route-level access control
+- 🔒 Detailed policy evaluation
+- 💾 Built-in caching system
+- 📊 Performance monitoring
+- 📝 Audit logging
+- 🔄 Batch processing support
+- ⚡ Parallel evaluation option
+- 🎯 Custom operator support
+
 ## Installation
 
 You can install the package via composer:

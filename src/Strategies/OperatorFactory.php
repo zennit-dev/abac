@@ -4,7 +4,6 @@ namespace zennit\ABAC\Strategies;
 
 use InvalidArgumentException;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Services\ConfigurationService;
 use zennit\ABAC\Strategies\Operators\AndOperator;
 use zennit\ABAC\Strategies\Operators\ContainsOperator;
 use zennit\ABAC\Strategies\Operators\EndsWithOperator;
@@ -22,12 +21,15 @@ use zennit\ABAC\Strategies\Operators\NotOperator;
 use zennit\ABAC\Strategies\Operators\NotStartsWithOperator;
 use zennit\ABAC\Strategies\Operators\OrOperator;
 use zennit\ABAC\Strategies\Operators\StartsWithOperator;
+use zennit\ABAC\Traits\HasConfigurations;
 
 class OperatorFactory
 {
+    use HasConfigurations;
+
     private array $operators;
 
-    public function __construct(private readonly ConfigurationService $config)
+    public function __construct()
     {
         $this->operators = [
             'equals' => new EqualsOperator(),
@@ -53,16 +55,13 @@ class OperatorFactory
         $this->removeDisabledOperators();
     }
 
-    /**
-     * @throws UnsupportedOperatorException
-     */
-    public function create(string $operator): OperatorInterface
+    private function registerCustomOperators(): void
     {
-        if (!isset($this->operators[$operator]) || in_array($operator, $this->config->getDisabledOperators())) {
-            throw new UnsupportedOperatorException("Operator '$operator' is not supported");
+        foreach ($this->getCustomOperators() as $key => $operatorClass) {
+            if (class_exists($operatorClass) && is_subclass_of($operatorClass, OperatorInterface::class)) {
+                $this->register($key, new $operatorClass());
+            }
         }
-
-        return $this->operators[$operator];
     }
 
     public function register(string $key, OperatorInterface $operator): void
@@ -78,19 +77,22 @@ class OperatorFactory
         $this->operators[$key] = $operator;
     }
 
-    private function registerCustomOperators(): void
+    private function removeDisabledOperators(): void
     {
-        foreach ($this->config->getCustomOperators() as $key => $operatorClass) {
-            if (class_exists($operatorClass) && is_subclass_of($operatorClass, OperatorInterface::class)) {
-                $this->register($key, new $operatorClass());
-            }
+        foreach ($this->getDisabledOperators() as $operator) {
+            unset($this->operators[$operator]);
         }
     }
 
-    private function removeDisabledOperators(): void
+    /**
+     * @throws UnsupportedOperatorException
+     */
+    public function create(string $operator): OperatorInterface
     {
-        foreach ($this->config->getDisabledOperators() as $operator) {
-            unset($this->operators[$operator]);
+        if (!isset($this->operators[$operator]) || in_array($operator, $this->getDisabledOperators())) {
+            throw new UnsupportedOperatorException("Operator '$operator' is not supported");
         }
+
+        return $this->operators[$operator];
     }
 }
