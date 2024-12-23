@@ -3,7 +3,6 @@
 namespace zennit\ABAC\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 use zennit\ABAC\Models\UserAttribute;
 use zennit\ABAC\Traits\HasConfigurations;
 

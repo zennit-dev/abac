@@ -14,7 +14,7 @@ It's the duty of the maintainer to ensure that all submissions to the project ar
 
 ## Viability
 
-When requesting or submitting new features, first consider whether it might be useful to others. Open source projects are used by many developers, who may have entirely different needs to your own. Think about whether or not your feature is likely to be used by other users of the project.
+When requesting or submitting new features, first consider whether it might be useful to others. Open source projects are used by many developers, who may have entirely different needs to your own. Think about whether your feature is likely to be used by other users of the project.
 
 ## Procedure
 

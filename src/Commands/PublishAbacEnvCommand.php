@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -42,11 +43,11 @@ class PublishAbacEnvCommand extends Command
         try {
             $content = "# ABAC Configuration\n";
             foreach ($this->envVariables as $key => $value) {
-                $content .= "{$key}=\"{$value}\"\n";
+                $content .= "$key=\"$value\"\n";
             }
 
             if (File::exists($filePath) && !$this->option('force')) {
-                if (!$this->confirm("File {$filePath} already exists. Do you want to append ABAC variables?")) {
+                if (!$this->confirm("File $filePath already exists. Do you want to append ABAC variables?")) {
                     return;
                 }
                 // Append with a newline separator
@@ -57,7 +58,7 @@ class PublishAbacEnvCommand extends Command
             }
 
             $this->info('Environment variables written successfully to: ' . $filePath);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('Failed to write environment variables: ' . $e->getMessage());
         }
     }
