@@ -77,9 +77,24 @@ class PublishAbacCommand extends Command
 
     private function publishMigrations(): void
     {
-        $this->call('vendor:publish', [
-            '--tag' => 'abac-migrations',
-            '--force' => true,
-        ]);
+        $migrationPath = database_path('migrations');
+        $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
+        
+        // Get existing migration
+        $existingFile = collect(File::glob($migrationPath . '/*_create_abac_tables.php'))
+            ->reject(fn($file) => str_contains($file, '_backup_'))
+            ->first();
+
+        if ($existingFile) {
+            $this->call('vendor:publish', [
+                '--tag' => 'abac-migrations',
+                '--force' => true,
+            ]);
+        } else {
+            $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
+            $this->publishes([
+                $sourcePath => database_path("migrations/{$newFileName}"),
+            ], 'abac-migrations');
+        }
     }
 }
