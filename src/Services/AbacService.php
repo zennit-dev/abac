@@ -36,7 +36,7 @@ readonly class AbacService
     private function evaluate(AccessContext $context): PolicyEvaluationResult
     {
         return $this->monitor->measure('policy_evaluation', function () use ($context) {
-            $cacheKey = "access:{$context->subject->id}:{$context->resource}:{$context->operation}";
+            $cacheKey = "access:{$context->subject->id}:$context->resource:$context->operation";
 
             $result = $this->cache->remember(
                 $cacheKey,

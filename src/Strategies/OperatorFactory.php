@@ -58,9 +58,15 @@ class OperatorFactory
     private function registerCustomOperators(): void
     {
         foreach ($this->getCustomOperators() as $key => $operatorClass) {
-            if (class_exists($operatorClass) && is_subclass_of($operatorClass, OperatorInterface::class)) {
-                $this->register($key, new $operatorClass());
+            if (!class_exists($operatorClass)) {
+                throw new InvalidArgumentException("Custom operator class '$operatorClass' does not exist");
             }
+
+            if (!is_subclass_of($operatorClass, OperatorInterface::class)) {
+                throw new InvalidArgumentException("Custom operator class '$operatorClass' must implement OperatorInterface");
+            }
+
+            $this->register($key, new $operatorClass());
         }
     }
 
@@ -71,7 +77,7 @@ class OperatorFactory
         }
 
         if (isset($this->operators[$key])) {
-            throw new InvalidArgumentException("Operator with key '{$key}' is already registered");
+            throw new InvalidArgumentException("Operator with key '$key' is already registered");
         }
 
         $this->operators[$key] = $operator;

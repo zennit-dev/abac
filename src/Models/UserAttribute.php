@@ -11,25 +11,14 @@ class UserAttribute extends Model
     use HasConfigurations;
 
     protected $fillable = [
+        'subject_type',
+        'subject_id',
         'attribute_name',
         'attribute_value',
     ];
 
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $userAttributeTable = $this->getUserAttributesTable();
-        $this->fillable[] = $userAttributeTable['subject_type_column'];
-        $this->fillable[] = $userAttributeTable['subject_id_column'];
-    }
-
     public function subject(): MorphTo
     {
-        return $this->morphTo(
-            'subject',
-            $this->getUserAttributesTable()['subject_type_column'],
-            $this->getUserAttributesTable()['subject_id_column']
-        );
+        return $this->morphTo();
     }
 }

@@ -23,7 +23,7 @@ readonly class AttributeLoader
             ->get();
 
         foreach ($subjectAttributes as $attribute) {
-            $attributes["subject.{$attribute->attribute_name}"] = $attribute->attribute_value;
+            $attributes["subject.$attribute->attribute_name"] = $attribute->attribute_value;
         }
 
         // Load resource attributes
@@ -32,7 +32,7 @@ readonly class AttributeLoader
             ->get();
 
         foreach ($resourceAttributes as $attribute) {
-            $attributes["resource.{$attribute->attribute_name}"] = $attribute->attribute_value;
+            $attributes["resource.$attribute->attribute_name"] = $attribute->attribute_value;
         }
 
         return new AttributeCollection($attributes);

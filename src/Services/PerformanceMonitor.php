@@ -42,7 +42,7 @@ class PerformanceMonitor
 
         if ($duration > $this->getSlowEvaluationThreshold()) {
             Log::channel($this->getLogChannel())
-                ->warning("Performance warning: {$operation} took {$duration}ms");
+                ->warning("Performance warning: $operation took {$duration}ms");
         }
 
         unset($this->timers[$operation]);

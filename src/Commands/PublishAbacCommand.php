@@ -31,7 +31,7 @@ class PublishAbacCommand extends Command
                 File::copy($sourcePath, $existingFile);
             } else {
                 $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
-                File::copy($sourcePath, database_path("migrations/{$newFileName}"));
+                File::copy($sourcePath, database_path("migrations/$newFileName"));
             }
             $this->info('Migration published successfully.');
         }

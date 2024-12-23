@@ -32,4 +32,11 @@ return [
             'async' => env('ABAC_ASYNC_EVENTS', false),
         ],
     ],
+    'operators' => [
+        'disabled' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
+        'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
+    ],
+    'database' => [
+        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'App\\Models\\User'),
+    ],
 ];

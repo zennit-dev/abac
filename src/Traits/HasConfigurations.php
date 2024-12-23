@@ -91,4 +91,31 @@ trait HasConfigurations
     {
         return config('abac.monitoring.events.async');
     }
+
+    // Operators Configuration
+    public function getDisabledOperators(): array
+    {
+        return config('abac.operators.disabled', []);
+    }
+
+    public function getCustomOperators(): array
+    {
+        $operators = config('abac.operators.custom', []);
+
+        // Convert to key => class format if not already
+        return collect($operators)->mapWithKeys(function ($value, $key) {
+            // If numeric key, use the class basename as the operator key
+            if (is_numeric($key)) {
+                $key = strtolower(class_basename($value));
+            }
+
+            return [$key => $value];
+        })->toArray();
+    }
+
+    // Database Configuration
+    public function getUserAttributeSubjectType(): string
+    {
+        return config('abac.database.user_attribute_subject_type');
+    }
 }

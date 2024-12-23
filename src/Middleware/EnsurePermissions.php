@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\HasConfigurations;
 
@@ -20,6 +21,7 @@ readonly class EnsurePermissions
 
     /**
      * Handle an incoming request.
+     * @throws ValidationException
      */
     public function handle(Request $request, Closure $next): Response
     {

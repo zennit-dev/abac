@@ -3,19 +3,30 @@
 namespace zennit\ABAC\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use zennit\ABAC\Models\UserAttribute;
+use zennit\ABAC\Traits\HasConfigurations;
 
 class UserAttributeFactory extends Factory
 {
+    use HasConfigurations;
+
     protected $model = UserAttribute::class;
 
     public function definition(): array
     {
         return [
-            config('abac.tables.user_attributes.subject_type_column', 'subject_type') => 'App\\Models\\User',
-            config('abac.tables.user_attributes.subject_id_column', 'subject_id') => $this->faker->numberBetween(1, 100),
+            'subject_type' => $this->getUserAttributeSubjectType(),
+            'subject_id' => $this->faker->numberBetween(1, 10),
             'attribute_name' => $this->faker->word,
             'attribute_value' => $this->faker->word,
         ];
+    }
+
+    public function forSubject(string $subjectType): self
+    {
+        return $this->state([
+            'subject_type' => $subjectType,
+        ]);
     }
 }

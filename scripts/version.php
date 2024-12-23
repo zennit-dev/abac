@@ -29,7 +29,7 @@ class VersionUpdater
         // Create git tag
         $this->createGitTag($newVersion);
 
-        echo "Version updated to {$newVersion}\n";
+        echo "Version updated to $newVersion\n";
         echo "Don't forget to push your changes:\n";
         echo "  git push && git push --tags\n";
     }
