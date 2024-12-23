@@ -46,19 +46,16 @@ class PublishAbacCommand extends Command
 
         if (!$this->option('force')) {
             $existingMigration = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
-                ->reject(fn ($file) => str_contains($file, '_backup_'))
+                ->reject(fn($file) => str_contains($file, '_backup_'))
                 ->first();
 
             if ($existingMigration) {
                 $sourcePath = __DIR__ . '/../../database/migrations/create_abac_tables.php';
-
+                
                 if (md5_file($existingMigration) === md5_file($sourcePath)) {
                     $this->info('Migration file is already up to date.');
                     $shouldPublish = false;
                 } else {
-                    $backupPath = preg_replace('/\.php$/', '_backup_' . now()->format('Y_m_d_His') . '.php', $existingMigration);
-                    File::copy($existingMigration, $backupPath);
-                    $this->info('Backup created at: ' . basename($backupPath));
                     $shouldPublish = $this->confirm(
                         'An ABAC migration file already exists and differs from the package version. Do you want to update it?',
                         false
