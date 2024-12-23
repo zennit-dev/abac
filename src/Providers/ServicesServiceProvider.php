@@ -16,7 +16,7 @@ use zennit\ABAC\Validators\AccessContextValidator;
 
 class ServicesServiceProvider extends ServiceProvider
 {
-    protected array $singletons = [
+    public array $singletons = [
         CacheManager::class,
         PolicyEvaluator::class,
         AuditLogger::class,
@@ -31,10 +31,6 @@ class ServicesServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        foreach ($this->singletons as $singleton) {
-            $this->app->singleton($singleton);
-        }
-
         // Register the main service with alias
         $this->app->alias(AbacService::class, 'abac');
     }
