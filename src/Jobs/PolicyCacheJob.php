@@ -7,7 +7,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Repositories\PolicyRepository;
 use zennit\ABAC\Services\CacheManager;
@@ -42,29 +41,26 @@ class PolicyCacheJob implements ShouldQueue
         };
 
         if ($this->action === 'warm' && $this->getEventsEnabled()) {
-            $policiesCount = $this->resource ?
-                $repository->getPoliciesFor($this->resource)->count() :
-                $repository->all()->count();
-            
+            $count = $this->resource
+                ? $repository->getPoliciesQueryFor($this->resource)->count()
+                : $repository->getQuery()->count();
+
             $duration = microtime(true) - $startTime;
             $metadata = [
                 'resource' => $this->resource,
                 'action' => $this->action,
             ];
-            
-            $event = new CacheWarmed($policiesCount, $duration, $metadata);
-            event($event);
+
+            event(new CacheWarmed($count, $duration, $metadata));
         }
     }
 
     private function warmCache(CacheManager $cache, PolicyRepository $repository): void
     {
-        $policies = $this->resource ?
-            $repository->getPoliciesFor($this->resource) :
-            $repository->all();
+        $policies = $this->resource
+            ? $repository->getPoliciesForResourceGrouped($this->resource)
+            : $repository->getPoliciesGrouped();
 
-        Collection::make($policies)
-            ->chunk($this->getBatchChunkSize())
-            ->each(fn ($chunk) => $cache->warmPolicies($chunk->all()));
+        $policies->each(fn($group) => $cache->warmPolicies($group->all()));
     }
 }

@@ -8,6 +8,7 @@ use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Traits\HasConfigurations;
+use Illuminate\Support\Collection;
 
 readonly class CacheManager
 {
@@ -73,29 +74,15 @@ readonly class CacheManager
 
     public function warmPolicies(array $policies): void
     {
-        if (!$this->getCacheWarmingEnabled()) {
-            return;
-        }
-
         $startTime = microtime(true);
-        $warmedCount = 0;
+        
+        Collection::make($policies)
+            ->groupBy(fn($policy) => "{$policy->permission->resource}:{$policy->permission->operation}")
+            ->each(function($group, $key) {
+                $this->remember("policy:$key", fn() => $group->first());
+            });
 
-        $chunks = array_chunk($policies, $this->getBatchChunkSize());
-        foreach ($chunks as $chunk) {
-            foreach ($chunk as $policy) {
-                $this->remember(
-                    "policy:{$policy->permission->resource}:{$policy->permission->operation}",
-                    fn () => $policy
-                );
-                $warmedCount++;
-            }
-        }
-
-        // Dispatch cache warmed event
-        $this->dispatchWarmingComplete($warmedCount, microtime(true) - $startTime);
-
-        // Schedule next warming before expiration
-        $this->scheduleNextWarming();
+        $this->dispatchWarmingComplete(count($policies), microtime(true) - $startTime);
     }
 
     public function remember(string $key, callable $callback, ?int $ttl = null): mixed
@@ -119,21 +106,6 @@ readonly class CacheManager
         );
     }
 
-    private function scheduleNextWarming(): void
-    {
-        if (!$this->getCacheEnabled() || !$this->getCacheWarmingEnabled()) {
-            return;
-        }
-
-        // Schedule next warming 1 minute before cache expires
-        $nextRun = now()->addSeconds($this->getCacheTTL() - 60);
-        
-        Queue::later(
-            $nextRun,
-            new PolicyCacheJob()
-        );
-    }
-
     private function dispatchWarmingComplete(int $count, float $duration): void
     {
         if ($this->getEventsEnabled()) {
@@ -142,8 +114,7 @@ readonly class CacheManager
                 'ttl' => $this->getCacheTTL(),
             ];
             
-            $event = new CacheWarmed($count, $duration, $metadata);
-            event($event);
+            event(new CacheWarmed($count, $duration, $metadata));
         }
     }
 

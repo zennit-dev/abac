@@ -2,55 +2,60 @@
 
 namespace zennit\ABAC\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
-use zennit\ABAC\Models\Permission;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use zennit\ABAC\Models\Policy;
 
 class PolicyRepository
 {
-    public function getPoliciesFor(string $resource, string $operation = 'all'): Collection
+    /**
+     * Get policies for a specific resource
+     */
+    public function getPoliciesFor(string $resource): Collection
     {
-        if ($operation === 'all') {
-            return Policy::query()
-                ->whereHas('permission', function ($query) use ($resource) {
-                    $query->where('resource', $resource);
-                })
-                ->with(['conditions.attributes'])
-                ->get();
-        }
+        return $this->getPoliciesQueryFor($resource)->get();
+    }
 
+    /**
+     * Get the base query builder for policies
+     */
+    public function getQuery(): Builder
+    {
         return Policy::query()
-            ->whereHas('permission', function ($query) use ($resource, $operation) {
-                $query->where([
-                    'resource' => $resource,
-                    'operation' => $operation,
-                ]);
-            })
-            ->with(['conditions.attributes'])
-            ->get();
+            ->with(['permission', 'conditions.attributes']);
     }
 
-    public function create(array $data): Policy
+    /**
+     * Get the query builder for policies filtered by resource
+     */
+    public function getPoliciesQueryFor(string $resource): Builder
     {
-        $permission = Permission::firstOrCreate([
-            'resource' => $data['resource'],
-            'operation' => $data['operation'],
-        ]);
-
-        return Policy::create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'permission_id' => $permission->id,
-        ]);
+        return $this->getQuery()
+            ->whereHas('permission', fn ($query) => $query->where('resource', $resource)
+            );
     }
 
-    public function delete(int $id): bool
+    /**
+     * Get policies grouped by resource and operation
+     */
+    public function getPoliciesGrouped(): Collection
     {
-        return Policy::destroy($id) > 0;
+        return $this->getQuery()
+            ->get()
+            ->groupBy(function ($policy) {
+                return "{$policy->permission->resource}:{$policy->permission->operation}";
+            });
     }
 
-    public function all(): Collection
+    /**
+     * Get policies for a specific resource grouped by operation
+     */
+    public function getPoliciesForResourceGrouped(string $resource): Collection
     {
-        return Policy::with(['permission', 'conditions.attributes'])->get();
+        return $this->getPoliciesQueryFor($resource)
+            ->get()
+            ->groupBy(function ($policy) {
+                return "{$policy->permission->resource}:{$policy->permission->operation}";
+            });
     }
 }
