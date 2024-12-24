@@ -137,14 +137,13 @@ readonly class CacheManager
     private function dispatchWarmingComplete(int $count, float $duration): void
     {
         if ($this->getEventsEnabled()) {
-            CacheWarmed::dispatch(
-                policiesCount: $count,
-                duration: $duration,
-                metadata: [
-                    'next_warming' => now()->addSeconds($this->getCacheTTL() - 60)->toDateTimeString(),
-                    'ttl' => $this->getCacheTTL(),
-                ]
-            );
+            $metadata = [
+                'next_warming' => now()->addSeconds($this->getCacheTTL() - 60)->toDateTimeString(),
+                'ttl' => $this->getCacheTTL(),
+            ];
+            
+            $event = new CacheWarmed($count, $duration, $metadata);
+            event($event);
         }
     }
 
