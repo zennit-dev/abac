@@ -11,7 +11,7 @@ class CacheWarmed
     use SerializesModels;
 
     public function __construct(
-        public int $policiesCount,
+        public int $count,
         public float $duration,
         public array $metadata = []
     ) {

@@ -113,7 +113,13 @@ class CacheManager
                 'next_warming' => now()->addSeconds($this->getCacheTTL() - 60)->toDateTimeString(),
                 'ttl' => $this->getCacheTTL(),
             ];
-            
+
+			   dd([
+                'count' => $count,
+                'duration' => $duration,
+                'metadata' => $metadata
+            ]);
+
             event(new CacheWarmed($count, $duration, $metadata));
         }
     }

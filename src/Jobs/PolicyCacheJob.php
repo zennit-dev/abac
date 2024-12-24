@@ -51,6 +51,12 @@ class PolicyCacheJob implements ShouldQueue
                 'action' => $this->action,
             ];
 
+            dd([
+                'count' => $count,
+                'duration' => $duration,
+                'metadata' => $metadata
+            ]);
+
             event(new CacheWarmed($count, $duration, $metadata));
         }
     }
