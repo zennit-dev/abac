@@ -68,13 +68,10 @@ class VersionUpdater
 
         $version = 'v' . $version;
         
-        // Get the last commit message
-        $lastMessage = trim(shell_exec('git log -1 --pretty=%B'));
-        
         // Create tag locally only
         exec('git add composer.json');
-        exec('git commit -m "' . $lastMessage . '"');
-        exec('git tag -a ' . $version . ' -m "Version ' . $version . '"');
+        exec(sprintf('git commit -m "Version bump to %s"', $version));
+        exec(sprintf('git tag -a %s -m "Version %s"', escapeshellarg($version), escapeshellarg($version)));
     }
 }
 
