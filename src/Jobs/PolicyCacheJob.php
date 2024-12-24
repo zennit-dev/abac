@@ -21,8 +21,8 @@ class PolicyCacheJob implements ShouldQueue
     use SerializesModels;
 
     public function __construct(
-        private readonly string $action = 'warm',
-        private readonly ?string $resource = null
+        private string $action = 'warm',
+        private ?string $resource = null
     ) {
     }
 

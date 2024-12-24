@@ -10,7 +10,7 @@ use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Traits\HasConfigurations;
 use Illuminate\Support\Collection;
 
-readonly class CacheManager
+class CacheManager
 {
     use HasConfigurations;
 

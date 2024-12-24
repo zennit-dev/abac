@@ -7,7 +7,7 @@ use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\PolicyEvaluationResult;
 use zennit\ABAC\Traits\HasConfigurations;
 
-readonly class AuditLogger
+class AuditLogger
 {
     use HasConfigurations;
 

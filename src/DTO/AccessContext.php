@@ -2,13 +2,13 @@
 
 namespace zennit\ABAC\DTO;
 
-readonly class AccessContext
+class AccessContext
 {
     public function __construct(
-        public object $subject,
         public string $resource,
         public string $operation,
-        public array $resourceIds = []
+        public mixed $subject,
+        public ?array $context = []
     ) {
     }
 

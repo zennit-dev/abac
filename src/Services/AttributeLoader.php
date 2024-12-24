@@ -8,14 +8,13 @@ use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
 use zennit\ABAC\Traits\HasConfigurations;
 
-readonly class AttributeLoader
+class AttributeLoader
 {
     use HasConfigurations;
 
     public function __construct(
-        private CacheManager $cache
-    ) {
-    }
+        private CacheManager $cache,
+    ) {}
 
     public function loadForContext(AccessContext $context): AttributeCollection
     {
@@ -27,8 +26,6 @@ readonly class AttributeLoader
         );
 
         return $this->cache->rememberAttributes($contextKey, function () use ($context) {
-            $attributes = [];
-
             // Cache user attributes
             $subjectAttributes = $this->cache->rememberUserAttributes(
                 $context->subject->id,

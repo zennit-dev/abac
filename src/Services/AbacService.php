@@ -9,17 +9,18 @@ use zennit\ABAC\Logging\AuditLogger;
 use zennit\ABAC\Traits\HasConfigurations;
 use zennit\ABAC\Validators\AccessContextValidator;
 
-readonly class AbacService
+class AbacService
 {
     use HasConfigurations;
 
     public function __construct(
-        private PolicyEvaluator $evaluator,
         private CacheManager $cache,
-        private AuditLogger $logger,
-        private PerformanceMonitor $monitor,
         private AttributeLoader $attributeLoader,
-    ) {}
+        private PolicyEvaluator $evaluator,
+        private AuditLogger $logger,
+	    private PerformanceMonitor $monitor
+    ) {
+    }
 
     /**
      * @throws ValidationException

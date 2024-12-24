@@ -10,7 +10,7 @@ use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\HasConfigurations;
 
-readonly class EnsurePermissions
+class EnsurePermissions
 {
     use HasConfigurations;
 
@@ -30,10 +30,10 @@ readonly class EnsurePermissions
         }
 
         $context = new AccessContext(
-            subject: $request->user(),
-            resource: $this->getResourceFromPath($request->path()),
-            operation: strtolower($request->method()),
-            resourceIds: []
+            resource:    $this->getResourceFromPath($request->path()),
+	        operation:   strtolower($request->method()),
+	        subject:     $request->user(),
+	        context: []
         );
 
         if (!$this->abac->can($context)) {

@@ -7,7 +7,7 @@ use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\DTO\PolicyEvaluationResult;
 use zennit\ABAC\Repositories\PolicyRepository;
 
-readonly class PolicyEvaluator
+class PolicyEvaluator
 {
     public function __construct(
         private PolicyRepository $policyRepository,
@@ -56,4 +56,5 @@ readonly class PolicyEvaluator
             );
         });
     }
+
 }
