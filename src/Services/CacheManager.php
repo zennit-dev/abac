@@ -3,12 +3,12 @@
 namespace zennit\ABAC\Services;
 
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Traits\HasConfigurations;
-use Illuminate\Support\Collection;
 
 class CacheManager
 {
@@ -42,11 +42,11 @@ class CacheManager
     public function forget(string $key): bool
     {
         $result = $this->cache->forget($this->getCachePrefix() . $key);
-        
+
         if ($result && $this->getCacheWarmingEnabled()) {
             $this->scheduleWarmUp($this->extractResourceFromKey($key));
         }
-        
+
         return $result;
     }
 
@@ -63,23 +63,23 @@ class CacheManager
     public function flush(): bool
     {
         $result = $this->cache->flush();
-        
+
         // Schedule a complete cache warm after flush
         if ($result && $this->getCacheWarmingEnabled()) {
             $this->scheduleWarmUp();
         }
-        
+
         return $result;
     }
 
     public function warmPolicies(array $policies): void
     {
         $startTime = microtime(true);
-        
+
         Collection::make($policies)
-            ->groupBy(fn($policy) => "{$policy->permission->resource}:{$policy->permission->operation}")
-            ->each(function($group, $key) {
-                $this->remember("policy:$key", fn() => $group->first());
+            ->groupBy(fn ($policy) => "{$policy->permission->resource}:{$policy->permission->operation}")
+            ->each(function ($group, $key) {
+                $this->remember("policy:$key", fn () => $group->first());
             });
 
         $this->dispatchWarmingComplete(count($policies), microtime(true) - $startTime);
@@ -114,12 +114,6 @@ class CacheManager
                 'ttl' => $this->getCacheTTL(),
             ];
 
-			   dd([
-                'count' => $count,
-                'duration' => $duration,
-                'metadata' => $metadata
-            ]);
-
             event(new CacheWarmed($count, $duration, $metadata));
         }
     }
@@ -130,7 +124,7 @@ class CacheManager
         if (preg_match('/^policy:([^:]+)/', $key, $matches)) {
             return $matches[1];
         }
-        
+
         return null;
     }
 }

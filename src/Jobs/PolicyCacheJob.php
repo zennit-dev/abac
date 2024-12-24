@@ -51,12 +51,6 @@ class PolicyCacheJob implements ShouldQueue
                 'action' => $this->action,
             ];
 
-            dd([
-                'count' => $count,
-                'duration' => $duration,
-                'metadata' => $metadata
-            ]);
-
             event(new CacheWarmed($count, $duration, $metadata));
         }
     }
@@ -67,6 +61,6 @@ class PolicyCacheJob implements ShouldQueue
             ? $repository->getPoliciesForResourceGrouped($this->resource)
             : $repository->getPoliciesGrouped();
 
-        $policies->each(fn($group) => $cache->warmPolicies($group->all()));
+        $policies->each(fn ($group) => $cache->warmPolicies($group->all()));
     }
 }
