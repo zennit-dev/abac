@@ -20,22 +20,22 @@ readonly class CacheManager
 
     public function rememberAttributes(string $contextKey, callable $callback): AttributeCollection
     {
-        return $this->remember("attributes:{$contextKey}", $callback);
+        return $this->remember("attributes:$contextKey", $callback);
     }
 
     public function rememberUserAttributes(int $userId, string $type, callable $callback): array
     {
-        return $this->remember("user_attributes:{$type}:{$userId}", $callback);
+        return $this->remember("user_attributes:$type:$userId", $callback);
     }
 
     public function rememberResourceAttributes(string $resource, callable $callback): array
     {
-        return $this->remember("resource_attributes:{$resource}", $callback);
+        return $this->remember("resource_attributes:$resource", $callback);
     }
 
     public function rememberPolicyEvaluation(string $key, callable $callback): mixed
     {
-        return $this->remember("evaluation:{$key}", $callback);
+        return $this->remember("evaluation:$key", $callback);
     }
 
     public function forget(string $key): bool
@@ -51,12 +51,12 @@ readonly class CacheManager
 
     public function forgetUserAttributes(int $userId, string $type): void
     {
-        $this->forget("user_attributes:{$type}:{$userId}");
+        $this->forget("user_attributes:$type:$userId");
     }
 
     public function forgetResourceAttributes(string $resource): void
     {
-        $this->forget("resource_attributes:{$resource}");
+        $this->forget("resource_attributes:$resource");
     }
 
     public function flush(): bool
@@ -130,7 +130,7 @@ readonly class CacheManager
         
         Queue::later(
             $nextRun,
-            new PolicyCacheJob('warm', null, true)
+            new PolicyCacheJob()
         );
     }
 

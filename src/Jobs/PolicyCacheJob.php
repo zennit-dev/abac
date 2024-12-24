@@ -42,16 +42,20 @@ class PolicyCacheJob implements ShouldQueue
         };
 
         if ($this->action === 'warm' && $this->getEventsEnabled()) {
-            CacheWarmed::dispatch(
-                policiesCount: $this->resource ?
-                                   $repository->getPoliciesFor($this->resource)->count() :
-                                   $repository->all()->count(),
+            $policiesCount = $this->resource ?
+                $repository->getPoliciesFor($this->resource)->count() :
+                $repository->all()->count();
+            
+            $event = new CacheWarmed(
+                policiesCount: $policiesCount,
                 duration: microtime(true) - $startTime,
                 metadata: [
                     'resource' => $this->resource,
                     'action' => $this->action,
                 ]
             );
+            
+            event($event);
         }
     }
 

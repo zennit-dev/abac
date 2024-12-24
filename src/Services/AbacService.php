@@ -19,8 +19,7 @@ readonly class AbacService
         private AuditLogger $logger,
         private PerformanceMonitor $monitor,
         private AttributeLoader $attributeLoader,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ValidationException
@@ -63,6 +62,22 @@ readonly class AbacService
         }
 
         return $this->evaluator->evaluate($context, $attributes);
+    }
+
+    /**
+     * Invalidate cache when user attributes change
+     */
+    public function invalidateUserCache(int $userId, string $userType): void
+    {
+        $this->cache->forgetUserAttributes($userId, $userType);
+    }
+
+    /**
+     * Invalidate cache when resource attributes change
+     */
+    public function invalidateResourceCache(string $resource): void
+    {
+        $this->cache->forgetResourceAttributes($resource);
     }
 
     /**

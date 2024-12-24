@@ -3,7 +3,6 @@
 namespace zennit\ABAC\Observers;
 
 use zennit\ABAC\Jobs\PolicyCacheJob;
-use zennit\ABAC\Models\UserAttribute;
 
 class UserAttributeObserver
 {
