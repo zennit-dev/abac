@@ -23,6 +23,6 @@ class Permission extends Model
 
     public function policies(): HasMany
     {
-        return $this->hasMany(Policy::class);
+        return $this->hasMany(Policy::class, 'permission_id');
     }
 }

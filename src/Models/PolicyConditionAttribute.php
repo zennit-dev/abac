@@ -27,6 +27,6 @@ class PolicyConditionAttribute extends Model
 
     public function condition(): BelongsTo
     {
-        return $this->belongsTo(PolicyCondition::class);
+        return $this->belongsTo(PolicyCondition::class, 'policy_condition_id');
     }
 }

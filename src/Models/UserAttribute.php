@@ -17,13 +17,13 @@ class UserAttribute extends Model
         'attribute_value',
     ];
 
-	protected $casts = [
-		'id' => 'integer',
-		'subject_type' => 'string',
-		'subject_id' => 'integer',
-		'attribute_name' => 'string',
-		'attribute_value' => 'string',
-	];
+    protected $casts = [
+        'id' => 'integer',
+        'subject_type' => 'string',
+        'subject_id' => 'integer',
+        'attribute_name' => 'string',
+        'attribute_value' => 'string',
+    ];
 
     public function subject(): MorphTo
     {

@@ -16,19 +16,19 @@ class PolicyCollection extends Model
         'policy_id',
     ];
 
-	protected $casts = [
-		'id' => 'integer',
-		'policy_id' => 'integer',
-		'operator' => 'string',
-	];
+    protected $casts = [
+        'id' => 'integer',
+        'policy_id' => 'integer',
+        'operator' => 'string',
+    ];
 
     public function policy(): belongsTo
     {
-        return $this->belongsTo(Policy::class);
+        return $this->belongsTo(Policy::class, 'policy_id');
     }
 
     public function conditions(): HasMany
     {
-        return $this->hasMany(PolicyCondition::class);
+        return $this->hasMany(PolicyCondition::class, 'policy_collection_id');
     }
 }

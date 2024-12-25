@@ -16,19 +16,19 @@ class Policy extends Model
         'permission_id',
     ];
 
-	protected $casts = [
-		'id' => 'integer',
-		'permission_id' => 'integer',
-		'name' => 'string',
-	];
+    protected $casts = [
+        'id' => 'integer',
+        'permission_id' => 'integer',
+        'name' => 'string',
+    ];
 
     public function permission(): BelongsTo
     {
-        return $this->belongsTo(Permission::class);
+        return $this->belongsTo(Permission::class, 'permission_id');
     }
 
     public function collections(): HasMany
     {
-        return $this->hasMany(PolicyCollection::class);
+        return $this->hasMany(PolicyCollection::class, 'policy_id');
     }
 }
