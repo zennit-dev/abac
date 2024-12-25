@@ -13,7 +13,7 @@ use zennit\ABAC\Repositories\PolicyRepository;
 use zennit\ABAC\Services\ZennitAbacCacheManager;
 use zennit\ABAC\Traits\HasConfigurations;
 
-readonly class PolicyCacheJob implements ShouldQueue
+class PolicyCacheJob implements ShouldQueue
 {
     use Dispatchable;
     use HasConfigurations;

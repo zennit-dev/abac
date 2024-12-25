@@ -33,7 +33,7 @@ class PublishAbacEnvCommand extends Command
 
     public function handle(): void
     {
-        $filePath = $this->ask('Where would you like to save the environment variables? (provide full path)');
+        $filePath = $this->ask('Where would you like to save the environment variables? (provide full path, null for abort)');
 
         if (!$filePath) {
             $this->error('No file path provided. Aborting.');
