@@ -178,7 +178,7 @@ composer version-major  # Increment major version
 ### Cache Configuration
 
 ```php
-// config/abac.php
+// config/zennit_abac.php
 'cache' => [
     'enabled' => true,
     'ttl' => 3600,

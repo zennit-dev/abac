@@ -50,7 +50,7 @@
                 "zennit\\ABAC\\Providers\\AbacServiceProvider"
             ],
             "config": {
-                "abac": "config/abac.php"
+                "abac": "config/zennit_abac.php"
             },
             "aliases": {
                 "Abac": "zennit\\ABAC\\Facades\\Abac"

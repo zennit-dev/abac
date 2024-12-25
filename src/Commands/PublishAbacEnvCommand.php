@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class PublishAbacEnvCommand extends Command
 {
-    protected $signature = 'abac:publish-env {--force : Force the operation to run without confirmation}';
+    protected $signature = 'zennit_abac:publish-env {--force : Force the operation to run without confirmation}';
 
     protected $description = 'Publish ABAC environment variables';
 
