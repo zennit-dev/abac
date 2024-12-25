@@ -3,8 +3,7 @@
 namespace zennit\ABAC\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use zennit\ABAC\Enums\PolicyOperators;
-use zennit\ABAC\Models\Policy;
+use zennit\ABAC\Enums\Operators\ListOperators;
 use zennit\ABAC\Models\PolicyCondition;
 
 class PolicyConditionFactory extends Factory
@@ -14,8 +13,8 @@ class PolicyConditionFactory extends Factory
     public function definition(): array
     {
         return [
-            'operator' => $this->faker->randomElement(PolicyOperators::values()),
-            'policy_id' => Policy::factory()->create()->id,
+            'operator' => $this->faker->randomElement(ListOperators::values()),
+            'policy_collection_id' => PolicyCondition::factory()->create()->id,
         ];
     }
 }

@@ -7,28 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Policy extends Model
+class PolicyCollection extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'permission_id',
+        'operator',
+        'policy_id',
     ];
 
 	protected $casts = [
 		'id' => 'integer',
-		'permission_id' => 'integer',
-		'name' => 'string',
+		'policy_id' => 'integer',
+		'operator' => 'string',
 	];
 
-    public function permission(): BelongsTo
+    public function policy(): belongsTo
     {
-        return $this->belongsTo(Permission::class);
+        return $this->belongsTo(Policy::class);
     }
 
-    public function collections(): HasMany
+    public function conditions(): HasMany
     {
-        return $this->hasMany(PolicyCollection::class);
+        return $this->hasMany(PolicyCondition::class);
     }
 }

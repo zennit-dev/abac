@@ -14,13 +14,13 @@ class PolicyCondition extends Model
 
     protected $fillable = [
         'operator',
-        'policy_id',
+        'policy_collection_id',
     ];
 
     protected $casts = [
         'id' => 'integer',
         'operator' => 'string',
-        'policy_id' => 'integer',
+        'policy_collection_id' => 'integer',
     ];
 
     protected static function newFactory(): PolicyConditionFactory
@@ -28,9 +28,9 @@ class PolicyCondition extends Model
         return PolicyConditionFactory::new();
     }
 
-    public function policy(): BelongsTo
+    public function collection(): BelongsTo
     {
-        return $this->belongsTo(Policy::class);
+        return $this->belongsTo(PolicyCollection::class, 'policy_collection_id');
     }
 
     public function attributes(): HasMany

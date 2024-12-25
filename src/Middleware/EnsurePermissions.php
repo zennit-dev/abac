@@ -4,15 +4,16 @@ namespace zennit\ABAC\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\ZennitAbacService;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 class EnsurePermissions
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
     public function __construct(
         protected ZennitAbacService $abac
@@ -22,6 +23,7 @@ class EnsurePermissions
     /**
      * Handle an incoming request.
      * @throws ValidationException
+     * @throws InvalidArgumentException
      */
     public function handle(Request $request, Closure $next): Response
     {

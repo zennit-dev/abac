@@ -8,24 +8,28 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Log;
+use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Repositories\PolicyRepository;
 use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 class PolicyCacheJob implements ShouldQueue
 {
     use Dispatchable;
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
     public function __construct(
-        private string $action = 'warm',
-        private ?string $resource = null
+        private readonly string $action = 'warm',
+        private readonly ?string $resource = null
     ) {}
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function handle(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
     {
         if (!$this->getCacheEnabled() || !$this->getCacheWarmingEnabled()) {
@@ -58,12 +62,17 @@ class PolicyCacheJob implements ShouldQueue
         }
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function warmCache(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
     {
         $policies = $this->resource
             ? $repository->getPoliciesForResourceGrouped($this->resource)
             : $repository->getPoliciesGrouped();
 
-        $policies->each(fn ($group) => $cache->warmPolicies($group->all()));
+        $policies->each(
+            fn ($group) => $cache->warmPolicies($group->all())
+        );
     }
 }

@@ -5,28 +5,26 @@ namespace zennit\ABAC\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Jobs\PolicyCacheJob;
+use zennit\ABAC\Models\Permission;
+use zennit\ABAC\Models\Policy;
+use zennit\ABAC\Models\PolicyCollection;
+use zennit\ABAC\Models\PolicyCondition;
+use zennit\ABAC\Models\PolicyConditionAttribute;
+use zennit\ABAC\Models\ResourceAttribute;
+use zennit\ABAC\Models\UserAttribute;
+use zennit\ABAC\Observers\PermissionObserver;
+use zennit\ABAC\Observers\PolicyCollectionObserver;
+use zennit\ABAC\Observers\PolicyConditionAttributeObserver;
+use zennit\ABAC\Observers\PolicyConditionObserver;
+use zennit\ABAC\Observers\PolicyObserver;
+use zennit\ABAC\Observers\ResourceAttributeObserver;
+use zennit\ABAC\Observers\UserAttributeObserver;
 use zennit\ABAC\Services\ZennitAbacService;
-use zennit\ABAC\Traits\HasConfigurations;
-use zennit\ABAC\Models\{
-    Permission,
-    Policy,
-    PolicyCondition,
-    PolicyConditionAttribute,
-    ResourceAttribute,
-    UserAttribute
-};
-use zennit\ABAC\Observers\{
-    PermissionObserver,
-    PolicyObserver,
-    PolicyConditionObserver,
-    PolicyConditionAttributeObserver,
-    ResourceAttributeObserver,
-    UserAttributeObserver
-};
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 class AbacServiceProvider extends ServiceProvider
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
     public function register(): void
     {
@@ -57,7 +55,7 @@ class AbacServiceProvider extends ServiceProvider
                 ->withoutOverlapping();
 
             $scheduleType = $this->getCacheWarmingSchedule();
-            
+
             match ($scheduleType) {
                 'daily' => $job->daily(),
                 'weekly' => $job->weekly(),
@@ -69,11 +67,12 @@ class AbacServiceProvider extends ServiceProvider
 
     protected function registerObservers(): void
     {
-        Permission::observe(PermissionObserver::class);
-        Policy::observe(PolicyObserver::class);
-        PolicyCondition::observe(PolicyConditionObserver::class);
-        PolicyConditionAttribute::observe(PolicyConditionAttributeObserver::class);
         ResourceAttribute::observe(ResourceAttributeObserver::class);
         UserAttribute::observe(UserAttributeObserver::class);
+        Permission::observe(PermissionObserver::class);
+        Policy::observe(PolicyObserver::class);
+        PolicyCollection::observe(PolicyCollectionObserver::class);
+        PolicyCondition::observe(PolicyConditionObserver::class);
+        PolicyConditionAttribute::observe(PolicyConditionAttributeObserver::class);
     }
 }

@@ -5,20 +5,35 @@ namespace zennit\ABAC\Repositories;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Models\Policy;
+use zennit\ABAC\Services\ZennitAbacCacheManager;
 
 readonly class PolicyRepository
 {
     public function __construct(
-        protected CacheRepository $cache
+        protected CacheRepository $cache,
+	    protected ZennitAbacCacheManager $cacheManager
     ) {}
 
-    /**
-     * Get policies for a specific resource
-     */
-    public function getPoliciesFor(string $resource): Collection
+	/**
+	 * Get policies for a specific resource and operation
+	 * @throws InvalidArgumentException
+	 */
+    public function getPoliciesFor(string $resource, string $operation): Collection
     {
-        return $this->getPoliciesQueryFor($resource)->get();
+        $policies = $this->cacheManager->getPoliciesFromCache($resource, $operation);
+
+        if (empty($policies)) {
+            $policies = $this->getPoliciesQueryFor($resource)
+                ->whereHas('permission', fn ($q) => $q->where('operation', $operation))
+                ->with(['collections.conditions.attributes', 'permission'])
+                ->get();
+
+            $this->cacheManager->warmPolicies($policies->all());
+        }
+
+        return collect($policies);
     }
 
     /**

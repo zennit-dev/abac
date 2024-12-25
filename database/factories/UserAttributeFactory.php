@@ -4,11 +4,11 @@ namespace zennit\ABAC\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use zennit\ABAC\Models\UserAttribute;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 class UserAttributeFactory extends Factory
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
     protected $model = UserAttribute::class;
 

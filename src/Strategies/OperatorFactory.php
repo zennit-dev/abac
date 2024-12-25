@@ -4,28 +4,29 @@ namespace zennit\ABAC\Strategies;
 
 use InvalidArgumentException;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Strategies\Operators\AndOperator;
-use zennit\ABAC\Strategies\Operators\ContainsOperator;
-use zennit\ABAC\Strategies\Operators\EndsWithOperator;
-use zennit\ABAC\Strategies\Operators\EqualsOperator;
-use zennit\ABAC\Strategies\Operators\GreaterThanEqualsOperator;
-use zennit\ABAC\Strategies\Operators\GreaterThanOperator;
-use zennit\ABAC\Strategies\Operators\InOperator;
-use zennit\ABAC\Strategies\Operators\LessThanEqualsOperator;
-use zennit\ABAC\Strategies\Operators\LessThanOperator;
-use zennit\ABAC\Strategies\Operators\NotContainsOperator;
-use zennit\ABAC\Strategies\Operators\NotEndsWithOperator;
-use zennit\ABAC\Strategies\Operators\NotEqualsOperator;
-use zennit\ABAC\Strategies\Operators\NotInOperator;
-use zennit\ABAC\Strategies\Operators\NotOperator;
-use zennit\ABAC\Strategies\Operators\NotStartsWithOperator;
-use zennit\ABAC\Strategies\Operators\OrOperator;
-use zennit\ABAC\Strategies\Operators\StartsWithOperator;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\Strategies\Contracts\OperatorInterface;
+use zennit\ABAC\Strategies\Operators\Arithmetic\EqualsOperator;
+use zennit\ABAC\Strategies\Operators\Arithmetic\GreaterThanEqualsOperator;
+use zennit\ABAC\Strategies\Operators\Arithmetic\GreaterThanOperator;
+use zennit\ABAC\Strategies\Operators\Arithmetic\LessThanEqualsOperator;
+use zennit\ABAC\Strategies\Operators\Arithmetic\LessThanOperator;
+use zennit\ABAC\Strategies\Operators\Arithmetic\NotEqualsOperator;
+use zennit\ABAC\Strategies\Operators\List\InOperator;
+use zennit\ABAC\Strategies\Operators\List\NotInOperator;
+use zennit\ABAC\Strategies\Operators\Logical\AndOperator;
+use zennit\ABAC\Strategies\Operators\Logical\NotOperator;
+use zennit\ABAC\Strategies\Operators\Logical\OrOperator;
+use zennit\ABAC\Strategies\Operators\String\ContainsOperator;
+use zennit\ABAC\Strategies\Operators\String\EndsWithOperator;
+use zennit\ABAC\Strategies\Operators\String\NotContainsOperator;
+use zennit\ABAC\Strategies\Operators\String\NotEndsWithOperator;
+use zennit\ABAC\Strategies\Operators\String\NotStartsWithOperator;
+use zennit\ABAC\Strategies\Operators\String\StartsWithOperator;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 class OperatorFactory
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
     private array $operators;
 

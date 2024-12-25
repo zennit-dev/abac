@@ -24,7 +24,7 @@ class PolicyConditionObserver
 
     private function invalidateCache(PolicyCondition $condition): void
     {
-        $resource = $condition->policy->permission->resource;
+        $resource = $condition->collection->policy->permission->resource;
         PolicyCacheJob::dispatch('invalidate', $resource);
         PolicyCacheJob::dispatch('warm', $resource);
     }

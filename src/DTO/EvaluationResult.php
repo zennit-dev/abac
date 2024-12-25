@@ -2,13 +2,12 @@
 
 namespace zennit\ABAC\DTO;
 
-class PolicyEvaluationResult
+class EvaluationResult
 {
     public function __construct(
         public bool $granted,
         public string $reason,
         public array $context = [],
-        public array $matchedPolicies = []
-    ) {
-    }
+        public array $matched = []
+    ) {}
 }

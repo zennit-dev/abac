@@ -4,14 +4,14 @@ namespace zennit\ABAC\Logging;
 
 use Illuminate\Support\Facades\Log;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\PolicyEvaluationResult;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\DTO\EvaluationResult;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 readonly class AuditLogger
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
-    public function logAccess(AccessContext $context, PolicyEvaluationResult $result): void
+    public function logAccess(AccessContext $context, EvaluationResult $result): void
     {
         $message = sprintf(
             'Access %s for resource "%s" operation "%s"',

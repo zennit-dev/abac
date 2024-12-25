@@ -41,6 +41,15 @@ Install the package via Composer:
 composer require zennit/abac
 ```
 
+Add the service provider to your `bootstrap/providers.php`:
+
+```php
+return [
+    // ... other providers
+    zennit\ABAC\Providers\AbacServiceProvider::class,
+];
+```
+
 ---
 
 ## Quick Start
@@ -209,7 +218,7 @@ composer version-major  # Increment major version
 
 ```php
 use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Enums\PolicyOperators;
+use zennit\ABAC\Enums\Operators\ListOperators;
 
 // Create a policy
 $policy = Policy::create([
@@ -221,7 +230,7 @@ $policy = Policy::create([
 
 // Add conditions
 $policy->conditions()->create([
-    'operator' => PolicyOperators::EQUALS,
+    'operator' => ListOperators::EQUALS,
     'attributes' => [
         [
             'attribute_name' => 'owner_id',

@@ -2,7 +2,7 @@
 
 namespace zennit\ABAC\Traits;
 
-trait HasConfigurations
+trait ZennitAbacHasConfigurations
 {
     // Cache Configuration
     public function getCacheEnabled(): bool
@@ -70,7 +70,7 @@ trait HasConfigurations
     public function getLogChannel(): string
     {
         $channel = config('abac.monitoring.logging.channel', 'zennit.abac');
-        return config("logging.channels.{$channel}") ? $channel : config('logging.default');
+        return config("logging.channels.$channel") ? $channel : config('logging.default');
     }
 
     public function getDetailedLogging(): bool

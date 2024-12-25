@@ -7,9 +7,9 @@ use zennit\ABAC\Logging\AuditLogger;
 use zennit\ABAC\Repositories\PolicyRepository;
 use zennit\ABAC\Services\ZennitAbacAttributeLoader;
 use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Services\ZennitAbacConditionEvaluator;
+use zennit\ABAC\Services\Evaluators\ZennitAbacCollectionEvaluator;
 use zennit\ABAC\Services\ZennitAbacPerformanceMonitor;
-use zennit\ABAC\Services\ZennitAbacPolicyEvaluator;
+use zennit\ABAC\Services\Evaluators\ZennitAbacPolicyEvaluator;
 use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Strategies\OperatorFactory;
 use zennit\ABAC\Validators\AccessContextValidator;
@@ -21,7 +21,7 @@ class ServicesServiceProvider extends ServiceProvider
         ZennitAbacPolicyEvaluator::class,
         AuditLogger::class,
         ZennitAbacPerformanceMonitor::class,
-        ZennitAbacConditionEvaluator::class,
+        ZennitAbacCollectionEvaluator::class,
         OperatorFactory::class,
         AccessContextValidator::class,
         PolicyRepository::class,

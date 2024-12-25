@@ -2,45 +2,40 @@
 
 namespace zennit\ABAC\Services;
 
+use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
-use zennit\ABAC\Traits\HasConfigurations;
+use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 readonly class ZennitAbacAttributeLoader
 {
-    use HasConfigurations;
+    use ZennitAbacHasConfigurations;
 
     public function __construct(
         private ZennitAbacCacheManager $cache,
     ) {}
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function loadForContext(AccessContext $context): AttributeCollection
     {
-        $contextKey = sprintf(
-            '%s:%d:%s',
-            get_class($context->subject),
+        // Cache user attributes
+        $subjectAttributes = $this->cache->rememberUserAttributes(
             $context->subject->id,
-            $context->resource
+            get_class($context->subject),
+            fn () => $this->loadUserAttributes($context)
         );
 
-        return $this->cache->rememberAttributes($contextKey, function () use ($context) {
-            // Cache user attributes
-            $subjectAttributes = $this->cache->rememberUserAttributes(
-                $context->subject->id,
-                get_class($context->subject),
-                fn () => $this->loadUserAttributes($context)
-            );
+        // Cache resource attributes
+        $resourceAttributes = $this->cache->rememberResourceAttributes(
+            $context->resource,
+            fn () => $this->loadResourceAttributes($context)
+        );
 
-            // Cache resource attributes
-            $resourceAttributes = $this->cache->rememberResourceAttributes(
-                $context->resource,
-                fn () => $this->loadResourceAttributes($context)
-            );
-
-            return new AttributeCollection([...$subjectAttributes, ...$resourceAttributes]);
-        });
+        return new AttributeCollection([...$subjectAttributes, ...$resourceAttributes]);
     }
 
     private function loadUserAttributes(AccessContext $context): array
