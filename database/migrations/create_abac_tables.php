@@ -57,7 +57,7 @@ return new class extends Migration
         Schema::create('policy_collections', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->enum('operator', AllOperators::values());
+            $table->enum('operator', LogicalOperators::values());
             $table->foreignId('policy_id')
                 ->constrained('policies')
                 ->cascadeOnDelete();
@@ -66,7 +66,7 @@ return new class extends Migration
         Schema::create('policy_conditions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->enum('operator', AllOperators::values());
+            $table->enum('operator', LogicalOperators::values());
             $table->foreignId('policy_collection_id')
                 ->constrained('policy_collections')
                 ->cascadeOnDelete();
