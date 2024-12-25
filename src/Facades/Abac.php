@@ -14,6 +14,6 @@ class Abac extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'abac.facade';
+        return 'zennit.abac.facade';
     }
 }

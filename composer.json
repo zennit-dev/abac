@@ -1,7 +1,7 @@
 {
     "name": "zennit/abac",
     "description": "Attribute-Based Access Control (ABAC) for Laravel",
-    "version": "4.0.2",
+    "version": "4.0.1",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -50,7 +50,7 @@
                 "zennit\\ABAC\\Providers\\AbacServiceProvider"
             ],
             "config": {
-                "abac": "config/zennit_abac.php"
+                "zennit_abac": "config/zennit_abac.php"
             },
             "aliases": {
                 "Abac": "zennit\\ABAC\\Facades\\Abac"

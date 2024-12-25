@@ -5,7 +5,7 @@ return [
         'enabled' => env('ABAC_CACHE_ENABLED', true),
         'ttl' => env('ABAC_CACHE_TTL', 3600),
         'tags' => ['zennit.abac', 'zennit.abac-policies', 'zennit.abac-attributes'],
-        'prefix' => 'zennit.abac:',
+        'prefix' => 'zennit:abac:',
         'warming' => [
             'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
             'chunk_size' => env('ABAC_CACHE_WARMING_CHUNK_SIZE', 100),

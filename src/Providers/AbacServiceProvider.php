@@ -4,6 +4,7 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use zennit\ABAC\Facades\Abac;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Models\Permission;
 use zennit\ABAC\Models\Policy;
@@ -34,7 +35,7 @@ class AbacServiceProvider extends ServiceProvider
         $this->app->register(CommandServiceProvider::class);
 
         // Register the facade
-        $this->app->bind('abac.facade', function ($app) {
+        $this->app->bind('zennit.abac.facade', function ($app) {
             return $app->make(ZennitAbacService::class);
         });
     }
@@ -51,7 +52,7 @@ class AbacServiceProvider extends ServiceProvider
     {
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $job = $schedule->job(new PolicyCacheJob('warm'))
-                ->name('abac:warm-cache')
+                ->name('zennit_abac:warm-cache')
                 ->withoutOverlapping();
 
             $scheduleType = $this->getCacheWarmingSchedule();

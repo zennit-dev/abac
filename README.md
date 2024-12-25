@@ -272,7 +272,7 @@ Protect your routes with ABAC middleware:
 
 ```php
 // In RouteServiceProvider
-Route::middleware(['abac.permissions'])
+Route::middleware(['zennit.abac.permissions'])
     ->group(function () {
         // Protected routes
     });
