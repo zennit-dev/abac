@@ -13,17 +13,18 @@ readonly class PolicyRepository
 {
     public function __construct(
         protected CacheRepository $cache,
-	    protected ZennitAbacCacheManager $cacheManager
+        protected ZennitAbacCacheManager $cacheManager
     ) {}
 
-	/**
-	 * Get policies for a specific resource and operation.
-	 *
-	 * @param string $resource The resource identifier
-	 * @param string $operation The operation name
-	 * @return Collection Collection of matching policies
-	 * @throws InvalidArgumentException If cache operations fail
-	 */
+    /**
+     * Get policies for a specific resource and operation.
+     *
+     * @param  string  $resource  The resource identifier
+     * @param  string  $operation  The operation name
+     *
+     * @throws InvalidArgumentException If cache operations fail
+     * @return Collection Collection of matching policies
+     */
     public function getPoliciesFor(string $resource, string $operation): Collection
     {
         $policies = $this->cacheManager->getPoliciesFromCache($resource, $operation);
@@ -34,7 +35,7 @@ readonly class PolicyRepository
                 ->with(['collections.conditions.attributes', 'permission'])
                 ->get();
 
-            $this->cacheManager->warmPolicies($policies->all());
+            $this->cacheManager->warmPolicies($policies);
         }
 
         return collect($policies);
@@ -54,7 +55,8 @@ readonly class PolicyRepository
     /**
      * Get the query builder for policies filtered by resource.
      *
-     * @param string $resource The resource to filter by
+     * @param  string  $resource  The resource to filter by
+     *
      * @return Builder Filtered query builder
      */
     public function getPoliciesQueryFor(string $resource): Builder
@@ -81,7 +83,8 @@ readonly class PolicyRepository
     /**
      * Get policies for a specific resource grouped by operation.
      *
-     * @param string $resource The resource to get policies for
+     * @param  string  $resource  The resource to get policies for
+     *
      * @return Collection Collection of grouped policies
      */
     public function getPoliciesForResourceGrouped(string $resource): Collection

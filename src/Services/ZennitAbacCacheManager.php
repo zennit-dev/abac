@@ -3,6 +3,7 @@
 namespace zennit\ABAC\Services;
 
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use Log;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -119,18 +120,17 @@ readonly class ZennitAbacCacheManager
         return true;
     }
 
-    /**
-     * Warm up the cache for policies and their related resource attributes.
-     *
-     * @param  Policy[]  $policies  Array of Policy models to cache
-     *
-     * @throws InvalidArgumentException
-     */
-    public function warmPolicies(array $policies): void
+	/**
+	 * Warm up the cache for policies and their related resource attributes.
+	 *
+	 * @param Collection<Policy> $policies Collection of Policy models to cache
+	 *
+	 * @throws InvalidArgumentException
+	 */
+    public function warmPolicies(Collection $policies): void
     {
         $startTime = microtime(true);
-        /** @var Policy $policy */
-        $policyGroups = collect($policies)->groupBy(fn ($policy) => "{$policy->permission->resource}:{$policy->permission->operation}");
+        $policyGroups = $policies->groupBy(fn ($policy) => "{$policy->permission->resource}:{$policy->permission->operation}");
 
         /**
          * @var int|null|string $key
