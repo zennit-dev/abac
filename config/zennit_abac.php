@@ -13,10 +13,7 @@ return [
         ],
     ],
     'evaluation' => [
-        'parallel' => env('ABAC_PARALLEL_EVALUATION', false),
-        'batch_size' => env('ABAC_BATCH_SIZE', 1000),
-        'chunk_size' => env('ABAC_BATCH_CHUNK_SIZE', 100),
-        'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
+		'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
     ],
     'monitoring' => [
         'logging' => [

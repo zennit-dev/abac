@@ -56,7 +56,7 @@ return [
 
 1. Publish configuration and migrations:
    ```bash
-   php artisan abac:publish
+   php artisan zennit_abac:publish
    ```
 
 2. Run migrations:
@@ -99,35 +99,35 @@ $result = Abac::evaluate($context);
 
 ```bash
 # Publish all ABAC files (config, migrations, and env variables)
-php artisan abac:publish
+php artisan zennit_abac:publish
 
 # Individual publishing commands
-php artisan abac:publish-config    # Publish configuration file only
-php artisan abac:publish-migration # Publish migration files only
-php artisan abac:publish-env       # Publish environment variables only
+php artisan zennit_abac:publish-config    # Publish configuration file only
+php artisan zennit_abac:publish-migration # Publish migration files only
+php artisan zennit_abac:publish-env       # Publish environment variables only
 ```
 
 ### Cache Management
 
 ```bash
 # Warm the entire policy cache
-php artisan abac:cache-warm
+php artisan zennit_abac:cache-warm
 
 # Warm cache for specific resource
-php artisan abac:cache-warm posts
+php artisan zennit_abac:cache-warm posts
 
 # Invalidate cache
-php artisan abac:cache-invalidate
+php artisan zennit_abac:cache-invalidate
 
 # Clear cache
-php artisan abac:cache-clear
+php artisan zennit_abac:cache-clear
 ```
 
 ### Environment Setup
 
 ```bash
 # Add required environment variables to .env file
-php artisan abac:publish-env
+php artisan zennit_abac:publish-env
 
 # Available environment variables:
 ABAC_CACHE_ENABLED=true
@@ -153,10 +153,10 @@ ABAC_USER_ATTRIBUTE_SUBJECT_TYPE="App\Models\User"
 All commands support the `--force` option to skip confirmations:
 
 ```bash
-php artisan abac:publish --force
-php artisan abac:publish-config --force
-php artisan abac:publish-migration --force
-php artisan abac:publish-env --force
+php artisan zennit_abac:publish --force
+php artisan zennit_abac:publish-config --force
+php artisan zennit_abac:publish-migration --force
+php artisan zennit_abac:publish-env --force
 ```
 
 ### Testing
@@ -182,8 +182,8 @@ composer version-major  # Increment major version
 'cache' => [
     'enabled' => true,
     'ttl' => 3600,
-    'tags' => ['abac', 'abac-policies', 'abac-attributes'],
-    'prefix' => 'abac:',
+    'tags' => ['zennit.abac', 'zennit.abac-policies', 'zennit.abac-attributes'],
+    'prefix' => 'zennit:abac:',
     'warming' => [
         'enabled' => true,
         'chunk_size' => 100,
@@ -202,7 +202,7 @@ composer version-major  # Increment major version
     ],
     'logging' => [
         'enabled' => true,
-        'channel' => 'abac',
+        'channel' => 'zennit.abac',
         'detailed' => true,
     ],
     'events' => [

@@ -22,7 +22,7 @@ class PublishAbacEnvCommand extends Command
         'ABAC_BATCH_CHUNK_SIZE' => '100',
         'ABAC_STRICT_VALIDATION' => 'true',
         'ABAC_LOGGING_ENABLED' => 'true',
-        'ABAC_LOG_CHANNEL' => 'abac',
+        'ABAC_LOG_CHANNEL' => 'zennit.abac',
         'ABAC_DETAILED_LOGGING' => 'false',
         'ABAC_PERFORMANCE_LOGGING' => 'true',
         'ABAC_SLOW_EVALUATION_THRESHOLD' => '100',

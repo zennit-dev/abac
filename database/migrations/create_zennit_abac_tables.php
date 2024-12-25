@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
-use zennit\ABAC\Enums\Operators\ListOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 

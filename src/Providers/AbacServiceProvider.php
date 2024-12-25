@@ -4,7 +4,6 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use zennit\ABAC\Facades\Abac;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Models\Permission;
 use zennit\ABAC\Models\Policy;
@@ -20,6 +19,7 @@ use zennit\ABAC\Observers\PolicyConditionObserver;
 use zennit\ABAC\Observers\PolicyObserver;
 use zennit\ABAC\Observers\ResourceAttributeObserver;
 use zennit\ABAC\Observers\UserAttributeObserver;
+use zennit\ABAC\Services\ZennitAbacCacheManager;
 use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
@@ -40,6 +40,11 @@ class AbacServiceProvider extends ServiceProvider
         // Register the facade
         $this->app->bind('zennit.abac.facade', function ($app) {
             return $app->make(ZennitAbacService::class);
+        });
+
+        // Register the cache manager
+        $this->app->bind('zennit.abac.cache', function ($app) {
+            return $app->make(ZennitAbacCacheManager::class);
         });
     }
 
