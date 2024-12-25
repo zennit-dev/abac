@@ -60,9 +60,6 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": [
-            "docker exec abac php vendor/bin/phpunit --coverage-html coverage"
-        ],
         "version-patch": [
             "php -f scripts/version.php patch"
         ],
@@ -72,6 +69,9 @@
         "version-major": [
             "php -f scripts/version.php major"
         ]
+    },
+    "config": {
+        "sort-packages": true
     },
     "repositories": [
         {

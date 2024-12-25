@@ -8,12 +8,12 @@ use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
 use zennit\ABAC\Traits\HasConfigurations;
 
-class AttributeLoader
+readonly class ZennitAbacAttributeLoader
 {
     use HasConfigurations;
 
     public function __construct(
-        private CacheManager $cache,
+        private ZennitAbacCacheManager $cache,
     ) {}
 
     public function loadForContext(AccessContext $context): AttributeCollection

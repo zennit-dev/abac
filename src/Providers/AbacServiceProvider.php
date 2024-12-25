@@ -5,7 +5,7 @@ namespace zennit\ABAC\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Jobs\PolicyCacheJob;
-use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\HasConfigurations;
 use zennit\ABAC\Models\{
     Permission,
@@ -37,7 +37,7 @@ class AbacServiceProvider extends ServiceProvider
 
         // Register the facade
         $this->app->bind('abac.facade', function ($app) {
-            return $app->make(AbacService::class);
+            return $app->make(ZennitAbacService::class);
         });
     }
 

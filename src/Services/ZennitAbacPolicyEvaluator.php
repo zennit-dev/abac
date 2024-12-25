@@ -7,12 +7,12 @@ use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\DTO\PolicyEvaluationResult;
 use zennit\ABAC\Repositories\PolicyRepository;
 
-class PolicyEvaluator
+readonly class ZennitAbacPolicyEvaluator
 {
     public function __construct(
-        private PolicyRepository $policyRepository,
-        private ConditionEvaluator $conditionEvaluator,
-        private CacheManager $cache
+        private PolicyRepository             $policyRepository,
+        private ZennitAbacConditionEvaluator $conditionEvaluator,
+        private ZennitAbacCacheManager $cache
     ) {
     }
 
@@ -29,7 +29,7 @@ class PolicyEvaluator
 
         // Cache the evaluation result
         return $this->cache->rememberPolicyEvaluation($cacheKey, function () use ($context, $attributes) {
-            $policies = $this->policyRepository->getPoliciesFor($context->resource, $context->operation);
+            $policies = $this->policyRepository->getPoliciesFor($context->resource);
 
             if ($policies->isEmpty()) {
                 return new PolicyEvaluationResult(

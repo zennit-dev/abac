@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
-use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\HasConfigurations;
 
 class EnsurePermissions
@@ -15,7 +15,7 @@ class EnsurePermissions
     use HasConfigurations;
 
     public function __construct(
-        protected AbacService $abac
+        protected ZennitAbacService $abac
     ) {
     }
 

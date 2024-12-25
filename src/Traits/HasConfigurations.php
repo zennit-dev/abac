@@ -69,7 +69,8 @@ trait HasConfigurations
 
     public function getLogChannel(): string
     {
-        return config('abac.monitoring.logging.channel');
+        $channel = config('abac.monitoring.logging.channel', 'zennit.abac');
+        return config("logging.channels.{$channel}") ? $channel : config('logging.default');
     }
 
     public function getDetailedLogging(): bool

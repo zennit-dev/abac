@@ -10,7 +10,7 @@ use zennit\ABAC\Models\PolicyCondition;
 use zennit\ABAC\Strategies\OperatorFactory;
 use zennit\ABAC\Traits\HasConfigurations;
 
-class ConditionEvaluator
+readonly class ZennitAbacConditionEvaluator
 {
     use HasConfigurations;
 

@@ -1,9 +1,9 @@
 <?php
 
-use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Services\ZennitAbacService;
 
 if (!function_exists('abac')) {
-    function abac(): AbacService
+    function abac(): ZennitAbacService
     {
         return app('abac');
     }

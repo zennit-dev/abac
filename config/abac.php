@@ -4,8 +4,8 @@ return [
     'cache' => [
         'enabled' => env('ABAC_CACHE_ENABLED', true),
         'ttl' => env('ABAC_CACHE_TTL', 3600),
-        'tags' => ['abac', 'abac-policies', 'abac-attributes'],
-        'prefix' => 'abac:',
+        'tags' => ['zennit.abac', 'zennit.abac-policies', 'zennit.abac-attributes'],
+        'prefix' => 'zennit.abac:',
         'warming' => [
             'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
             'chunk_size' => env('ABAC_CACHE_WARMING_CHUNK_SIZE', 100),
@@ -21,7 +21,7 @@ return [
     'monitoring' => [
         'logging' => [
             'enabled' => env('ABAC_LOGGING_ENABLED', true),
-            'channel' => env('ABAC_LOG_CHANNEL', 'abac'),
+            'channel' => env('ABAC_LOG_CHANNEL', 'zennit.abac'),
             'detailed' => env('ABAC_DETAILED_LOGGING', false),
         ],
         'performance' => [

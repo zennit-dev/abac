@@ -5,7 +5,7 @@ namespace zennit\ABAC\Validators;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
 
-class AccessContextValidator
+readonly class AccessContextValidator
 {
     /**
      * @throws ValidationException

@@ -2,17 +2,16 @@
 
 namespace zennit\ABAC\Repositories;
 
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use zennit\ABAC\Models\Policy;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
-class PolicyRepository
+readonly class PolicyRepository
 {
     public function __construct(
         protected CacheRepository $cache
-    ) {
-    }
+    ) {}
 
     /**
      * Get policies for a specific resource

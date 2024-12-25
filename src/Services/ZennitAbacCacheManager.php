@@ -3,21 +3,29 @@
 namespace zennit\ABAC\Services;
 
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
+use Log;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Traits\HasConfigurations;
 
-class CacheManager
+readonly class ZennitAbacCacheManager
 {
     use HasConfigurations;
 
+    private const CACHE_KEYS = [
+        'permissions' => 'permissions:all',
+        'policies' => 'policies:all',
+        'policy_conditions' => 'conditions:all',
+        'policy_condition_attributes' => 'condition_attributes:all',
+        'resource_attributes' => 'resource_attributes:all',
+        'user_attributes' => 'user_attributes:all',
+    ];
+
     public function __construct(
         private Repository $cache,
-    ) {
-    }
+    ) {}
 
     public function rememberAttributes(string $contextKey, callable $callback): AttributeCollection
     {
@@ -62,25 +70,45 @@ class CacheManager
 
     public function flush(): bool
     {
-        $result = $this->cache->flush();
+        $this->logCacheOperation('flush', []);
 
-        // Schedule a complete cache warm after flush
-        if ($result && $this->getCacheWarmingEnabled()) {
+        // Flush each cache key individually
+        foreach (self::CACHE_KEYS as $key) {
+            $this->cache->forget($this->getCachePrefix() . $key);
+        }
+
+        if ($this->getCacheWarmingEnabled()) {
             $this->scheduleWarmUp();
         }
 
-        return $result;
+        return true;
     }
 
     public function warmPolicies(array $policies): void
     {
         $startTime = microtime(true);
 
-        Collection::make($policies)
-            ->groupBy(fn ($policy) => "{$policy->permission->resource}:{$policy->permission->operation}")
-            ->each(function ($group, $key) {
-                $this->remember("policy:$key", fn () => $group->first());
-            });
+        // Cache permissions
+        $permissions = collect($policies)->map->permissions->unique('id');
+        $this->remember(self::CACHE_KEYS['permissions'], fn () => $permissions->all());
+
+        // Cache policies
+        $this->remember(self::CACHE_KEYS['policies'], fn () => $policies);
+
+        // Cache conditions
+        $conditions = collect($policies)->flatMap->conditions;
+        $this->remember(self::CACHE_KEYS['policy_conditions'], fn () => $conditions->all());
+
+        // Cache condition attributes
+        $attributes = $conditions->flatMap->attributes;
+        $this->remember(self::CACHE_KEYS['policy_condition_attributes'], fn () => $attributes->all());
+
+        $this->logCacheOperation('warm', [
+            'permissions' => $permissions->count(),
+            'policies' => count($policies),
+            'conditions' => $conditions->count(),
+            'attributes' => $attributes->count(),
+        ]);
 
         $this->dispatchWarmingComplete(count($policies), microtime(true) - $startTime);
     }
@@ -126,5 +154,16 @@ class CacheManager
         }
 
         return null;
+    }
+
+    private function logCacheOperation(string $operation, array $counts): void
+    {
+        $message = sprintf(
+            'Cache %s: %s',
+            $operation,
+            collect($counts)->map(fn ($count, $type) => "$type=$count")->join(', ')
+        );
+
+        Log::info($message);
     }
 }
