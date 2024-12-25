@@ -28,7 +28,12 @@ class PolicyCacheJob implements ShouldQueue
     ) {}
 
     /**
-     * @throws InvalidArgumentException
+     * Execute the cache management job.
+     * Handles both cache warming and invalidation operations.
+     *
+     * @param ZennitAbacCacheManager $cache The cache manager service
+     * @param PolicyRepository $repository The policy repository
+     * @throws InvalidArgumentException If cache operations fail
      */
     public function handle(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
     {
@@ -63,7 +68,12 @@ class PolicyCacheJob implements ShouldQueue
     }
 
     /**
-     * @throws InvalidArgumentException
+     * Warm the cache with policies.
+     * Loads and caches policies either for a specific resource or all resources.
+     *
+     * @param ZennitAbacCacheManager $cache The cache manager service
+     * @param PolicyRepository $repository The policy repository
+     * @throws InvalidArgumentException If cache operations fail
      */
     private function warmCache(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
     {

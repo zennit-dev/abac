@@ -27,6 +27,9 @@ class AbacServiceProvider extends ServiceProvider
 {
     use ZennitAbacHasConfigurations;
 
+    /**
+     * Register services and dependencies.
+     */
     public function register(): void
     {
         $this->app->register(ConfigurationServiceProvider::class);
@@ -40,6 +43,10 @@ class AbacServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Bootstrap any application services.
+     * Configures cache warming and observers if enabled.
+     */
     public function boot(): void
     {
         if ($this->getCacheEnabled() && $this->getCacheWarmingEnabled()) {
@@ -48,6 +55,10 @@ class AbacServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Register the cache warming job with the scheduler.
+     * Configures the job based on the cache warming schedule setting.
+     */
     protected function registerCacheWarmingJob(): void
     {
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
@@ -66,6 +77,10 @@ class AbacServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Register model observers for cache invalidation.
+     * Sets up observers for all ABAC models to manage cache state.
+     */
     protected function registerObservers(): void
     {
         ResourceAttribute::observe(ResourceAttributeObserver::class);

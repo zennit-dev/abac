@@ -16,7 +16,15 @@ readonly class ZennitAbacPerformanceMonitor
         $this->timers = [];
     }
 
-    public function measure(string $operation, callable $callback)
+    /**
+     * Measure the execution time of an operation.
+     *
+     * @param  string  $operation  The name of the operation being measured
+     * @param  callable  $callback  The operation to measure
+     *
+     * @return mixed The result of the callback
+     */
+    public function measure(string $operation, callable $callback): mixed
     {
         if (!$this->getPerformanceLoggingEnabled()) {
             return $callback();
@@ -34,10 +42,18 @@ readonly class ZennitAbacPerformanceMonitor
         return $result;
     }
 
+    /**
+     * Calculate the duration of an operation.
+     *
+     * @param  string  $operation  The operation name
+     * @param  array  $timers  Array of operation start times
+     *
+     * @return float Duration in milliseconds
+     */
     private function calculateDuration(string $operation, array $timers): float
     {
-        return isset($timers[$operation]) 
-            ? (microtime(true) - $timers[$operation]) * 1000 
+        return isset($timers[$operation])
+            ? (microtime(true) - $timers[$operation]) * 1000
             : 0;
     }
 }

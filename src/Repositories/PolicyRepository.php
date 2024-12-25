@@ -17,8 +17,12 @@ readonly class PolicyRepository
     ) {}
 
 	/**
-	 * Get policies for a specific resource and operation
-	 * @throws InvalidArgumentException
+	 * Get policies for a specific resource and operation.
+	 *
+	 * @param string $resource The resource identifier
+	 * @param string $operation The operation name
+	 * @return Collection Collection of matching policies
+	 * @throws InvalidArgumentException If cache operations fail
 	 */
     public function getPoliciesFor(string $resource, string $operation): Collection
     {
@@ -37,7 +41,9 @@ readonly class PolicyRepository
     }
 
     /**
-     * Get the base query builder for policies
+     * Get the base query builder for policies.
+     *
+     * @return Builder Query builder for policies
      */
     public function getQuery(): Builder
     {
@@ -46,7 +52,10 @@ readonly class PolicyRepository
     }
 
     /**
-     * Get the query builder for policies filtered by resource
+     * Get the query builder for policies filtered by resource.
+     *
+     * @param string $resource The resource to filter by
+     * @return Builder Filtered query builder
      */
     public function getPoliciesQueryFor(string $resource): Builder
     {
@@ -56,7 +65,9 @@ readonly class PolicyRepository
     }
 
     /**
-     * Get policies grouped by resource and operation
+     * Get policies grouped by resource and operation.
+     *
+     * @return Collection Collection of grouped policies
      */
     public function getPoliciesGrouped(): Collection
     {
@@ -68,7 +79,10 @@ readonly class PolicyRepository
     }
 
     /**
-     * Get policies for a specific resource grouped by operation
+     * Get policies for a specific resource grouped by operation.
+     *
+     * @param string $resource The resource to get policies for
+     * @return Collection Collection of grouped policies
      */
     public function getPoliciesForResourceGrouped(string $resource): Collection
     {

@@ -22,8 +22,13 @@ class EnsurePermissions
 
     /**
      * Handle an incoming request.
-     * @throws ValidationException
-     * @throws InvalidArgumentException
+     * Validates permissions for the current user against the requested resource.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param Closure $next The next middleware in the pipeline
+     * @return Response The HTTP response
+     * @throws ValidationException If context validation fails
+     * @throws InvalidArgumentException If cache operations fail
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -46,7 +51,11 @@ class EnsurePermissions
     }
 
     /**
-     * Return a standardized unauthorized response
+     * Return a standardized unauthorized response.
+     * Creates a JSON response with error message for unauthorized access.
+     *
+     * @param string $message The error message to return
+     * @return Response The HTTP response with 401 status
      */
     private function unauthorizedResponse(string $message): Response
     {
@@ -57,10 +66,11 @@ class EnsurePermissions
     }
 
     /**
-     * Extract the base resource name from the path without considering IDs
-     * Examples:
-     * - /api/v1/posts -> posts
-     * - /api/v1/organizations/projects/tasks -> tasks
+     * Extract the resource name from the request path.
+     * Handles API versioning and removes IDs from the path.
+     *
+     * @param string $path The request path
+     * @return string The extracted resource name
      */
     private function getResourceFromPath(string $path): string
     {
@@ -85,7 +95,11 @@ class EnsurePermissions
     }
 
     /**
-     * Check if a string is a UUID
+     * Check if a string matches UUID format.
+     * Used to identify and remove UUIDs from resource paths.
+     *
+     * @param string $string The string to check
+     * @return bool True if the string is a valid UUID
      */
     private function isUuid(string $string): bool
     {

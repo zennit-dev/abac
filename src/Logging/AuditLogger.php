@@ -11,6 +11,13 @@ readonly class AuditLogger
 {
     use ZennitAbacHasConfigurations;
 
+    /**
+     * Log an access attempt with detailed context.
+     * Records both successful and failed access attempts with relevant metadata.
+     *
+     * @param AccessContext $context The access context containing subject and resource
+     * @param EvaluationResult $result The result of the policy evaluation
+     */
     public function logAccess(AccessContext $context, EvaluationResult $result): void
     {
         $message = sprintf(
@@ -27,6 +34,14 @@ readonly class AuditLogger
         ]);
     }
 
+    /**
+     * Log a message with configurable context data.
+     * Handles logging based on configuration settings.
+     *
+     * @param string $level The log level (info, warning, error, etc.)
+     * @param string $message The log message
+     * @param array $context Additional context data for the log entry
+     */
     private function log(string $level, string $message, array $context = []): void
     {
         Log::channel($this->getLogChannel())->$level(

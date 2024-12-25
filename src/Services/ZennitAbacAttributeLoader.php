@@ -18,7 +18,11 @@ readonly class ZennitAbacAttributeLoader
     ) {}
 
     /**
-     * @throws InvalidArgumentException
+     * Load all attributes required for evaluating an access context.
+     *
+     * @param AccessContext $context The context containing subject and resource
+     * @return AttributeCollection Collection of all relevant attributes
+     * @throws InvalidArgumentException If cache operations fail
      */
     public function loadForContext(AccessContext $context): AttributeCollection
     {
@@ -38,6 +42,12 @@ readonly class ZennitAbacAttributeLoader
         return new AttributeCollection([...$subjectAttributes, ...$resourceAttributes]);
     }
 
+    /**
+     * Load attributes associated with a user/subject.
+     *
+     * @param AccessContext $context The context containing the subject
+     * @return array Array of user attributes
+     */
     private function loadUserAttributes(AccessContext $context): array
     {
         $attributes = [];
@@ -53,6 +63,12 @@ readonly class ZennitAbacAttributeLoader
         return $attributes;
     }
 
+    /**
+     * Load attributes associated with a resource.
+     *
+     * @param AccessContext $context The context containing the resource
+     * @return array Array of resource attributes
+     */
     private function loadResourceAttributes(AccessContext $context): array
     {
         $attributes = [];

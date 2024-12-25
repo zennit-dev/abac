@@ -27,7 +27,14 @@ readonly class ZennitAbacCacheManager
     ) {}
 
     /**
+     * Remember user attributes in cache for a specific user and type.
+     *
+     * @param  int  $userId  The ID of the user
+     * @param  string  $type  The type of user attributes
+     * @param  callable  $callback  Function that returns the attributes to cache
+     *
      * @throws InvalidArgumentException
+     * @return array The cached user attributes
      */
     public function rememberUserAttributes(int $userId, string $type, callable $callback): array
     {
@@ -38,7 +45,13 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Remember resource attributes in cache for a specific resource.
+     *
+     * @param  string  $resource  The resource identifier
+     * @param  callable  $callback  Function that returns the attributes to cache
+     *
      * @throws InvalidArgumentException
+     * @return array The cached resource attributes
      */
     public function rememberResourceAttributes(string $resource, callable $callback): array
     {
@@ -49,7 +62,13 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Remember policy evaluation result in cache.
+     *
+     * @param  string  $key  The cache key for the evaluation
+     * @param  callable  $callback  Function that returns the evaluation result
+     *
      * @throws InvalidArgumentException
+     * @return mixed The cached evaluation result
      */
     public function rememberPolicyEvaluation(string $key, callable $callback): mixed
     {
@@ -60,6 +79,13 @@ readonly class ZennitAbacCacheManager
         );
     }
 
+    /**
+     * Remove an item from cache and optionally schedule cache warm-up.
+     *
+     * @param  string  $key  The cache key to forget
+     *
+     * @return bool True if the item was removed, false otherwise
+     */
     public function forget(string $key): bool
     {
         $result = $this->cache->forget($this->getCachePrefix() . $key);
@@ -72,7 +98,10 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Flush all cached items and optionally schedule cache warm-up.
+     *
      * @throws InvalidArgumentException
+     * @return bool True if the cache was flushed successfully
      */
     public function flush(): bool
     {
@@ -91,24 +120,29 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Warm up the cache for policies and their related resource attributes.
+     *
+     * @param  Policy[]  $policies  Array of Policy models to cache
+     *
      * @throws InvalidArgumentException
      */
     public function warmPolicies(array $policies): void
     {
         $startTime = microtime(true);
+        /** @var Policy $policy */
         $policyGroups = collect($policies)->groupBy(fn ($policy) => "{$policy->permission->resource}:{$policy->permission->operation}");
 
-		/**
-		 * @var int|null|string $key
-		 * @var Policy  $groupPolicies
-		 */
-	    foreach ($policyGroups as $key => $groupPolicies) {
+        /**
+         * @var int|null|string $key
+         * @var Policy $groupPolicies
+         */
+        foreach ($policyGroups as $key => $groupPolicies) {
             [$resource] = explode(':', $key);
 
             // Cache complete policy data
             $this->remember(
                 self::CACHE_KEYS['policies'] . ":$key",
-                fn () => $groupPolicies->load(['collections.attributes.condition', 'permission'])->all()
+                fn () => $groupPolicies->load(['collections.conditions.attributes', 'permission'])->all()
             );
 
             // Cache resource attributes
@@ -127,7 +161,14 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Remember an item in cache.
+     *
+     * @param  string  $key  The cache key
+     * @param  callable  $callback  Function that returns the value to cache
+     * @param  int|null  $ttl  Time to live in seconds, null for default TTL
+     *
      * @throws InvalidArgumentException
+     * @return mixed The cached value
      */
     public function remember(string $key, callable $callback, ?int $ttl = null): mixed
     {
@@ -148,6 +189,10 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Register a cache key in the key registry for cleanup tracking.
+     *
+     * @param  string  $key  The cache key to register
+     *
      * @throws InvalidArgumentException
      */
     private function registerCacheKey(string $key): void
@@ -161,6 +206,11 @@ readonly class ZennitAbacCacheManager
         }
     }
 
+    /**
+     * Schedule a cache warm-up job.
+     *
+     * @param  string|null  $resource  Optional resource to warm up specifically
+     */
     private function scheduleWarmUp(?string $resource = null): void
     {
         Queue::later(
@@ -169,6 +219,12 @@ readonly class ZennitAbacCacheManager
         );
     }
 
+    /**
+     * Dispatch cache warming complete event.
+     *
+     * @param  int  $count  Number of policies warmed
+     * @param  float  $duration  Time taken to warm the cache
+     */
     private function dispatchWarmingComplete(int $count, float $duration): void
     {
         if ($this->getEventsEnabled()) {
@@ -181,6 +237,13 @@ readonly class ZennitAbacCacheManager
         }
     }
 
+    /**
+     * Extract resource name from a cache key.
+     *
+     * @param  string  $key  The cache key
+     *
+     * @return string|null The extracted resource name or null if not found
+     */
     private function extractResourceFromKey(string $key): ?string
     {
         // Extract resource from cache key format "policy:resource:operation"
@@ -191,6 +254,12 @@ readonly class ZennitAbacCacheManager
         return null;
     }
 
+    /**
+     * Log cache operation details.
+     *
+     * @param  string  $operation  The operation being performed (e.g., 'warm', 'flush')
+     * @param  array  $counts  Array of count metrics to log
+     */
     private function logCacheOperation(string $operation, array $counts): void
     {
         $message = sprintf(
@@ -203,11 +272,18 @@ readonly class ZennitAbacCacheManager
     }
 
     /**
+     * Get cached policies for a specific resource and operation.
+     *
+     * @param  string  $resource  The resource identifier
+     * @param  string  $operation  The operation name
+     *
      * @throws InvalidArgumentException
+     * @return array Array of cached policies
      */
     public function getPoliciesFromCache(string $resource, string $operation): array
     {
         $key = self::CACHE_KEYS['policies'] . ":$resource:$operation";
+
         return $this->cache->get($this->getCachePrefix() . $key, []);
     }
 }

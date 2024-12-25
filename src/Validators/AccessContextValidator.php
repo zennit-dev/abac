@@ -8,7 +8,10 @@ use zennit\ABAC\Exceptions\ValidationException;
 readonly class AccessContextValidator
 {
     /**
-     * @throws ValidationException
+     * Validate an access context.
+     *
+     * @param AccessContext $context The context to validate
+     * @throws ValidationException If validation fails
      */
     public function validate(AccessContext $context): void
     {
@@ -18,7 +21,10 @@ readonly class AccessContextValidator
     }
 
     /**
-     * @throws ValidationException
+     * Validate the subject in an access context.
+     *
+     * @param AccessContext $context The context containing the subject
+     * @throws ValidationException If subject is invalid
      */
     private function validateSubject(AccessContext $context): void
     {
@@ -32,7 +38,10 @@ readonly class AccessContextValidator
     }
 
     /**
-     * @throws ValidationException
+     * Validate a resource string.
+     *
+     * @param string $resource The resource to validate
+     * @throws ValidationException If resource is empty
      */
     private function validateResource(string $resource): void
     {
@@ -42,7 +51,10 @@ readonly class AccessContextValidator
     }
 
     /**
-     * @throws ValidationException
+     * Validate an operation string.
+     *
+     * @param string $operation The operation to validate
+     * @throws ValidationException If operation is empty
      */
     private function validateOperation(string $operation): void
     {

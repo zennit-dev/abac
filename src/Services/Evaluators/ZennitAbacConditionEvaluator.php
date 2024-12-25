@@ -15,7 +15,12 @@ readonly class ZennitAbacConditionEvaluator
     }
 
     /**
-     * @throws UnsupportedOperatorException
+     * Evaluate a policy condition against attributes.
+     *
+     * @param PolicyCondition $condition The condition to evaluate
+     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @return bool True if condition is met
+     * @throws UnsupportedOperatorException If an operator is not supported
      */
     public function evaluate(PolicyCondition $condition, AttributeCollection $attributes): bool
     {

@@ -25,8 +25,12 @@ readonly class ZennitAbacService
     }
 
 	/**
-	 * @throws ValidationException
-	 * @throws InvalidArgumentException
+	 * Check if a subject has permission to perform an operation on a resource.
+	 *
+	 * @param AccessContext $context The access context containing subject, resource, and operation
+	 * @return bool True if access is granted, false otherwise
+	 * @throws ValidationException If the context is invalid
+	 * @throws InvalidArgumentException If cache operations fail
 	 */
     public function can(AccessContext $context): bool
     {
@@ -34,8 +38,12 @@ readonly class ZennitAbacService
     }
 
 	/**
-	 * @throws ValidationException
-	 * @throws InvalidArgumentException
+	 * Evaluate an access request and return detailed results.
+	 *
+	 * @param AccessContext $context The access context to evaluate
+	 * @return EvaluationResult The detailed evaluation result
+	 * @throws ValidationException If the context is invalid
+	 * @throws InvalidArgumentException If cache operations fail
 	 */
     private function evaluate(AccessContext $context): EvaluationResult
     {
@@ -55,10 +63,14 @@ readonly class ZennitAbacService
         });
     }
 
-    /**
-     * @throws ValidationException
-     * @throws InvalidArgumentException
-     */
+	/**
+	 * Perform the actual access evaluation logic.
+	 *
+	 * @param AccessContext $context The access context to evaluate
+	 * @return EvaluationResult The evaluation result with detailed information
+	 * @throws ValidationException If the context is invalid
+	 * @throws InvalidArgumentException If cache operations fail
+	 */
     private function evaluateAccess(AccessContext $context): EvaluationResult
     {
         $attributes = $this->attributeLoader->loadForContext($context);
@@ -70,9 +82,12 @@ readonly class ZennitAbacService
         return $this->evaluator->evaluate($context, $attributes);
     }
 
-    /**
-     * @throws ValidationException
-     */
+	/**
+	 * Validate the access context.
+	 *
+	 * @param AccessContext $context The context to validate
+	 * @throws ValidationException If the context is invalid
+	 */
     private function validateContext(AccessContext $context): void
     {
         app(AccessContextValidator::class)->validate($context);

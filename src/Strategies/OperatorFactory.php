@@ -56,6 +56,47 @@ class OperatorFactory
         $this->removeDisabledOperators();
     }
 
+    /**
+     * Create an operator instance by its identifier.
+     *
+     * @param string $operator The operator identifier
+     * @return OperatorInterface The operator instance
+     * @throws UnsupportedOperatorException If the operator is not supported
+     */
+    public function create(string $operator): OperatorInterface
+    {
+        if (!isset($this->operators[$operator]) || in_array($operator, $this->getDisabledOperators())) {
+            throw new UnsupportedOperatorException("Operator '$operator' is not supported");
+        }
+
+        return $this->operators[$operator];
+    }
+
+    /**
+     * Register a custom operator.
+     *
+     * @param string $key The operator identifier
+     * @param OperatorInterface $operator The operator instance
+     * @throws InvalidArgumentException If key is empty or operator already exists
+     */
+    public function register(string $key, OperatorInterface $operator): void
+    {
+        if (empty($key)) {
+            throw new InvalidArgumentException('Operator key cannot be empty');
+        }
+
+        if (isset($this->operators[$key])) {
+            throw new InvalidArgumentException("Operator with key '$key' is already registered");
+        }
+
+        $this->operators[$key] = $operator;
+    }
+
+    /**
+     * Register all custom operators from configuration.
+     *
+     * @throws InvalidArgumentException If custom operator class is invalid
+     */
     private function registerCustomOperators(): void
     {
         foreach ($this->getCustomOperators() as $key => $operatorClass) {
@@ -71,35 +112,13 @@ class OperatorFactory
         }
     }
 
-    public function register(string $key, OperatorInterface $operator): void
-    {
-        if (empty($key)) {
-            throw new InvalidArgumentException('Operator key cannot be empty');
-        }
-
-        if (isset($this->operators[$key])) {
-            throw new InvalidArgumentException("Operator with key '$key' is already registered");
-        }
-
-        $this->operators[$key] = $operator;
-    }
-
+    /**
+     * Remove disabled operators from the available operators list.
+     */
     private function removeDisabledOperators(): void
     {
         foreach ($this->getDisabledOperators() as $operator) {
             unset($this->operators[$operator]);
         }
-    }
-
-    /**
-     * @throws UnsupportedOperatorException
-     */
-    public function create(string $operator): OperatorInterface
-    {
-        if (!isset($this->operators[$operator]) || in_array($operator, $this->getDisabledOperators())) {
-            throw new UnsupportedOperatorException("Operator '$operator' is not supported");
-        }
-
-        return $this->operators[$operator];
     }
 }
