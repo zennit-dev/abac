@@ -34,4 +34,4 @@ class PublishAbacConfigCommand extends Command
 
         return true;
     }
-} 
+}

@@ -6,15 +6,21 @@ use Illuminate\Support\ServiceProvider;
 
 class ConfigurationServiceProvider extends ServiceProvider
 {
+    public const CONFIG_PATH = __DIR__ . '/../../config/zennit_abac.php';
+
+    public const CONFIG_KEY = 'zennit_abac';
+
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../../config/zennit_abac.php', 'zennit_abac');
+        $this->mergeConfigFrom(self::CONFIG_PATH, self::CONFIG_KEY);
     }
 
     public function boot(): void
     {
-        $this->publishes([
-            __DIR__ . '/../../config/zennit_abac.php' => config_path('zennit_abac.php'),
-        ], 'zennit-abac-config');
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                self::CONFIG_PATH => config_path('zennit_abac.php'),
+            ], 'zennit-abac-config');
+        }
     }
 }

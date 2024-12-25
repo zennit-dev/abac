@@ -15,14 +15,13 @@ class PublishAbacMigrationCommand extends Command
     {
         if ($this->shouldPublishMigrations()) {
             $sourcePath = __DIR__ . '/../../database/migrations/create_zennit_abac_tables.php';
-            $existingFile = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
-                ->reject(fn ($file) => str_contains($file, '_backup_'))
+            $existingFile = collect(File::glob(database_path('migrations') . '/*_create_zennit_abac_tables.php'))
                 ->first();
 
             if ($existingFile) {
                 File::copy($sourcePath, $existingFile);
             } else {
-                $newFileName = date('Y_m_d_His') . '_create_abac_tables.php';
+                $newFileName = date('Y_m_d_His') . '_create_zennit_abac_tables.php';
                 File::copy($sourcePath, database_path("migrations/$newFileName"));
             }
             $this->info('Migration published successfully.');
@@ -35,8 +34,7 @@ class PublishAbacMigrationCommand extends Command
             return true;
         }
 
-        $existingFile = collect(File::glob(database_path('migrations') . '/*_create_abac_tables.php'))
-            ->reject(fn ($file) => str_contains($file, '_backup_'))
+        $existingFile = collect(File::glob(database_path('migrations') . '/*_create_zennit_abac_tables.php'))
             ->first();
 
         if ($existingFile) {
