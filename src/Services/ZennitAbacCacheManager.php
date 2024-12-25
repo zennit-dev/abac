@@ -5,9 +5,11 @@ namespace zennit\ABAC\Services;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Queue;
 use Log;
+use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
+use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Traits\HasConfigurations;
 
 readonly class ZennitAbacCacheManager
@@ -15,34 +17,52 @@ readonly class ZennitAbacCacheManager
     use HasConfigurations;
 
     private const CACHE_KEYS = [
-        'permissions' => 'permissions:all',
-        'policies' => 'policies:all',
-        'policy_conditions' => 'conditions:all',
-        'policy_condition_attributes' => 'condition_attributes:all',
-        'resource_attributes' => 'resource_attributes:all',
-        'user_attributes' => 'user_attributes:all',
+        'permissions' => 'permissions',
+        'policies' => 'policies',
+        'conditions' => 'conditions',
+        'condition_attributes' => 'condition_attributes',
+        'resource_attributes' => 'resource_attributes',
+        'user_attributes' => 'user_attributes',
     ];
 
     public function __construct(
         private Repository $cache,
     ) {}
 
-    public function rememberAttributes(string $contextKey, callable $callback): AttributeCollection
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function rememberAttributes(string $contextKey, callable $callback): AttributeCollection
     {
         return $this->remember("attributes:$contextKey", $callback);
     }
 
-    public function rememberUserAttributes(int $userId, string $type, callable $callback): array
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function rememberUserAttributes(int $userId, string $type, callable $callback): array
     {
-        return $this->remember("user_attributes:$type:$userId", $callback);
+        return $this->remember(
+            self::CACHE_KEYS['user_attributes'] . ":$type:$userId",
+            $callback
+        );
     }
 
-    public function rememberResourceAttributes(string $resource, callable $callback): array
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function rememberResourceAttributes(string $resource, callable $callback): array
     {
-        return $this->remember("resource_attributes:$resource", $callback);
+        return $this->remember(
+            self::CACHE_KEYS['resource_attributes'] . ":$resource",
+            $callback
+        );
     }
 
-    public function rememberPolicyEvaluation(string $key, callable $callback): mixed
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function rememberPolicyEvaluation(string $key, callable $callback): mixed
     {
         return $this->remember("evaluation:$key", $callback);
     }
@@ -68,12 +88,15 @@ readonly class ZennitAbacCacheManager
         $this->forget("resource_attributes:$resource");
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function flush(): bool
     {
         $this->logCacheOperation('flush', []);
 
-        // Flush each cache key individually
-        foreach (self::CACHE_KEYS as $key) {
+        $keys = $this->cache->get($this->getCachePrefix() . 'key_registry', []);
+        foreach ($keys as $key) {
             $this->cache->forget($this->getCachePrefix() . $key);
         }
 
@@ -84,46 +107,82 @@ readonly class ZennitAbacCacheManager
         return true;
     }
 
-    public function warmPolicies(array $policies): void
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function warmPolicies(array $policies): void
     {
         $startTime = microtime(true);
+        $policyGroups = collect($policies)->groupBy(fn ($policy) => 
+            "{$policy->permission->resource}:{$policy->permission->operation}"
+        );
 
-        // Cache permissions
-        $permissions = collect($policies)->map->permissions->unique('id');
-        $this->remember(self::CACHE_KEYS['permissions'], fn () => $permissions->all());
+        foreach ($policyGroups as $key => $groupPolicies) {
+            [$resource] = explode(':', $key);  // Only extract the resource since operation isn't used
 
-        // Cache policies
-        $this->remember(self::CACHE_KEYS['policies'], fn () => $policies);
+            // Cache permissions
+            $permissions = $groupPolicies->map->permission->unique('id');
+            $this->remember(self::CACHE_KEYS['permissions'] . ":$key", fn () => $permissions->all());
 
-        // Cache conditions
-        $conditions = collect($policies)->flatMap->conditions;
-        $this->remember(self::CACHE_KEYS['policy_conditions'], fn () => $conditions->all());
+            // Cache policies
+            $this->remember(self::CACHE_KEYS['policies'] . ":$key", fn () => $groupPolicies->all());
 
-        // Cache condition attributes
-        $attributes = $conditions->flatMap->attributes;
-        $this->remember(self::CACHE_KEYS['policy_condition_attributes'], fn () => $attributes->all());
+            // Cache conditions
+            $conditions = $groupPolicies->flatMap->conditions;
+            $this->remember(self::CACHE_KEYS['conditions'] . ":$key", fn () => $conditions->all());
+
+            // Cache condition attributes
+            $conditionAttributes = $conditions->flatMap->attributes;
+            $this->remember(self::CACHE_KEYS['condition_attributes'] . ":$key", fn () => $conditionAttributes->all());
+
+            // Cache resource attributes for this resource
+            $resourceAttributes = ResourceAttribute::where('resource', $resource)->get();
+            $this->remember(self::CACHE_KEYS['resource_attributes'] . ":$resource",
+                fn () => $resourceAttributes->all()
+            );
+        }
 
         $this->logCacheOperation('warm', [
-            'permissions' => $permissions->count(),
+            'groups' => $policyGroups->count(),
             'policies' => count($policies),
-            'conditions' => $conditions->count(),
-            'attributes' => $attributes->count(),
         ]);
 
         $this->dispatchWarmingComplete(count($policies), microtime(true) - $startTime);
     }
 
-    public function remember(string $key, callable $callback, ?int $ttl = null): mixed
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	public function remember(string $key, callable $callback, ?int $ttl = null): mixed
     {
         if (!$this->getCacheEnabled()) {
             return $callback();
         }
 
+        $fullKey = $this->getCachePrefix() . $key;
+
+        // Register the key for later cleanup
+        $this->registerCacheKey($key);
+
         return $this->cache->remember(
-            $this->getCachePrefix() . $key,
+            $fullKey,
             $ttl ?? $this->getCacheTTL(),
             $callback
         );
+    }
+
+	/**
+	 * @throws InvalidArgumentException
+	 */
+	private function registerCacheKey(string $key): void
+    {
+        $registryKey = $this->getCachePrefix() . 'key_registry';
+        $keys = $this->cache->get($registryKey, []);
+
+        if (!in_array($key, $keys)) {
+            $keys[] = $key;
+            $this->cache->forever($registryKey, $keys);
+        }
     }
 
     private function scheduleWarmUp(?string $resource = null): void
