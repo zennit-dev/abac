@@ -23,7 +23,7 @@ use zennit\ABAC\Services\ZennitAbacCacheManager;
 use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
-class AbacServiceProvider extends ServiceProvider
+class ZennitAbacServiceProvider extends ServiceProvider
 {
     use ZennitAbacHasConfigurations;
 
@@ -32,10 +32,11 @@ class AbacServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->register(ConfigurationServiceProvider::class);
-        $this->app->register(ServicesServiceProvider::class);
-        $this->app->register(MiddlewareServiceProvider::class);
-        $this->app->register(CommandServiceProvider::class);
+        $this->app->register(ZennitConfigurationServiceProvider::class);
+        $this->app->register(ZennitServicesServiceProvider::class);
+        $this->app->register(ZennitMiddlewareServiceProvider::class);
+        $this->app->register(ZennitCommandServiceProvider::class);
+        $this->app->register(ZennitEventServiceProvider::class);
 
         // Register the facade
         $this->app->bind('zennit.abac.facade', function ($app) {

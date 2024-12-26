@@ -45,7 +45,7 @@ readonly class ZennitAbacService
 	 * @throws ValidationException If the context is invalid
 	 * @throws InvalidArgumentException If cache operations fail
 	 */
-    private function evaluate(AccessContext $context): EvaluationResult
+    public function evaluate(AccessContext $context): EvaluationResult
     {
         return $this->monitor->measure('policy_evaluation', function () use ($context) {
             $cacheKey = "access:{$context->subject->id}:$context->resource:$context->operation";

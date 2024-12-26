@@ -8,7 +8,7 @@ use zennit\ABAC\Commands\PublishAbacConfigCommand;
 use zennit\ABAC\Commands\PublishAbacEnvCommand;
 use zennit\ABAC\Commands\PublishAbacMigrationCommand;
 
-class CommandServiceProvider extends ServiceProvider
+class ZennitCommandServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {

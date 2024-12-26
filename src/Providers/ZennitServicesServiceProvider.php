@@ -14,7 +14,7 @@ use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Strategies\OperatorFactory;
 use zennit\ABAC\Validators\AccessContextValidator;
 
-class ServicesServiceProvider extends ServiceProvider
+class ZennitServicesServiceProvider extends ServiceProvider
 {
     public array $singletons = [
         ZennitAbacCacheManager::class,

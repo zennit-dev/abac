@@ -12,16 +12,15 @@ A flexible and powerful ABAC implementation for Laravel applications.
 4. [Basic Usage](#basic-usage)
 5. [Commands](#commands)
 6. [Configuration](#configuration)
-7. [Defining Policies](#defining-policies)
-8. [Operators](#operators)
-9. [Middleware](#middleware)
-10. [Events](#events)
-11. [Advanced Usage](#advanced-usage)
-12. [Caching](#caching)
-13. [Requirements](#requirements)
-14. [Contributing](#contributing)
-15. [Security](#security)
-16. [License](#license)
+7. [Operators](#operators)
+8. [Middleware](#middleware)
+9. [Events](#events)
+10. [Advanced Usage](#advanced-usage)
+11. [Caching](#caching)
+12. [Requirements](#requirements)
+13. [Contributing](#contributing)
+14. [Security](#security)
+15. [License](#license)
 
 ---
 
@@ -45,8 +44,8 @@ Add the service provider to your `bootstrap/providers.php`:
 
 ```php
 return [
-    // ... other providers
-    zennit\ABAC\Providers\AbacServiceProvider::class,
+    # ... other providers
+    zennit\ABAC\Providers\ZennitAbacServiceProvider::class,
 ];
 ```
 
@@ -72,24 +71,49 @@ Here's an example of how to perform access control checks:
 
 ```php
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Facades\Abac;
 
-// Create an access context
+# Using the Facade
 $context = new AccessContext(
     subject: $user,
     resource: 'posts',
     operation: 'update',
-    resourceIds: [$postId]
+    resourceIds: [$postId] # null or [] for all
 );
 
-// Simple check
-if (Abac::can($context)) {
-    // Allow action
-}
+# Check returns boolean
+$hasAccess = Abac::can($context);
 
-// Detailed evaluation
+# Detailed evaluation returns EvaluationResult
 $result = Abac::evaluate($context);
+
+# Using the helper functions
+$hasAccess = abacPolicy()->can($user, 'posts', 'update', [$postId]);
+
+# Cache management helper
+abacCache()->warm('posts');  # Warm cache for posts
+abacCache()->invalidate();   # Invalidate all cache
+abacCache()->clear();        # Clear all cache
 ```
+
+The `can()` method evaluates the access request and returns a boolean indicating whether access is granted.
+
+The `evaluate()` method returns an `EvaluationResult` object with detailed information about the evaluation:
+
+```php
+class EvaluationResult
+{
+    public function __construct(
+        public readonly bool $granted,
+        public readonly array $matchedPolicies = [],
+        public readonly array $failedPolicies = [],
+        public readonly ?string $reason = null
+    ) {}
+}
+```
+
+The evaluation result is automatically cached using the subject ID, resource, and operation as the cache key.
 
 ---
 
@@ -157,18 +181,6 @@ php artisan zennit_abac:publish --force
 php artisan zennit_abac:publish-config --force
 php artisan zennit_abac:publish-migration --force
 php artisan zennit_abac:publish-env --force
-```
-
-### Testing
-
-```bash
-# Run tests with coverage report
-composer test
-
-# Version management
-composer version-patch  # Increment patch version
-composer version-minor  # Increment minor version
-composer version-major  # Increment major version
 ```
 
 ---
@@ -298,8 +310,8 @@ $permission = Permission::create([
     'operation' => 'update'
 ]);
 
-// Relationships
-$permission->policies(); // HasMany Policy
+# Relationships
+$permission->policies(); # HasMany Policy
 ```
 
 ### Policy
@@ -311,9 +323,9 @@ $policy = Policy::create([
     'permission_id' => $permissionId
 ]);
 
-// Relationships
-$policy->permission(); // BelongsTo Permission
-$policy->collections(); // HasMany PolicyCollection
+# Relationships
+$policy->permission();  # BelongsTo Permission
+$policy->collections(); # HasMany PolicyCollection
 ```
 
 ### PolicyCollection
@@ -325,9 +337,9 @@ $collection = PolicyCollection::create([
     'policy_id' => $policyId
 ]);
 
-// Relationships
-$collection->policy(); // BelongsTo Policy
-$collection->conditions(); // HasMany PolicyCondition
+# Relationships
+$collection->policy();     # BelongsTo Policy
+$collection->conditions(); # HasMany PolicyCondition
 ```
 
 ### PolicyCondition
@@ -339,9 +351,9 @@ $condition = PolicyCondition::create([
     'policy_collection_id' => $collectionId
 ]);
 
-// Relationships
-$condition->collection(); // BelongsTo PolicyCollection
-$condition->attributes(); // HasMany PolicyConditionAttribute
+# Relationships
+$condition->collection(); # BelongsTo PolicyCollection
+$condition->attributes(); # HasMany PolicyConditionAttribute
 ```
 
 ### PolicyConditionAttribute
@@ -355,8 +367,8 @@ $attribute = PolicyConditionAttribute::create([
     'operator' => 'EQUALS'
 ]);
 
-// Relationships
-$attribute->condition(); // BelongsTo PolicyCondition
+# Relationships
+$attribute->condition(); # BelongsTo PolicyCondition
 ```
 
 ### ResourceAttribute
@@ -381,8 +393,8 @@ $attribute = UserAttribute::create([
     'attribute_value' => 'admin'
 ]);
 
-// Relationships
-$attribute->subject(); // MorphTo
+# Relationships
+$attribute->subject(); # MorphTo
 ```
 
 ---
@@ -416,10 +428,10 @@ Available operators:
 Protect your routes with ABAC middleware:
 
 ```php
-// In RouteServiceProvider
+# In RouteServiceProvider
 Route::middleware(['zennit.abac.permissions'])
     ->group(function () {
-        // Protected routes
+        # Protected routes
     });
 ```
 
@@ -444,7 +456,7 @@ The following events are dispatched:
 ```php
 use zennit\ABAC\Models\UserAttribute;
 
-// Add attributes to a subject
+# Add attributes to a subject
 UserAttribute::create([
     'subject_type' => get_class($subject),
     'subject_id' => $subject->id,
@@ -458,7 +470,7 @@ UserAttribute::create([
 ```php
 use zennit\ABAC\Models\ResourceAttribute;
 
-// Add attributes to a resource
+# Add attributes to a resource
 ResourceAttribute::create([
     'resource' => 'posts',
     'attribute_name' => 'status',
@@ -471,13 +483,13 @@ ResourceAttribute::create([
 ```php
 use zennit\ABAC\Jobs\PolicyCacheJob;
 
-// Warm cache for all policies
+# Warm cache for all policies
 PolicyCacheJob::dispatch('warm');
 
-// Warm cache for specific resource
+# Warm cache for specific resource
 PolicyCacheJob::dispatch('warm', 'posts');
 
-// Invalidate cache
+# Invalidate cache
 PolicyCacheJob::dispatch('invalidate');
 ```
 
@@ -500,16 +512,16 @@ The package includes a comprehensive caching system that caches:
 ```php
 use zennit\ABAC\Jobs\PolicyCacheJob;
 
-// Invalidate all caches
+# Invalidate all caches
 PolicyCacheJob::dispatch('invalidate');
 
-// Invalidate specific resource
+# Invalidate specific resource
 PolicyCacheJob::dispatch('invalidate', 'posts');
 
-// Warm all caches
+# Warm all caches
 PolicyCacheJob::dispatch('warm');
 
-// Warm specific resource
+# Warm specific resource
 PolicyCacheJob::dispatch('warm', 'posts');
 ```
 

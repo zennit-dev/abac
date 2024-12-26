@@ -5,7 +5,7 @@ namespace zennit\ABAC\Providers;
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Middleware\EnsurePermissions;
 
-class MiddlewareServiceProvider extends ServiceProvider
+class ZennitMiddlewareServiceProvider extends ServiceProvider
 {
     protected array $middlewareAliases = [
         'zennit.abac' => EnsurePermissions::class,

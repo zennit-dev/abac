@@ -4,7 +4,7 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class ConfigurationServiceProvider extends ServiceProvider
+class ZennitConfigurationServiceProvider extends ServiceProvider
 {
     public const CONFIG_PATH = __DIR__ . '/../../config/zennit_abac.php';
 

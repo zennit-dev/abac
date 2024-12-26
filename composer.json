@@ -38,7 +38,8 @@
     "autoload": {
         "psr-4": {
             "zennit\\ABAC\\": "src/",
-            "zennit\\ABAC\\Database\\Factories\\": "database/factories/"
+            "zennit\\ABAC\\Database\\Factories\\": "database/factories/",
+            "zennit\\ABAC\\Database\\Seeders": "database/seeders/"
         },
         "files": [
             "src/helpers.php"
@@ -47,7 +48,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "zennit\\ABAC\\Providers\\AbacServiceProvider"
+                "ZennitAbacServiceProvider"
             ],
             "config": {
                 "zennit_abac": "config/zennit_abac.php"
