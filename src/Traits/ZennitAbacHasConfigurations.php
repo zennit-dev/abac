@@ -10,14 +10,15 @@ trait ZennitAbacHasConfigurations
         return config('zennit_abac.cache.enabled');
     }
 
+    public function getCacheStore(): string
+    {
+        return config('zennit_abac.cache.store');
+
+    }
+
     public function getCacheTTL(): int
     {
         return config('zennit_abac.cache.ttl');
-    }
-
-    public function getCacheTags(): array
-    {
-        return config('zennit_abac.cache.tags');
     }
 
     public function getCachePrefix(): string
@@ -30,32 +31,12 @@ trait ZennitAbacHasConfigurations
         return config('zennit_abac.cache.warming.enabled');
     }
 
-    public function getBatchChunkSize(): int
-    {
-        return config('zennit_abac.cache.warming.chunk_size');
-    }
-
     public function getCacheWarmingSchedule(): string
     {
         return config('zennit_abac.cache.warming.schedule');
     }
 
     // Evaluation Configuration
-    public function getParallelEvaluationEnabled(): bool
-    {
-        return config('zennit_abac.evaluation.parallel');
-    }
-
-    public function getBatchSize(): int
-    {
-        return config('zennit_abac.evaluation.batch_size');
-    }
-
-    public function getEvaluationChunkSize(): int
-    {
-        return config('zennit_abac.evaluation.chunk_size');
-    }
-
     public function getStrictValidation(): bool
     {
         return config('zennit_abac.evaluation.strict_validation');
@@ -70,6 +51,7 @@ trait ZennitAbacHasConfigurations
     public function getLogChannel(): string
     {
         $channel = config('zennit_abac.monitoring.logging.channel', 'zennit.abac');
+
         return config("logging.channels.$channel") ? $channel : config('logging.default');
     }
 
@@ -91,11 +73,6 @@ trait ZennitAbacHasConfigurations
     public function getEventsEnabled(): bool
     {
         return config('zennit_abac.monitoring.events.enabled');
-    }
-
-    public function getAsyncEvents(): bool
-    {
-        return config('zennit_abac.monitoring.events.async');
     }
 
     // Operators Configuration

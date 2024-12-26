@@ -7,7 +7,7 @@ use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
-return new class extends Migration
+return new class () extends Migration
 {
     use ZennitAbacHasConfigurations;
 
@@ -87,7 +87,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('policy_condition_attributes');
         Schema::dropIfExists('policy_conditions');
-		Schema::dropIfExists('policy_collections');
+        Schema::dropIfExists('policy_collections');
         Schema::dropIfExists('policies');
         Schema::dropIfExists('permissions');
         Schema::dropIfExists('resource_attributes');

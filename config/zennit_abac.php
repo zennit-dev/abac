@@ -2,32 +2,30 @@
 
 return [
     'cache' => [
-        'enabled' => env('ABAC_CACHE_ENABLED', true),
-        'ttl' => env('ABAC_CACHE_TTL', 3600),
-        'tags' => ['zennit.abac', 'zennit.abac-policies', 'zennit.abac-attributes'],
-        'prefix' => 'zennit:abac:',
+        'enabled' => env('AZENNIT_BAC_CACHE_ENABLED', true),
+        'store' => env('ZENNIT_ABAC_CACHE_STORE', 'database'),
+        'ttl' => env('ZENNIT_ABAC_CACHE_TTL', 3600),
+        'prefix' => env('ZENNIT_ABAC_CACHE_PREFIX', 'zennit_abac_'),
         'warming' => [
-            'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
-            'chunk_size' => env('ABAC_CACHE_WARMING_CHUNK_SIZE', 100),
-            'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
+            'enabled' => env('ZENNIT_ABAC_CACHE_WARMING_ENABLED', true),
+            'schedule' => env('ZENNIT_ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
         ],
     ],
     'evaluation' => [
-		'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
+        'strict_validation' => env('ZENNIT_ABAC_STRICT_VALIDATION', true),
     ],
     'monitoring' => [
         'logging' => [
-            'enabled' => env('ABAC_LOGGING_ENABLED', true),
-            'channel' => env('ABAC_LOG_CHANNEL', 'zennit.abac'),
-            'detailed' => env('ABAC_DETAILED_LOGGING', false),
+            'enabled' => env('ZENNIT_ABAC_LOGGING_ENABLED', true),
+            'channel' => env('ZENNIT_ABAC_LOG_CHANNEL', 'zennit.abac'),
+            'detailed' => env('ZENNIT_ABAC_DETAILED_LOGGING', false),
         ],
         'performance' => [
-            'enabled' => env('ABAC_PERFORMANCE_LOGGING', true),
-            'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', 100),
+            'enabled' => env('ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED', true),
+            'slow_threshold' => env('ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD', 100),
         ],
         'events' => [
-            'enabled' => env('ABAC_EVENTS_ENABLED', true),
-            'async' => env('ABAC_ASYNC_EVENTS', false),
+            'enabled' => env('ZENNIT_ABAC_EVENTS_ENABLED', true),
         ],
     ],
     'operators' => [
@@ -35,6 +33,6 @@ return [
         'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
     'database' => [
-        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'App\\Models\\User'),
+        'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
 ];

@@ -2,6 +2,9 @@
 
 namespace zennit\ABAC\Services;
 
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\FileStore;
+use Illuminate\Cache\NullStore;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
@@ -17,15 +20,29 @@ readonly class ZennitAbacCacheManager
 {
     use ZennitAbacHasConfigurations;
 
+    private Repository $cache;
+
     private const CACHE_KEYS = [
         'resource_attributes' => 'resource_attributes',
         'user_attributes' => 'user_attributes',
         'policies' => 'policies',
     ];
 
-    public function __construct(
-        private Repository $cache,
-    ) {}
+    public function __construct()
+    {
+        $store = cache()->store($this->getCacheStore());
+        $this->cache = $store;
+        $concreteStore = $store->getStore();
+
+        // Skip prefix setting for stores that don't support it
+        if (!$concreteStore instanceof FileStore &&
+            !$concreteStore instanceof ArrayStore &&
+            !$concreteStore instanceof NullStore &&
+            method_exists($concreteStore, 'setPrefix')
+        ) {
+            $concreteStore->setPrefix($this->getCachePrefix());
+        }
+    }
 
     /**
      * Remember user attributes in cache for a specific user and type.
@@ -120,13 +137,13 @@ readonly class ZennitAbacCacheManager
         return true;
     }
 
-	/**
-	 * Warm up the cache for policies and their related resource attributes.
-	 *
-	 * @param Collection<Policy> $policies Collection of Policy models to cache
-	 *
-	 * @throws InvalidArgumentException
-	 */
+    /**
+     * Warm up the cache for policies and their related resource attributes.
+     *
+     * @param  Collection<Policy>  $policies  Collection of Policy models to cache
+     *
+     * @throws InvalidArgumentException
+     */
     public function warmPolicies(Collection $policies): void
     {
         $startTime = microtime(true);
@@ -176,13 +193,10 @@ readonly class ZennitAbacCacheManager
             return $callback();
         }
 
-        $fullKey = $this->getCachePrefix() . $key;
-
-        // Register the key for later cleanup
         $this->registerCacheKey($key);
 
         return $this->cache->remember(
-            $fullKey,
+            $key,
             $ttl ?? $this->getCacheTTL(),
             $callback
         );
@@ -197,7 +211,7 @@ readonly class ZennitAbacCacheManager
      */
     private function registerCacheKey(string $key): void
     {
-        $registryKey = $this->getCachePrefix() . 'key_registry';
+        $registryKey = 'key_registry';
         $keys = $this->cache->get($registryKey, []);
 
         if (!in_array($key, $keys)) {

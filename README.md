@@ -175,69 +175,214 @@ composer version-major  # Increment major version
 
 ## Configuration
 
-### Cache Configuration
+### Environment Variables
 
-```php
-// config/zennit_abac.php
-'cache' => [
-    'enabled' => true,
-    'ttl' => 3600,
-    'tags' => ['zennit.abac', 'zennit.abac-policies', 'zennit.abac-attributes'],
-    'prefix' => 'zennit:abac:',
-    'warming' => [
-        'enabled' => true,
-        'chunk_size' => 100,
-        'schedule' => 'hourly', // Options: hourly, daily, weekly, monthly
-    ],
-],
+```bash
+# ABAC Cache Configuration
+ZENNIT_ABAC_CACHE_ENABLED=true
+ZENNIT_ABAC_CACHE_STORE=${CACHE_STORE}
+ZENNIT_ABAC_CACHE_TTL=${SESSION_LIFETIME}
+ZENNIT_ABAC_CACHE_PREFIX=zennit_abac_
+ZENNIT_ABAC_CACHE_WARMING_ENABLED=true
+ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=hourly
+
+# ABAC Validation Configuration
+ZENNIT_ABAC_STRICT_VALIDATION=true
+
+# ABAC Logging Configuration
+ZENNIT_ABAC_LOGGING_ENABLED=true
+ZENNIT_ABAC_LOG_CHANNEL=${LOG_CHANNEL}
+ZENNIT_ABAC_DETAILED_LOGGING=false
+ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED=true
+ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100
+
+# ABAC Events Configuration
+ZENNIT_ABAC_EVENTS_ENABLED=true
+
+# ABAC Model Configuration
+ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User
 ```
 
-### Performance Monitoring
+### Full Configuration Options
 
 ```php
-'monitoring' => [
-    'performance' => [
-        'enabled' => true,
-        'slow_threshold' => 100, // milliseconds
+return [
+    'cache' => [
+        'enabled' => env('ZENNIT_ABAC_CACHE_ENABLED', true),
+        'store' => env('ZENNIT_ABAC_CACHE_STORE', 'database'),
+        'ttl' => env('ZENNIT_ABAC_CACHE_TTL', 3600),
+        'prefix' => env('ZENNIT_ABAC_CACHE_PREFIX', 'zennit_abac_'),
+        'warming' => [
+            'enabled' => env('ZENNIT_ABAC_CACHE_WARMING_ENABLED', true),
+            'schedule' => env('ZENNIT_ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
+        ],
     ],
-    'logging' => [
-        'enabled' => true,
-        'channel' => 'zennit.abac',
-        'detailed' => true,
+    'evaluation' => [
+        'strict_validation' => env('ZENNIT_ABAC_STRICT_VALIDATION', true),
     ],
-    'events' => [
-        'enabled' => true,
-        'async' => false,
+    'monitoring' => [
+        'logging' => [
+            'enabled' => env('ZENNIT_ABAC_LOGGING_ENABLED', true),
+            'channel' => env('ZENNIT_ABAC_LOG_CHANNEL', 'stderr'),
+            'detailed' => env('ZENNIT_ABAC_DETAILED_LOGGING', false),
+        ],
+        'performance' => [
+            'enabled' => env('ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED', true),
+            'slow_threshold' => env('ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD', 100),
+        ],
+        'events' => [
+            'enabled' => env('ZENNIT_ABAC_EVENTS_ENABLED', true),
+        ],
     ],
-],
+    'database' => [
+        'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'App\\Models\\User'),
+    ],
+];
 ```
 
----
+## Database Schema
 
-## Defining Policies
+The package creates the following tables:
 
+### Permissions
+- `id` - Primary key
+- `resource` - Resource identifier
+- `operation` - Operation name
+- Unique constraint on `[resource, operation]`
+
+### Policies
+- `id` - Primary key
+- `name` - Policy name
+- `permission_id` - Foreign key to permissions table
+
+### Policy Collections
+- `id` - Primary key
+- `operator` - Logical operator (AND, OR)
+- `policy_id` - Foreign key to policies table
+
+### Policy Conditions
+- `id` - Primary key
+- `operator` - Logical operator
+- `policy_collection_id` - Foreign key to policy_collections table
+
+### Policy Condition Attributes
+- `id` - Primary key
+- `policy_condition_id` - Foreign key to policy_conditions table
+- `operator` - Comparison operator
+- `attribute_name` - Name of the attribute to compare
+- `attribute_value` - Value to compare against
+
+### Resource Attributes
+- `id` - Primary key
+- `resource` - Resource identifier
+- `attribute_name` - Name of the attribute
+- `attribute_value` - Value of the attribute
+- Index on `[resource, attribute_name]`
+
+### User Attributes
+- `id` - Primary key
+- `subject_type` - Morphable type (default: App\Models\User)
+- `subject_id` - Subject ID
+- `attribute_name` - Name of the attribute
+- `attribute_value` - Value of the attribute
+- Unique constraint on `[subject_type, subject_id, attribute_name]`
+
+## Models
+
+### Permission
 ```php
-use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Enums\Operators\ListOperators;
+use zennit\ABAC\Models\Permission;
 
-// Create a policy
-$policy = Policy::create([
-    'name' => 'Edit Own Posts',
-    'description' => 'Allow users to edit their own posts',
+$permission = Permission::create([
     'resource' => 'posts',
     'operation' => 'update'
 ]);
 
-// Add conditions
-$policy->conditions()->create([
-    'operator' => ListOperators::EQUALS,
-    'attributes' => [
-        [
-            'attribute_name' => 'owner_id',
-            'attribute_value' => '$subject.id'
-        ]
-    ]
+// Relationships
+$permission->policies(); // HasMany Policy
+```
+
+### Policy
+```php
+use zennit\ABAC\Models\Policy;
+
+$policy = Policy::create([
+    'name' => 'Edit Own Posts',
+    'permission_id' => $permissionId
 ]);
+
+// Relationships
+$policy->permission(); // BelongsTo Permission
+$policy->collections(); // HasMany PolicyCollection
+```
+
+### PolicyCollection
+```php
+use zennit\ABAC\Models\PolicyCollection;
+
+$collection = PolicyCollection::create([
+    'operator' => 'AND',
+    'policy_id' => $policyId
+]);
+
+// Relationships
+$collection->policy(); // BelongsTo Policy
+$collection->conditions(); // HasMany PolicyCondition
+```
+
+### PolicyCondition
+```php
+use zennit\ABAC\Models\PolicyCondition;
+
+$condition = PolicyCondition::create([
+    'operator' => 'AND',
+    'policy_collection_id' => $collectionId
+]);
+
+// Relationships
+$condition->collection(); // BelongsTo PolicyCollection
+$condition->attributes(); // HasMany PolicyConditionAttribute
+```
+
+### PolicyConditionAttribute
+```php
+use zennit\ABAC\Models\PolicyConditionAttribute;
+
+$attribute = PolicyConditionAttribute::create([
+    'policy_condition_id' => $conditionId,
+    'attribute_name' => 'owner_id',
+    'attribute_value' => '$subject.id',
+    'operator' => 'EQUALS'
+]);
+
+// Relationships
+$attribute->condition(); // BelongsTo PolicyCondition
+```
+
+### ResourceAttribute
+```php
+use zennit\ABAC\Models\ResourceAttribute;
+
+$attribute = ResourceAttribute::create([
+    'resource' => 'posts',
+    'attribute_name' => 'status',
+    'attribute_value' => 'published'
+]);
+```
+
+### UserAttribute
+```php
+use zennit\ABAC\Models\UserAttribute;
+
+$attribute = UserAttribute::create([
+    'subject_type' => 'App\\Models\\User',
+    'subject_id' => $userId,
+    'attribute_name' => 'role',
+    'attribute_value' => 'admin'
+]);
+
+// Relationships
+$attribute->subject(); // MorphTo
 ```
 
 ---
