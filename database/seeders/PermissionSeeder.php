@@ -25,7 +25,7 @@ class PermissionSeeder extends Seeder
                 'policy_conditions',
                 'policy_conditions_attributes',
             ],
-            'operation' => [PermissionOperations::values()],
+            'operation' => PermissionOperations::values(),
         ];
 
         foreach ($basePermissions['resource'] as $resource) {
