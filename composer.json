@@ -50,6 +50,7 @@
             "providers": [
                 "zennit\\ABAC\\Providers\\ZennitAbacServiceProvider"
             ],
+
             "config": {
                 "zennit_abac": "config/zennit_abac.php"
             },

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\AccessControl;
+namespace zennit\ABAC\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use zennit\ABAC\Models\UserAttribute;
