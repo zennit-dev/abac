@@ -7,45 +7,45 @@ trait ZennitAbacHasConfigurations
     // Cache Configuration
     public function getCacheEnabled(): bool
     {
-        return config('zennit_abac.cache.enabled');
+        return config('zennit_abac.cache.enabled', true);
     }
 
     public function getCacheStore(): string
     {
-        return config('zennit_abac.cache.store');
+        return config('zennit_abac.cache.store', 'database');
 
     }
 
     public function getCacheTTL(): int
     {
-        return config('zennit_abac.cache.ttl');
+        return config('zennit_abac.cache.ttl', 3600);
     }
 
     public function getCachePrefix(): string
     {
-        return config('zennit_abac.cache.prefix');
+        return config('zennit_abac.cache.prefix', 'zennit_abac_');
     }
 
     public function getCacheWarmingEnabled(): bool
     {
-        return config('zennit_abac.cache.warming.enabled');
+        return config('zennit_abac.cache.warming.enabled', true);
     }
 
     public function getCacheWarmingSchedule(): string
     {
-        return config('zennit_abac.cache.warming.schedule');
+        return config('zennit_abac.cache.warming.schedule', 'hourly');
     }
 
     // Evaluation Configuration
     public function getStrictValidation(): bool
     {
-        return config('zennit_abac.evaluation.strict_validation');
+        return config('zennit_abac.evaluation.strict_validation', true);
     }
 
     // Monitoring Configuration
     public function getLoggingEnabled(): bool
     {
-        return config('zennit_abac.monitoring.logging.enabled');
+        return config('zennit_abac.monitoring.logging.enabled', true);
     }
 
     public function getLogChannel(): string
@@ -57,22 +57,22 @@ trait ZennitAbacHasConfigurations
 
     public function getDetailedLogging(): bool
     {
-        return config('zennit_abac.monitoring.logging.detailed');
+        return config('zennit_abac.monitoring.logging.detailed', true);
     }
 
     public function getPerformanceLoggingEnabled(): bool
     {
-        return config('zennit_abac.monitoring.performance.enabled');
+        return config('zennit_abac.monitoring.performance.enabled', true);
     }
 
     public function getSlowEvaluationThreshold(): int
     {
-        return config('zennit_abac.monitoring.performance.slow_threshold');
+        return config('zennit_abac.monitoring.performance.slow_threshold', 100);
     }
 
     public function getEventsEnabled(): bool
     {
-        return config('zennit_abac.monitoring.events.enabled');
+        return config('zennit_abac.monitoring.events.enabled', true);
     }
 
     // Operators Configuration
@@ -99,6 +99,12 @@ trait ZennitAbacHasConfigurations
     // Database Configuration
     public function getUserAttributeSubjectType(): string
     {
-        return config('zennit_abac.database.user_attribute_subject_type');
+        return config('zennit_abac.database.user_attribute_subject_type', 'users');
+    }
+
+    // Middleware Configuration
+    public function getSubjectMethod(): string
+    {
+        return config('zennit_abac.middleware.subject_method', 'user');
     }
 }

@@ -7,13 +7,8 @@ class AccessContext
     public function __construct(
         public string $resource,
         public string $operation,
-        public mixed $subject,
+        public object $subject,
         public ?array $context = []
     ) {
-    }
-
-    public function user(): object
-    {
-        return $this->subject;
     }
 }

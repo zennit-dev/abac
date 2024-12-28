@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
                 });
 
                 $end = now();
-                $this->command->info('Database seeding completed successfully in ' . $start->diffForHumans($end));
+                $this->command->info('ABAC database seeding completed successfully in ' . $start->diffForHumans($end));
             });
         } catch (Throwable $e) {
             logger()->error('Seeding failed: ' . $e->getMessage() . ' at ' . $e->getFile() . ' on line ' . $e->getLine());
