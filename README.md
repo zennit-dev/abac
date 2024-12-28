@@ -247,7 +247,10 @@ return [
         ],
     ],
     'database' => [
-        'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'App\\Models\\User'),
+        'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
+    ],
+    'middleware' => [
+        'subject_method' => env('ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
     ],
 ];
 ```
