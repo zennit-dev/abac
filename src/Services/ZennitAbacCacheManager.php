@@ -91,7 +91,7 @@ readonly class ZennitAbacCacheManager
     public function rememberPolicyEvaluation(string $key, callable $callback): mixed
     {
         return $this->remember(
-            self::CACHE_KEYS['evaluations'] . ":$key",
+            self::CACHE_KEYS['policies'] . ":$key",
             $callback,
             $this->getCacheTTL()
         );
