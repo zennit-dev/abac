@@ -9,12 +9,13 @@ use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
+use zennit\ABAC\Services\ZennitAbacCacheManager;
 use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
 /**
  * Class EnsurePermissions
- * 
+ *
  * Middleware implementation for ABAC permission checking.
  * Validates user access to resources based on configured policies and subjects.
  */
@@ -23,18 +24,19 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
     use ZennitAbacHasConfigurations;
 
     public function __construct(
-        protected ZennitAbacService $abac
+        protected ZennitAbacService $abac,
+        protected ZennitAbacCacheManager $cacheManager,
     ) {}
 
     /**
      * Handle an incoming request.
-     * Validates permissions for the current user against the requested resource.
      *
      * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next     The next middleware in the pipeline
-     * @return Response          The HTTP response
-     * @throws ValidationException      If context validation fails
+     * @param  Closure  $next  The next middleware in the pipeline
+     *
+     * @throws ValidationException If context validation fails
      * @throws InvalidArgumentException If cache operations fail
+     * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -42,6 +44,54 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
             return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
 
+        try {
+            $cacheKey = $this->buildCacheKey($request);
+            $hasAccess = $this->cacheManager->remember(
+                $cacheKey,
+                fn () => $this->checkAccess($request)
+            );
+
+            if (!$hasAccess) {
+                return $this->unauthorizedResponse('Unauthorized to access this route');
+            }
+
+            return $next($request);
+        } catch (InvalidArgumentException $e) {
+            // Fallback to uncached check if caching fails
+            if (!$this->checkAccess($request)) {
+                return $this->unauthorizedResponse('Unauthorized to access this route');
+            }
+
+            return $next($request);
+        }
+    }
+
+    /**
+     * Build a unique cache key for the request
+     */
+    private function buildCacheKey(Request $request): string
+    {
+        $user = $request->user();
+        $path = $request->path();
+        $method = $request->method();
+
+        return "permission_check:{$user->id}:{$path}:{$method}";
+    }
+
+    /**
+     * Check if the request has access
+     *
+     * @throws InvalidArgumentException
+     * @throws ValidationException
+     */
+    private function checkAccess(Request $request): bool
+    {
+        // First check excluded routes
+        if ($this->isExcludedRoute($request)) {
+            return true;
+        }
+
+        // If not excluded, check ABAC permissions
         $context = new AccessContext(
             resource: $this->getResourceFromPath($request->path()),
             operation: strtolower($request->method()),
@@ -49,20 +99,17 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
             context: []
         );
 
-        if (!$this->abac->can($context)) {
-            return $this->unauthorizedResponse('Unauthorized to access this route');
-        }
-
-        return $next($request);
+        return $this->abac->can($context);
     }
 
     /**
      * Define the subject for permission checking.
      * Retrieves the subject from the request using the method configured in zennit_abac.middleware.subject_method.
      *
-     * @param  Request     $request       The incoming HTTP request
-     * @return object|null                The subject for permission checking
-     * @throws RuntimeException           When the configured subject method doesn't exist
+     * @param  Request  $request  The incoming HTTP request
+     *
+     * @throws RuntimeException When the configured subject method doesn't exist
+     * @return object|null The subject for permission checking
      */
     public function defineSubject(Request $request): ?object
     {
@@ -135,5 +182,47 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
             '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
             strtolower($string)
         ) === 1;
+    }
+
+    /**
+     * Check if the current route is in the excluded routes list
+     */
+    private function isExcludedRoute(Request $request): bool
+    {
+        $currentPath = $request->path();
+        $currentMethod = strtoupper($request->method());
+        $excludedRoutes = $this->getExcludedRoutes();
+
+        foreach ($excludedRoutes as $route) {
+            // If route is string, check only path
+            if (is_string($route) && $this->matchPath($currentPath, $route)) {
+                return true;
+            }
+
+            // If route is array with method and path
+            if (is_array($route)
+                && isset($route['path'])
+                && isset($route['method'])
+                && $this->matchPath($currentPath, $route['path'])
+                && (
+                    $route['method'] === '*'
+                    || strtoupper($route['method']) === $currentMethod
+                )
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Match path against pattern, supporting wildcards
+     */
+    private function matchPath(string $path, string $pattern): bool
+    {
+        $pattern = str_replace('*', '.*', $pattern);
+
+        return preg_match('#^' . $pattern . '$#', $path) === 1;
     }
 }

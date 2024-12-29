@@ -218,6 +218,8 @@ ZENNIT_ABAC_SUBJECT_METHOD=user # Default method for resolving middleware subjec
 ### Full Configuration Options
 
 ```php
+<?php
+
 return [
     'cache' => [
         'enabled' => env('ZENNIT_ABAC_CACHE_ENABLED', true),
@@ -235,7 +237,7 @@ return [
     'monitoring' => [
         'logging' => [
             'enabled' => env('ZENNIT_ABAC_LOGGING_ENABLED', true),
-            'channel' => env('ZENNIT_ABAC_LOG_CHANNEL', 'stderr'),
+            'channel' => env('ZENNIT_ABAC_LOG_CHANNEL', 'zennit.abac'),
             'detailed' => env('ZENNIT_ABAC_DETAILED_LOGGING', false),
         ],
         'performance' => [
@@ -246,11 +248,32 @@ return [
             'enabled' => env('ZENNIT_ABAC_EVENTS_ENABLED', true),
         ],
     ],
+    'operators' => [
+        'disabled' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
+        'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
+    ],
     'database' => [
         'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
     'middleware' => [
-        'subject_method' => env('ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
+        'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),  // defaults to 'user' for backward compatibility
+    ],
+    'excluded_routes' => [
+        // Simple string path
+        'api/v1/current-user',
+        
+        // Or with specific method
+        [
+            'path' => 'api/v1/current-user',
+            'method' => 'GET'
+        ],
+        // You can use wildcards
+        'api/v1/current-user/*',
+        // Or specify multiple methods
+        [
+            'path' => 'api/v1/current-user/profile',
+            'method' => '*'  // Allows all methods
+        ],
     ],
 ];
 ```

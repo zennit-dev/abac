@@ -107,4 +107,9 @@ trait ZennitAbacHasConfigurations
     {
         return config('zennit_abac.middleware.subject_method', 'user');
     }
+
+    public function getExcludedRoutes(): array
+    {
+        return config('zennit_abac.middleware.excluded_routes', []);
+    }
 }

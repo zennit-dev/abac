@@ -37,5 +37,6 @@ return [
     ],
     'middleware' => [
         'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),  // defaults to 'user' for backward compatibility
+        'excluded_routes' => [], // routes to be excluded from the middleware checks
     ],
 ];
