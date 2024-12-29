@@ -5,13 +5,20 @@ namespace zennit\ABAC\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Psr\SimpleCache\InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
 
-readonly class EnsurePermissions
+/**
+ * Class EnsurePermissions
+ * 
+ * Middleware implementation for ABAC permission checking.
+ * Validates user access to resources based on configured policies and subjects.
+ */
+readonly class EnsurePermissions implements EnsurePermissionsInterface
 {
     use ZennitAbacHasConfigurations;
 
@@ -24,11 +31,10 @@ readonly class EnsurePermissions
      * Validates permissions for the current user against the requested resource.
      *
      * @param  Request  $request  The incoming HTTP request
-     * @param  Closure  $next  The next middleware in the pipeline
-     *
+     * @param  Closure  $next     The next middleware in the pipeline
+     * @return Response          The HTTP response
+     * @throws ValidationException      If context validation fails
      * @throws InvalidArgumentException If cache operations fail
-     * @throws ValidationException If context validation fails
-     * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -36,16 +42,10 @@ readonly class EnsurePermissions
             return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
 
-        $subjectMethod = $this->getSubjectMethod();
-        $subject = $request->$subjectMethod();
-        if (!$subject) {
-            return $this->unauthorizedResponse("$subject not found");
-        }
-
         $context = new AccessContext(
             resource: $this->getResourceFromPath($request->path()),
             operation: strtolower($request->method()),
-            subject: $subject,
+            subject: $this->defineSubject($request),
             context: []
         );
 
@@ -54,6 +54,25 @@ readonly class EnsurePermissions
         }
 
         return $next($request);
+    }
+
+    /**
+     * Define the subject for permission checking.
+     * Retrieves the subject from the request using the method configured in zennit_abac.middleware.subject_method.
+     *
+     * @param  Request     $request       The incoming HTTP request
+     * @return object|null                The subject for permission checking
+     * @throws RuntimeException           When the configured subject method doesn't exist
+     */
+    public function defineSubject(Request $request): ?object
+    {
+        $method = $this->getSubjectMethod();
+
+        if (!method_exists($request, $method)) {
+            throw new RuntimeException("Subject method '$method' does not exist on Request object");
+        }
+
+        return $request->$method();
     }
 
     /**
