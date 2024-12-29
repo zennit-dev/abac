@@ -13,21 +13,21 @@ class PublishAbacEnvCommand extends Command
     protected $description = 'Publish ABAC environment variables';
 
     private array $envVariables = [
-        'ZENNIT_ABAC_CACHE_ENABLED' => 'true',
-        'ZENNIT_ABAC_CACHE_STORE' => '${CACHE_STORE}',
-        'ZENNIT_ABAC_CACHE_TTL' => '${SESSION_LIFETIME}',
+        'ZENNIT_ABAC_CACHE_ENABLED' => true,
+        'ZENNIT_ABAC_CACHE_STORE' => 'database',
+        'ZENNIT_ABAC_CACHE_TTL' => 3600,
         'ZENNIT_ABAC_CACHE_PREFIX' => 'zennit_abac_',
-        'ZENNIT_ABAC_CACHE_WARMING_ENABLED' => 'true',
-        'ZENNIT_ABAC_CACHE_WARMING_SCHEDULE' => 'hourly',
-        'ZENNIT_ABAC_STRICT_VALIDATION' => 'true',
-        'ZENNIT_ABAC_LOGGING_ENABLED' => 'true',
-        'ZENNIT_ABAC_LOG_CHANNEL' => '${LOG_CHANNEL}',
-        'ZENNIT_ABAC_DETAILED_LOGGING' => 'false',
-        'ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED' => 'true',
-        'ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD' => '100',
-        'ZENNIT_ABAC_EVENTS_ENABLED' => 'true',
+        'ZENNIT_ABAC_CACHE_WARMING_ENABLED' => true,
+        'ZENNIT_ABAC_CACHE_WARMING_SCHEDULE' => 100,
+        'ZENNIT_ABAC_STRICT_VALIDATION' => true,
+        'ZENNIT_ABAC_LOGGING_ENABLED' => true,
+        'ZENNIT_ABAC_LOG_CHANNEL' => 'zennit.abac',
+        'ZENNIT_ABAC_DETAILED_LOGGING' => false,
+        'ZENNIT_ABAC_PERFORMANCE_LOGGING' => true,
+        'ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD' => 100,
+        'ZENNIT_ABAC_EVENTS_ENABLED' => true,
         'ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
-        'ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
+        'ZENNIT_ABAC_SUBJECT_METHOD' => 'user',
     ];
 
     public function handle(): void

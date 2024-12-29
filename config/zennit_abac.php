@@ -2,7 +2,7 @@
 
 return [
     'cache' => [
-        'enabled' => env('AZENNIT_BAC_CACHE_ENABLED', true),
+        'enabled' => env('ZENNIT_ABAC_CACHE_ENABLED', true),
         'store' => env('ZENNIT_ABAC_CACHE_STORE', 'database'),
         'ttl' => env('ZENNIT_ABAC_CACHE_TTL', 3600),
         'prefix' => env('ZENNIT_ABAC_CACHE_PREFIX', 'zennit_abac_'),

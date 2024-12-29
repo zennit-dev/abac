@@ -154,22 +154,21 @@ php artisan zennit_abac:cache-clear
 php artisan zennit_abac:publish-env
 
 # Available environment variables:
-ABAC_CACHE_ENABLED=true
-ABAC_CACHE_TTL=3600
-ABAC_CACHE_WARMING_ENABLED=true
-ABAC_CACHE_WARMING_CHUNK_SIZE=100
-ABAC_PARALLEL_EVALUATION=false
-ABAC_BATCH_SIZE=1000
-ABAC_BATCH_CHUNK_SIZE=100
-ABAC_STRICT_VALIDATION=true
-ABAC_LOGGING_ENABLED=true
-ABAC_LOG_CHANNEL=abac
-ABAC_DETAILED_LOGGING=false
-ABAC_PERFORMANCE_LOGGING=true
-ABAC_SLOW_EVALUATION_THRESHOLD=100
-ABAC_EVENTS_ENABLED=true
-ABAC_ASYNC_EVENTS=false
-ABAC_USER_ATTRIBUTE_SUBJECT_TYPE="App\Models\User"
+ZENNIT_ABAC_CACHE_ENABLED=true
+ZENNIT_ABAC_CACHE_STORE='database'
+ZENNIT_ABAC_CACHE_TTL=3600
+ZENNIT_ABAC_CACHE_PREFIX='zennit_abac_'
+ZENNIT_ABAC_CACHE_WARMING_ENABLED=true
+ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=100
+ZENNIT_ABAC_STRICT_VALIDATION=true
+ZENNIT_ABAC_LOGGING_ENABLED=true
+ZENNIT_ABAC_LOG_CHANNEL='zennit.abac'
+ZENNIT_ABAC_DETAILED_LOGGING=false
+ZENNIT_ABAC_PERFORMANCE_LOGGING=true
+ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100
+ZENNIT_ABAC_EVENTS_ENABLED=true
+ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE='users'
+ZENNIT_ABAC_SUBJECT_METHOD='user'
 ```
 
 ### Force Options
@@ -260,27 +259,32 @@ return [
 The package creates the following tables:
 
 ### Permissions
+
 - `id` - Primary key
 - `resource` - Resource identifier
 - `operation` - Operation name
 - Unique constraint on `[resource, operation]`
 
 ### Policies
+
 - `id` - Primary key
 - `name` - Policy name
 - `permission_id` - Foreign key to permissions table
 
 ### Policy Collections
+
 - `id` - Primary key
 - `operator` - Logical operator (AND, OR)
 - `policy_id` - Foreign key to policies table
 
 ### Policy Conditions
+
 - `id` - Primary key
 - `operator` - Logical operator
 - `policy_collection_id` - Foreign key to policy_collections table
 
 ### Policy Condition Attributes
+
 - `id` - Primary key
 - `policy_condition_id` - Foreign key to policy_conditions table
 - `operator` - Comparison operator
@@ -288,6 +292,7 @@ The package creates the following tables:
 - `attribute_value` - Value to compare against
 
 ### Resource Attributes
+
 - `id` - Primary key
 - `resource` - Resource identifier
 - `attribute_name` - Name of the attribute
@@ -295,6 +300,7 @@ The package creates the following tables:
 - Index on `[resource, attribute_name]`
 
 ### User Attributes
+
 - `id` - Primary key
 - `subject_type` - Morphable type (default: App\Models\User)
 - `subject_id` - Subject ID
@@ -305,6 +311,7 @@ The package creates the following tables:
 ## Models
 
 ### Permission
+
 ```php
 use zennit\ABAC\Models\Permission;
 
@@ -318,6 +325,7 @@ $permission->policies(); # HasMany Policy
 ```
 
 ### Policy
+
 ```php
 use zennit\ABAC\Models\Policy;
 
@@ -332,6 +340,7 @@ $policy->collections(); # HasMany PolicyCollection
 ```
 
 ### PolicyCollection
+
 ```php
 use zennit\ABAC\Models\PolicyCollection;
 
@@ -346,6 +355,7 @@ $collection->conditions(); # HasMany PolicyCondition
 ```
 
 ### PolicyCondition
+
 ```php
 use zennit\ABAC\Models\PolicyCondition;
 
@@ -360,6 +370,7 @@ $condition->attributes(); # HasMany PolicyConditionAttribute
 ```
 
 ### PolicyConditionAttribute
+
 ```php
 use zennit\ABAC\Models\PolicyConditionAttribute;
 
@@ -375,6 +386,7 @@ $attribute->condition(); # BelongsTo PolicyCondition
 ```
 
 ### ResourceAttribute
+
 ```php
 use zennit\ABAC\Models\ResourceAttribute;
 
@@ -386,6 +398,7 @@ $attribute = ResourceAttribute::create([
 ```
 
 ### UserAttribute
+
 ```php
 use zennit\ABAC\Models\UserAttribute;
 
