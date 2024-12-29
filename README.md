@@ -190,28 +190,29 @@ php artisan zennit_abac:publish-env --force
 
 ```bash
 # ABAC Cache Configuration
-ZENNIT_ABAC_CACHE_ENABLED=true
-ZENNIT_ABAC_CACHE_STORE=${CACHE_STORE}
-ZENNIT_ABAC_CACHE_TTL=${SESSION_LIFETIME}
-ZENNIT_ABAC_CACHE_PREFIX=zennit_abac_
-ZENNIT_ABAC_CACHE_WARMING_ENABLED=true
-ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=hourly
+ZENNIT_ABAC_CACHE_ENABLED=true # Enables or disables caching in the package.
+ZENNIT_ABAC_CACHE_STORE=${CACHE_STORE} # Defines the cache store to use (e.g., database, file, redis).
+ZENNIT_ABAC_CACHE_TTL=${SESSION_LIFETIME} # Sets the cache time-to-live (TTL) duration in seconds.
+ZENNIT_ABAC_CACHE_PREFIX=zennit_abac_ # Prefix to use for cache keys.
+ZENNIT_ABAC_CACHE_WARMING_ENABLED=true # Toggles automated cache warming functionality.
+ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=hourly # Specifies the cache warming schedule (e.g., hourly, daily).
 
 # ABAC Validation Configuration
-ZENNIT_ABAC_STRICT_VALIDATION=true
+ZENNIT_ABAC_STRICT_VALIDATION=true # Enforces strict validation of attributes and access configurations.
 
 # ABAC Logging Configuration
-ZENNIT_ABAC_LOGGING_ENABLED=true
-ZENNIT_ABAC_LOG_CHANNEL=${LOG_CHANNEL}
-ZENNIT_ABAC_DETAILED_LOGGING=false
-ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED=true
-ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100
+ZENNIT_ABAC_LOGGING_ENABLED=true # Enables or disables logging of ABAC activities.
+ZENNIT_ABAC_LOG_CHANNEL=${LOG_CHANNEL} # Specifies the logging channel dedicated to ABAC logs.
+ZENNIT_ABAC_DETAILED_LOGGING=false # Enables detailed logging of each access evaluation.
+ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED=true # Toggles logging of access evaluation performance metrics.
+ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100 # Threshold (in milliseconds) for slow evaluation logging.
 
 # ABAC Events Configuration
-ZENNIT_ABAC_EVENTS_ENABLED=true
+ZENNIT_ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC operations.
 
 # ABAC Model Configuration
-ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User
+ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
+ZENNIT_ABAC_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
 ```
 
 ### Full Configuration Options
