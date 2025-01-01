@@ -60,8 +60,9 @@ class OperatorFactory
      * Create an operator instance by its identifier.
      *
      * @param string $operator The operator identifier
-     * @return OperatorInterface The operator instance
+     *
      * @throws UnsupportedOperatorException If the operator is not supported
+     * @return OperatorInterface The operator instance
      */
     public function create(string $operator): OperatorInterface
     {
@@ -77,6 +78,7 @@ class OperatorFactory
      *
      * @param string $key The operator identifier
      * @param OperatorInterface $operator The operator instance
+     *
      * @throws InvalidArgumentException If key is empty or operator already exists
      */
     public function register(string $key, OperatorInterface $operator): void

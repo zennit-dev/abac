@@ -63,11 +63,12 @@ class VersionUpdater
         // Check if we're in a git repository
         if (!is_dir(dirname(__DIR__) . '/.git')) {
             echo "Warning: Not a git repository\n";
+
             return;
         }
 
         $version = 'v' . $version;
-        
+
         // Create tag locally only
         exec('git add composer.json');
         exec(sprintf('git commit -m "Version bump to %s"', $version));

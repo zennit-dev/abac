@@ -1,7 +1,7 @@
 <?php
 
-use zennit\ABAC\Services\ZennitAbacService;
 use zennit\ABAC\Services\ZennitAbacCacheManager;
+use zennit\ABAC\Services\ZennitAbacService;
 
 if (!function_exists('abacPolicy')) {
     function abacPolicy(): ZennitAbacService

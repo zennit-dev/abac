@@ -2,7 +2,6 @@
 
 namespace zennit\ABAC\Strategies\Contracts;
 
-
 interface LogicalOperatorInterface extends OperatorInterface
 {
     /**

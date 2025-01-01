@@ -14,7 +14,8 @@ readonly class PolicyRepository
     public function __construct(
         protected CacheRepository $cache,
         protected ZennitAbacCacheManager $cacheManager
-    ) {}
+    ) {
+    }
 
     /**
      * Get policies for a specific resource and operation.
@@ -62,7 +63,9 @@ readonly class PolicyRepository
     public function getPoliciesQueryFor(string $resource): Builder
     {
         return $this->getQuery()
-            ->whereHas('permission', fn ($query) => $query->where('resource', $resource)
+            ->whereHas(
+                'permission',
+                fn ($query) => $query->where('resource', $resource)
             );
     }
 

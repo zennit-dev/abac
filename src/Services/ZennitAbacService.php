@@ -16,35 +16,37 @@ readonly class ZennitAbacService
     use ZennitAbacHasConfigurations;
 
     public function __construct(
-        private ZennitAbacCacheManager       $cache,
-        private ZennitAbacAttributeLoader    $attributeLoader,
-        private ZennitAbacPolicyEvaluator    $evaluator,
-        private AuditLogger                  $logger,
+        private ZennitAbacCacheManager $cache,
+        private ZennitAbacAttributeLoader $attributeLoader,
+        private ZennitAbacPolicyEvaluator $evaluator,
+        private AuditLogger $logger,
         private ZennitAbacPerformanceMonitor $monitor
     ) {
     }
 
-	/**
-	 * Check if a subject has permission to perform an operation on a resource.
-	 *
-	 * @param AccessContext $context The access context containing subject, resource, and operation
-	 * @return bool True if access is granted, false otherwise
-	 * @throws ValidationException If the context is invalid
-	 * @throws InvalidArgumentException If cache operations fail
-	 */
+    /**
+     * Check if a subject has permission to perform an operation on a resource.
+     *
+     * @param AccessContext $context The access context containing subject, resource, and operation
+     *
+     * @throws ValidationException If the context is invalid
+     * @throws InvalidArgumentException If cache operations fail
+     * @return bool True if access is granted, false otherwise
+     */
     public function can(AccessContext $context): bool
     {
         return $this->evaluate($context)->granted;
     }
 
-	/**
-	 * Evaluate an access request and return detailed results.
-	 *
-	 * @param AccessContext $context The access context to evaluate
-	 * @return EvaluationResult The detailed evaluation result
-	 * @throws ValidationException If the context is invalid
-	 * @throws InvalidArgumentException If cache operations fail
-	 */
+    /**
+     * Evaluate an access request and return detailed results.
+     *
+     * @param AccessContext $context The access context to evaluate
+     *
+     * @throws ValidationException If the context is invalid
+     * @throws InvalidArgumentException If cache operations fail
+     * @return EvaluationResult The detailed evaluation result
+     */
     public function evaluate(AccessContext $context): EvaluationResult
     {
         return $this->monitor->measure('policy_evaluation', function () use ($context) {
@@ -63,14 +65,15 @@ readonly class ZennitAbacService
         });
     }
 
-	/**
-	 * Perform the actual access evaluation logic.
-	 *
-	 * @param AccessContext $context The access context to evaluate
-	 * @return EvaluationResult The evaluation result with detailed information
-	 * @throws ValidationException If the context is invalid
-	 * @throws InvalidArgumentException If cache operations fail
-	 */
+    /**
+     * Perform the actual access evaluation logic.
+     *
+     * @param AccessContext $context The access context to evaluate
+     *
+     * @throws ValidationException If the context is invalid
+     * @throws InvalidArgumentException If cache operations fail
+     * @return EvaluationResult The evaluation result with detailed information
+     */
     private function evaluateAccess(AccessContext $context): EvaluationResult
     {
         $attributes = $this->attributeLoader->loadForContext($context);
@@ -82,12 +85,13 @@ readonly class ZennitAbacService
         return $this->evaluator->evaluate($context, $attributes);
     }
 
-	/**
-	 * Validate the access context.
-	 *
-	 * @param AccessContext $context The context to validate
-	 * @throws ValidationException If the context is invalid
-	 */
+    /**
+     * Validate the access context.
+     *
+     * @param AccessContext $context The context to validate
+     *
+     * @throws ValidationException If the context is invalid
+     */
     private function validateContext(AccessContext $context): void
     {
         app(AccessContextValidator::class)->validate($context);

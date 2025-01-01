@@ -37,8 +37,6 @@ return [
     ],
     'middleware' => [
         'subject_method' => env('ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
-        'excluded_routes' => [
-            'current-user*',
-        ],
+        'excluded_routes' => [],
     ],
 ];

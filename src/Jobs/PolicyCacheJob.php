@@ -25,7 +25,8 @@ class PolicyCacheJob implements ShouldQueue
     public function __construct(
         private readonly string $action = 'warm',
         private readonly ?string $resource = null
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the cache management job.
@@ -33,6 +34,7 @@ class PolicyCacheJob implements ShouldQueue
      *
      * @param ZennitAbacCacheManager $cache The cache manager service
      * @param PolicyRepository $repository The policy repository
+     *
      * @throws InvalidArgumentException If cache operations fail
      */
     public function handle(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
@@ -73,6 +75,7 @@ class PolicyCacheJob implements ShouldQueue
      *
      * @param ZennitAbacCacheManager $cache The cache manager service
      * @param PolicyRepository $repository The policy repository
+     *
      * @throws InvalidArgumentException If cache operations fail
      */
     private function warmCache(ZennitAbacCacheManager $cache, PolicyRepository $repository): void

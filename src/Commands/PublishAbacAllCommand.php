@@ -15,11 +15,11 @@ class PublishAbacAllCommand extends Command
         $force = $this->option('force') ? ['--force' => true] : [];
 
         $this->info('Publishing ABAC files...');
-        
+
         $this->call('zennit_abac:publish-config', $force);
         $this->call('zennit_abac:publish-migration', $force);
         $this->call('zennit_abac:publish-env', $force);
-        
+
         $this->info('All ABAC files published successfully!');
     }
-} 
+}

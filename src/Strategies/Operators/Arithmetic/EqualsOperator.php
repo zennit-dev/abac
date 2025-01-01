@@ -10,4 +10,4 @@ class EqualsOperator implements ArithmeticOperatorInterface
     {
         return $values === $against;
     }
-} 
+}

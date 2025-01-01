@@ -4,7 +4,6 @@ namespace zennit\ABAC\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +26,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
     public function __construct(
         protected ZennitAbacService $abac,
         protected ZennitAbacCacheManager $cacheManager,
-    ) {}
+    ) {
+    }
 
     /**
      * Handle an incoming request.
@@ -35,8 +35,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws InvalidArgumentException If cache operations fail
      * @throws ValidationException If context validation fails
+     * @throws InvalidArgumentException If cache operations fail
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -48,29 +48,12 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
         $currentPath = $request->path();
         $excludedRoutes = $this->getExcludedRoutes();
 
-        Log::debug('🚀 Request Check:', [
-            'current_path' => $currentPath,
-            'method' => $request->method(),
-            'excluded_routes' => $excludedRoutes,
-        ]);
-
         // Check each excluded route
         foreach ($excludedRoutes as $pattern) {
-            $isMatch = $this->matchPath($currentPath, $pattern);
-            Log::debug('🔍 Route Check:', [
-                'pattern' => $pattern,
-                'path' => $currentPath,
-                'is_match' => $isMatch,
-            ]);
-
-            if ($isMatch) {
-                Log::debug('✅ Route excluded, allowing access');
-
+            if ($this->matchPath($currentPath, $pattern)) {
                 return $next($request);
             }
         }
-
-        Log::debug('❌ Route not excluded, checking permissions');
 
         try {
             $cacheKey = $this->buildCacheKey($request);

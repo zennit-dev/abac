@@ -9,5 +9,6 @@ class EvaluationResult
         public string $reason,
         public array $context = [],
         public array $matched = []
-    ) {}
+    ) {
+    }
 }

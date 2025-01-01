@@ -14,4 +14,4 @@ class InOperator implements ListOperatorInterface
 
         return in_array($values, $against, true);
     }
-} 
+}

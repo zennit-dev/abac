@@ -18,15 +18,17 @@ readonly class ZennitAbacPolicyEvaluator
         private PolicyRepository $policyRepository,
         private ZennitAbacCacheManager $cache,
         private ZennitAbacCollectionEvaluator $collectionEvaluator
-    ) {}
+    ) {
+    }
 
     /**
      * Evaluate access based on policies.
      *
      * @param AccessContext $context The access context to evaluate
      * @param AttributeCollection $attributes The attributes to evaluate against
-     * @return EvaluationResult The result of the policy evaluation
+     *
      * @throws InvalidArgumentException If cache operations fail
+     * @return EvaluationResult The result of the policy evaluation
      */
     public function evaluate(AccessContext $context, AttributeCollection $attributes): EvaluationResult
     {
@@ -51,6 +53,7 @@ readonly class ZennitAbacPolicyEvaluator
      * @param Collection $policies The policies to evaluate
      * @param AttributeCollection $attributes The attributes to evaluate against
      * @param AccessContext $context The access context
+     *
      * @return EvaluationResult The evaluation result
      */
     private function evaluatePolicies(Collection $policies, AttributeCollection $attributes, AccessContext $context): EvaluationResult
@@ -93,6 +96,7 @@ readonly class ZennitAbacPolicyEvaluator
      *
      * @param Policy $policy The policy to evaluate
      * @param AttributeCollection $attributes The attributes to evaluate against
+     *
      * @return bool True if policy conditions are met
      */
     private function evaluatePolicy(Policy $policy, AttributeCollection $attributes): bool
