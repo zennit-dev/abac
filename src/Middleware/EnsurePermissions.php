@@ -35,8 +35,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws ValidationException If context validation fails
      * @throws InvalidArgumentException If cache operations fail
+     * @throws ValidationException If context validation fails
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -58,7 +58,7 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
 
             return $next($request);
         } catch (InvalidArgumentException $e) {
-            // Fallback to uncached check if caching fails
+            report($e);
             if (!$this->checkAccess($request)) {
                 return $this->unauthorizedResponse('Unauthorized to access this route');
             }
@@ -76,7 +76,7 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
         $path = $request->path();
         $method = $request->method();
 
-        return "permission_check:{$user->id}:{$path}:{$method}";
+        return "permission_check:$user->id:$path:$method";
     }
 
     /**
@@ -227,14 +227,22 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      */
     private function matchPath(string $path, string $pattern): bool
     {
-        // Remove trailing slash from both path and pattern
-        $path = rtrim($path, '/');
-        $pattern = rtrim($pattern, '/');
+        // Normalize slashes and remove trailing/leading slashes
+        $path = trim($path, '/');
+        $pattern = trim($pattern, '/');
 
-        // Convert glob pattern to regex, escape forward slashes
-        $pattern = preg_quote($pattern, '#');
-        $pattern = str_replace('\*', '.*', $pattern);
+        // Simple exact match check first
+        if ($path === $pattern) {
+            return true;
+        }
 
-        return preg_match('#^' . $pattern . '#i', $path) === 1;
+        // Handle wildcard pattern
+        if (str_ends_with($pattern, '*')) {
+            $pattern = rtrim($pattern, '*');
+
+            return str_starts_with($path, $pattern);
+        }
+
+        return false;
     }
 }
