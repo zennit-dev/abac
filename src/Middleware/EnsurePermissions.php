@@ -4,6 +4,7 @@ namespace zennit\ABAC\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,8 +35,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws ValidationException If context validation fails
      * @throws InvalidArgumentException If cache operations fail
+     * @throws ValidationException If context validation fails
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -43,6 +44,33 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
         if (!$request->user()) {
             return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
+
+        $currentPath = $request->path();
+        $excludedRoutes = $this->getExcludedRoutes();
+
+        Log::debug('🚀 Request Check:', [
+            'current_path' => $currentPath,
+            'method' => $request->method(),
+            'excluded_routes' => $excludedRoutes,
+        ]);
+
+        // Check each excluded route
+        foreach ($excludedRoutes as $pattern) {
+            $isMatch = $this->matchPath($currentPath, $pattern);
+            Log::debug('🔍 Route Check:', [
+                'pattern' => $pattern,
+                'path' => $currentPath,
+                'is_match' => $isMatch,
+            ]);
+
+            if ($isMatch) {
+                Log::debug('✅ Route excluded, allowing access');
+
+                return $next($request);
+            }
+        }
+
+        Log::debug('❌ Route not excluded, checking permissions');
 
         try {
             $cacheKey = $this->buildCacheKey($request);
@@ -226,34 +254,21 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      */
     private function matchPath(string $path, string $pattern): bool
     {
-        // Normalize slashes and remove trailing slashes
         $path = trim($path, '/');
         $pattern = trim($pattern, '/');
 
-        // If pattern ends with *, remove it temporarily
-        $endsWithWildcard = str_ends_with($pattern, '*');
-        if ($endsWithWildcard) {
-            $pattern = rtrim($pattern, '*');
+        // Direct match check
+        if ($path === $pattern) {
+            return true;
         }
 
-        // Convert pattern to regex
-        $pattern = preg_quote($pattern, '#');
+        // Wildcard check
+        if (str_ends_with($pattern, '*')) {
+            $basePattern = rtrim($pattern, '*');
 
-        // Add the wildcard back if it was present
-        if ($endsWithWildcard) {
-            $pattern .= '.*';
+            return str_starts_with($path, $basePattern);
         }
 
-        $regex = '#^' . $pattern . '#i';
-        $result = preg_match($regex, $path) === 1;
-
-        \Log::debug('Path matching', [
-            'path' => $path,
-            'original_pattern' => $pattern,
-            'regex' => $regex,
-            'result' => $result,
-        ]);
-
-        return $result;
+        return false;
     }
 }

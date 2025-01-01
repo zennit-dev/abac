@@ -75,7 +75,7 @@ class PublishAbacEnvCommand extends Command
         $additions = [];
 
         foreach ($this->envVariables as $key => $value) {
-            if (!preg_match("/^{$key}=/m", $currentEnv)) {
+            if (!preg_match("/^$key=/m", $currentEnv)) {
                 $additions[] = "$key=$value";
             }
         }
