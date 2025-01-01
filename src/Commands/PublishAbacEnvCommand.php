@@ -27,7 +27,7 @@ class PublishAbacEnvCommand extends Command
         'ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD' => 100,
         'ZENNIT_ABAC_EVENTS_ENABLED' => true,
         'ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
-        'ZENNIT_ABAC_SUBJECT_METHOD' => 'user',
+        'ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
     ];
 
     public function handle(): void

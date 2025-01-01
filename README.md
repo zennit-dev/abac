@@ -212,7 +212,7 @@ ZENNIT_ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC ope
 
 # ABAC Model Configuration
 ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
-ZENNIT_ABAC_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
+ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
 ```
 
 ### Full Configuration Options
