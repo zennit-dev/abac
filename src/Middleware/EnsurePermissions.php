@@ -26,7 +26,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
     public function __construct(
         protected ZennitAbacService $abac,
         protected ZennitAbacCacheManager $cacheManager,
-    ) {}
+    ) {
+    }
 
     /**
      * Handle an incoming request.
@@ -194,22 +195,27 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
         $excludedRoutes = $this->getExcludedRoutes();
 
         foreach ($excludedRoutes as $route) {
-            // If route is string, check only path
+            // If route is string, exclude all methods
             if (is_string($route) && $this->matchPath($currentPath, $route)) {
                 return true;
             }
 
             // If route is array with method and path
-            if (is_array($route)
-                && isset($route['path'])
-                && isset($route['method'])
-                && $this->matchPath($currentPath, $route['path'])
-                && (
-                    $route['method'] === '*'
-                    || strtoupper($route['method']) === $currentMethod
-                )
-            ) {
-                return true;
+            if (is_array($route) && isset($route['path'])) {
+                if (!$this->matchPath($currentPath, $route['path'])) {
+                    continue;
+                }
+
+                // If method is not specified or is '*', exclude all methods
+                if (!isset($route['method']) || $route['method'] === '*') {
+                    return true;
+                }
+
+                // Handle both string and array method definitions
+                $methods = (array) $route['method'];
+                if (in_array($currentMethod, array_map('strtoupper', $methods))) {
+                    return true;
+                }
             }
         }
 
@@ -221,8 +227,14 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      */
     private function matchPath(string $path, string $pattern): bool
     {
-        $pattern = str_replace('*', '.*', $pattern);
+        // Remove trailing slash from both path and pattern
+        $path = rtrim($path, '/');
+        $pattern = rtrim($pattern, '/');
 
-        return preg_match('#^' . $pattern . '$#', $path) === 1;
+        // Convert glob pattern to regex, escape forward slashes
+        $pattern = preg_quote($pattern, '#');
+        $pattern = str_replace('\*', '.*', $pattern);
+
+        return preg_match('#^' . $pattern . '#i', $path) === 1;
     }
 }

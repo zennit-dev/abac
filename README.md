@@ -256,23 +256,29 @@ return [
         'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
     'middleware' => [
-        'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),  // defaults to 'user' for backward compatibility
-    ],
-    'excluded_routes' => [
-        // Simple string path
-        'api/v1/current-user',
-        
-        // Or with specific method
-        [
-            'path' => 'api/v1/current-user',
-            'method' => 'GET'
-        ],
-        // You can use wildcards
-        'api/v1/current-user/*',
-        // Or specify multiple methods
-        [
-            'path' => 'api/v1/current-user/profile',
-            'method' => '*'  // Allows all methods
+        'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),
+        'excluded_routes' => [
+            // Simple wildcard pattern - excludes all methods
+            'current-user*',    // Matches current-user, current-user/profile, etc.
+            'stats*',           // Matches stats, stats/daily, etc.
+            
+            // Exclude specific methods for a route pattern
+            [
+                'path' => 'posts*',  // Wildcard support
+                'method' => ['GET', 'POST', 'PUT']  // Array of methods to exclude
+            ],
+            
+            // Exclude all methods for a specific path
+            [
+                'path' => 'blogs*',
+                'method' => '*'
+            ],
+            
+            // Exclude single method
+            [
+                'path' => 'comments*',
+                'method' => 'GET'
+            ]
         ],
     ],
 ];
@@ -474,6 +480,46 @@ Route::middleware(['zennit.abac.permissions'])
         # Protected routes
     });
 ```
+
+### Excluding Routes
+
+You can exclude routes from ABAC checks using the configuration:
+
+```php
+'middleware' => [
+    'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),
+    'excluded_routes' => [
+        // Simple wildcard pattern - excludes all methods
+        'current-user*',    // Matches current-user, current-user/profile, etc.
+        'stats*',           // Matches stats, stats/daily, etc.
+        
+        // Exclude specific methods for a route pattern
+        [
+            'path' => 'cities*',  // Wildcard support
+            'method' => ['GET', 'POST', 'PUT']  // Array of methods to exclude
+        ],
+        
+        // Exclude all methods for a specific path
+        [
+            'path' => 'countries*',
+            'method' => '*'
+        ],
+        
+        // Exclude single method
+        [
+            'path' => 'states*',
+            'method' => 'GET'
+        ]
+    ],
+],
+```
+
+The excluded routes support:
+- Wildcard patterns (`*`) in paths
+- Method-specific exclusions
+- Multiple methods per route
+- Case-insensitive matching
+- Trailing slash handling
 
 ---
 
