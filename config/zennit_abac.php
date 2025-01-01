@@ -36,7 +36,9 @@ return [
         'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
     'middleware' => [
-        'subject_method' => env('ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),  // defaults to 'user' for backward compatibility
-        'excluded_routes' => [], // routes to be excluded from the middleware checks
+        'subject_method' => env('ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
+        'excluded_routes' => [
+            'current-user*',
+        ],
     ],
 ];

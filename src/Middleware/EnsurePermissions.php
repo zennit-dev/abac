@@ -26,8 +26,7 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
     public function __construct(
         protected ZennitAbacService $abac,
         protected ZennitAbacCacheManager $cacheManager,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
@@ -35,8 +34,8 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws InvalidArgumentException If cache operations fail
      * @throws ValidationException If context validation fails
+     * @throws InvalidArgumentException If cache operations fail
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -227,22 +226,34 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
      */
     private function matchPath(string $path, string $pattern): bool
     {
-        // Normalize slashes and remove trailing/leading slashes
+        // Normalize slashes and remove trailing slashes
         $path = trim($path, '/');
         $pattern = trim($pattern, '/');
 
-        // Simple exact match check first
-        if ($path === $pattern) {
-            return true;
-        }
-
-        // Handle wildcard pattern
-        if (str_ends_with($pattern, '*')) {
+        // If pattern ends with *, remove it temporarily
+        $endsWithWildcard = str_ends_with($pattern, '*');
+        if ($endsWithWildcard) {
             $pattern = rtrim($pattern, '*');
-
-            return str_starts_with($path, $pattern);
         }
 
-        return false;
+        // Convert pattern to regex
+        $pattern = preg_quote($pattern, '#');
+
+        // Add the wildcard back if it was present
+        if ($endsWithWildcard) {
+            $pattern .= '.*';
+        }
+
+        $regex = '#^' . $pattern . '#i';
+        $result = preg_match($regex, $path) === 1;
+
+        \Log::debug('Path matching', [
+            'path' => $path,
+            'original_pattern' => $pattern,
+            'regex' => $regex,
+            'result' => $result,
+        ]);
+
+        return $result;
     }
 }
