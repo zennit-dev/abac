@@ -39,12 +39,12 @@ class AbacServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
 
         // Register the facade
-        $this->app->bind('zennit.abac.facade', function ($app) {
+        $this->app->bind('abac.facade', function ($app) {
             return $app->make(AbacService::class);
         });
 
         // Register the cache manager
-        $this->app->bind('zennit.abac.cache', function ($app) {
+        $this->app->bind('abac.cache', function ($app) {
             return $app->make(AbacCacheManager::class);
         });
     }
@@ -69,7 +69,7 @@ class AbacServiceProvider extends ServiceProvider
     {
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $job = $schedule->job(new PolicyCacheJob('warm'))
-                ->name('zennit_abac:warm-cache')
+                ->name('abac:warm-cache')
                 ->withoutOverlapping();
 
             $scheduleType = $this->getCacheWarmingSchedule();

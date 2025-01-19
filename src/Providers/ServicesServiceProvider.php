@@ -32,6 +32,6 @@ class ServicesServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Register the main service with alias
-        $this->app->alias(AbacService::class, 'zennit.abac');
+        $this->app->alias(AbacService::class, 'abac');
     }
 }

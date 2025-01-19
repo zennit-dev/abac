@@ -7,83 +7,83 @@ trait AbacHasConfigurations
     // Cache Configuration
     public function getCacheEnabled(): bool
     {
-        return config('zennit_abac.cache.enabled', true);
+        return config('abac.cache.enabled', true);
     }
 
     public function getCacheStore(): string
     {
-        return config('zennit_abac.cache.store', 'database');
+        return config('abac.cache.store', 'database');
 
     }
 
     public function getCacheTTL(): int
     {
-        return config('zennit_abac.cache.ttl', 3600);
+        return config('abac.cache.ttl', 3600);
     }
 
     public function getCachePrefix(): string
     {
-        return config('zennit_abac.cache.prefix', 'zennit_abac_');
+        return config('abac.cache.prefix', 'abac_');
     }
 
     public function getCacheWarmingEnabled(): bool
     {
-        return config('zennit_abac.cache.warming.enabled', true);
+        return config('abac.cache.warming.enabled', true);
     }
 
     public function getCacheWarmingSchedule(): string
     {
-        return config('zennit_abac.cache.warming.schedule', 'hourly');
+        return config('abac.cache.warming.schedule', 'hourly');
     }
 
     // Evaluation Configuration
     public function getStrictValidation(): bool
     {
-        return config('zennit_abac.evaluation.strict_validation', true);
+        return config('abac.evaluation.strict_validation', true);
     }
 
     // Monitoring Configuration
     public function getLoggingEnabled(): bool
     {
-        return config('zennit_abac.monitoring.logging.enabled', true);
+        return config('abac.monitoring.logging.enabled', true);
     }
 
     public function getLogChannel(): string
     {
-        $channel = config('zennit_abac.monitoring.logging.channel', 'zennit.abac');
+        $channel = config('abac.monitoring.logging.channel', 'abac');
 
         return config("logging.channels.$channel") ? $channel : config('logging.default');
     }
 
     public function getDetailedLogging(): bool
     {
-        return config('zennit_abac.monitoring.logging.detailed', true);
+        return config('abac.monitoring.logging.detailed', true);
     }
 
     public function getPerformanceLoggingEnabled(): bool
     {
-        return config('zennit_abac.monitoring.performance.enabled', true);
+        return config('abac.monitoring.performance.enabled', true);
     }
 
     public function getSlowEvaluationThreshold(): int
     {
-        return config('zennit_abac.monitoring.performance.slow_threshold', 100);
+        return config('abac.monitoring.performance.slow_threshold', 100);
     }
 
     public function getEventsEnabled(): bool
     {
-        return config('zennit_abac.monitoring.events.enabled', true);
+        return config('abac.monitoring.events.enabled', true);
     }
 
     // Operators Configuration
     public function getDisabledOperators(): array
     {
-        return config('zennit_abac.operators.disabled', []);
+        return config('abac.operators.disabled', []);
     }
 
     public function getCustomOperators(): array
     {
-        $operators = config('zennit_abac.operators.custom', []);
+        $operators = config('abac.operators.custom', []);
 
         // Convert to key => class format if not already
         return collect($operators)->mapWithKeys(function ($value, $key) {
@@ -99,17 +99,17 @@ trait AbacHasConfigurations
     // Database Configuration
     public function getUserAttributeSubjectType(): string
     {
-        return config('zennit_abac.database.user_attribute_subject_type', 'users');
+        return config('abac.database.user_attribute_subject_type', 'users');
     }
 
     // Middleware Configuration
     public function getSubjectMethod(): string
     {
-        return config('zennit_abac.middleware.subject_method', 'user');
+        return config('abac.middleware.subject_method', 'user');
     }
 
     public function getExcludedRoutes(): array
     {
-        return config('zennit_abac.middleware.excluded_routes', []);
+        return config('abac.middleware.excluded_routes', []);
     }
 }

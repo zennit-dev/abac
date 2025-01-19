@@ -115,7 +115,7 @@ readonly class EnsurePermissions implements EnsurePermissionsInterface
 
     /**
      * Define the subject for permission checking.
-     * Retrieves the subject from the request using the method configured in zennit_abac.middleware.subject_method.
+     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
      *
      * @param  Request  $request  The incoming HTTP request
      *
