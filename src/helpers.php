@@ -1,17 +1,17 @@
 <?php
 
-use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Services\ZennitAbacService;
+use zennit\ABAC\Services\AbacCacheManager;
+use zennit\ABAC\Services\AbacService;
 
 if (!function_exists('abacPolicy')) {
-    function abacPolicy(): ZennitAbacService
+    function abacPolicy(): AbacService
     {
         return app('zennit.abac.facade');
     }
 }
 
 if (!function_exists('abacCache')) {
-    function abacCache(): ZennitAbacCacheManager
+    function abacCache(): AbacCacheManager
     {
         return app('zennit.abac.cache');
     }

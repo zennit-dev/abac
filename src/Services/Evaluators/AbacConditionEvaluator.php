@@ -7,7 +7,7 @@ use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Models\PolicyCondition;
 use zennit\ABAC\Strategies\OperatorFactory;
 
-readonly class ZennitAbacConditionEvaluator
+readonly class AbacConditionEvaluator
 {
     public function __construct(
         private OperatorFactory $operatorFactory,

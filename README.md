@@ -45,7 +45,7 @@ Add the service provider to your `bootstrap/providers.php`:
 ```php
 return [
     # ... other providers
-    zennit\ABAC\Providers\ZennitAbacServiceProvider::class,
+    zennit\ABAC\Providers\AbacServiceProvider::class,
 ];
 ```
 
@@ -55,7 +55,7 @@ return [
 
 1. Publish configuration and migrations:
    ```bash
-   php artisan zennit_abac:publish
+   php artisan abac:publish
    ```
 
 2. Run migrations:
@@ -123,52 +123,52 @@ The evaluation result is automatically cached using the subject ID, resource, an
 
 ```bash
 # Publish all ABAC files (config, migrations, and env variables)
-php artisan zennit_abac:publish
+php artisan abac:publish
 
 # Individual publishing commands
-php artisan zennit_abac:publish-config    # Publish configuration file only
-php artisan zennit_abac:publish-migration # Publish migration files only
-php artisan zennit_abac:publish-env       # Publish environment variables only
+php artisan abac:publish-config    # Publish configuration file only
+php artisan abac:publish-migration # Publish migration files only
+php artisan abac:publish-env       # Publish environment variables only
 ```
 
 ### Cache Management
 
 ```bash
 # Warm the entire policy cache
-php artisan zennit_abac:cache-warm
+php artisan abac:cache-warm
 
 # Warm cache for specific resource
-php artisan zennit_abac:cache-warm posts
+php artisan abac:cache-warm posts
 
 # Invalidate cache
-php artisan zennit_abac:cache-invalidate
+php artisan abac:cache-invalidate
 
 # Clear cache
-php artisan zennit_abac:cache-clear
+php artisan abac:cache-clear
 ```
 
 ### Environment Setup
 
 ```bash
 # Add required environment variables to .env file
-php artisan zennit_abac:publish-env
+php artisan abac:publish-env
 
 # Available environment variables:
-ZENNIT_ABAC_CACHE_ENABLED=true
-ZENNIT_ABAC_CACHE_STORE='database'
-ZENNIT_ABAC_CACHE_TTL=3600
-ZENNIT_ABAC_CACHE_PREFIX='zennit_abac_'
-ZENNIT_ABAC_CACHE_WARMING_ENABLED=true
-ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=100
-ZENNIT_ABAC_STRICT_VALIDATION=true
-ZENNIT_ABAC_LOGGING_ENABLED=true
-ZENNIT_ABAC_LOG_CHANNEL='zennit.abac'
-ZENNIT_ABAC_DETAILED_LOGGING=false
-ZENNIT_ABAC_PERFORMANCE_LOGGING=true
-ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100
-ZENNIT_ABAC_EVENTS_ENABLED=true
-ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE='users'
-ZENNIT_ABAC_SUBJECT_METHOD='user'
+ABAC_CACHE_ENABLED=true
+ABAC_CACHE_STORE='database'
+ABAC_CACHE_TTL=3600
+ABAC_CACHE_PREFIX='abac_'
+ABAC_CACHE_WARMING_ENABLED=true
+ABAC_CACHE_WARMING_SCHEDULE=100
+ABAC_STRICT_VALIDATION=true
+ABAC_LOGGING_ENABLED=true
+ABAC_LOG_CHANNEL='abac'
+ABAC_DETAILED_LOGGING=false
+ABAC_PERFORMANCE_LOGGING=true
+ABAC_SLOW_EVALUATION_THRESHOLD=100
+ABAC_EVENTS_ENABLED=true
+ABAC_USER_ATTRIBUTE_SUBJECT_TYPE='users'
+ABAC_SUBJECT_METHOD='user'
 ```
 
 ### Force Options
@@ -176,10 +176,10 @@ ZENNIT_ABAC_SUBJECT_METHOD='user'
 All commands support the `--force` option to skip confirmations:
 
 ```bash
-php artisan zennit_abac:publish --force
-php artisan zennit_abac:publish-config --force
-php artisan zennit_abac:publish-migration --force
-php artisan zennit_abac:publish-env --force
+php artisan abac:publish --force
+php artisan abac:publish-config --force
+php artisan abac:publish-migration --force
+php artisan abac:publish-env --force
 ```
 
 ---
@@ -190,29 +190,29 @@ php artisan zennit_abac:publish-env --force
 
 ```bash
 # ABAC Cache Configuration
-ZENNIT_ABAC_CACHE_ENABLED=true # Enables or disables caching in the package.
-ZENNIT_ABAC_CACHE_STORE=${CACHE_STORE} # Defines the cache store to use (e.g., database, file, redis).
-ZENNIT_ABAC_CACHE_TTL=${SESSION_LIFETIME} # Sets the cache time-to-live (TTL) duration in seconds.
-ZENNIT_ABAC_CACHE_PREFIX=zennit_abac_ # Prefix to use for cache keys.
-ZENNIT_ABAC_CACHE_WARMING_ENABLED=true # Toggles automated cache warming functionality.
-ZENNIT_ABAC_CACHE_WARMING_SCHEDULE=hourly # Specifies the cache warming schedule (e.g., hourly, daily).
+ABAC_CACHE_ENABLED=true # Enables or disables caching in the package.
+ABAC_CACHE_STORE=${CACHE_STORE} # Defines the cache store to use (e.g., database, file, redis).
+ABAC_CACHE_TTL=${SESSION_LIFETIME} # Sets the cache time-to-live (TTL) duration in seconds.
+ABAC_CACHE_PREFIX=abac_ # Prefix to use for cache keys.
+ABAC_CACHE_WARMING_ENABLED=true # Toggles automated cache warming functionality.
+ABAC_CACHE_WARMING_SCHEDULE=hourly # Specifies the cache warming schedule (e.g., hourly, daily).
 
 # ABAC Validation Configuration
-ZENNIT_ABAC_STRICT_VALIDATION=true # Enforces strict validation of attributes and access configurations.
+ABAC_STRICT_VALIDATION=true # Enforces strict validation of attributes and access configurations.
 
 # ABAC Logging Configuration
-ZENNIT_ABAC_LOGGING_ENABLED=true # Enables or disables logging of ABAC activities.
-ZENNIT_ABAC_LOG_CHANNEL=${LOG_CHANNEL} # Specifies the logging channel dedicated to ABAC logs.
-ZENNIT_ABAC_DETAILED_LOGGING=false # Enables detailed logging of each access evaluation.
-ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED=true # Toggles logging of access evaluation performance metrics.
-ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD=100 # Threshold (in milliseconds) for slow evaluation logging.
+ABAC_LOGGING_ENABLED=true # Enables or disables logging of ABAC activities.
+ABAC_LOG_CHANNEL=${LOG_CHANNEL} # Specifies the logging channel dedicated to ABAC logs.
+ABAC_DETAILED_LOGGING=false # Enables detailed logging of each access evaluation.
+ABAC_PERFORMANCE_LOGGING_ENABLED=true # Toggles logging of access evaluation performance metrics.
+ABAC_SLOW_EVALUATION_THRESHOLD=100 # Threshold (in milliseconds) for slow evaluation logging.
 
 # ABAC Events Configuration
-ZENNIT_ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC operations.
+ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC operations.
 
 # ABAC Model Configuration
-ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
-ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
+ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
+ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
 ```
 
 ### Full Configuration Options
@@ -222,30 +222,30 @@ ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middle
 
 return [
     'cache' => [
-        'enabled' => env('ZENNIT_ABAC_CACHE_ENABLED', true),
-        'store' => env('ZENNIT_ABAC_CACHE_STORE', 'database'),
-        'ttl' => env('ZENNIT_ABAC_CACHE_TTL', 3600),
-        'prefix' => env('ZENNIT_ABAC_CACHE_PREFIX', 'zennit_abac_'),
+        'enabled' => env('ABAC_CACHE_ENABLED', true),
+        'store' => env('ABAC_CACHE_STORE', 'database'),
+        'ttl' => env('ABAC_CACHE_TTL', 3600),
+        'prefix' => env('ABAC_CACHE_PREFIX', 'abac_'),
         'warming' => [
-            'enabled' => env('ZENNIT_ABAC_CACHE_WARMING_ENABLED', true),
-            'schedule' => env('ZENNIT_ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
+            'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
+            'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
         ],
     ],
     'evaluation' => [
-        'strict_validation' => env('ZENNIT_ABAC_STRICT_VALIDATION', true),
+        'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
     ],
     'monitoring' => [
         'logging' => [
-            'enabled' => env('ZENNIT_ABAC_LOGGING_ENABLED', true),
-            'channel' => env('ZENNIT_ABAC_LOG_CHANNEL', 'zennit.abac'),
-            'detailed' => env('ZENNIT_ABAC_DETAILED_LOGGING', false),
+            'enabled' => env('ABAC_LOGGING_ENABLED', true),
+            'channel' => env('ABAC_LOG_CHANNEL', 'abac'),
+            'detailed' => env('ABAC_DETAILED_LOGGING', false),
         ],
         'performance' => [
-            'enabled' => env('ZENNIT_ABAC_PERFORMANCE_LOGGING_ENABLED', true),
-            'slow_threshold' => env('ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD', 100),
+            'enabled' => env('ABAC_PERFORMANCE_LOGGING_ENABLED', true),
+            'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', 100),
         ],
         'events' => [
-            'enabled' => env('ZENNIT_ABAC_EVENTS_ENABLED', true),
+            'enabled' => env('ABAC_EVENTS_ENABLED', true),
         ],
     ],
     'operators' => [
@@ -253,10 +253,10 @@ return [
         'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
     'database' => [
-        'user_attribute_subject_type' => env('ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
+        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
     'middleware' => [
-        'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),
+        'subject_method' => env('ABAC_SUBJECT_METHOD', 'user'),
         'excluded_routes' => [
             // Simple wildcard pattern - excludes all methods
             'current-user*',    // Matches current-user, current-user/profile, etc.
@@ -475,7 +475,7 @@ Protect your routes with ABAC middleware:
 
 ```php
 # In RouteServiceProvider
-Route::middleware(['zennit.abac.permissions'])
+Route::middleware(['abac.permissions'])
     ->group(function () {
         # Protected routes
     });
@@ -487,7 +487,7 @@ You can exclude routes from ABAC checks using the configuration:
 
 ```php
 'middleware' => [
-    'subject_method' => env('ZENNIT_ABAC_SUBJECT_METHOD', 'user'),
+    'subject_method' => env('ABAC_SUBJECT_METHOD', 'user'),
     'excluded_routes' => [
         // Simple wildcard pattern - excludes all methods
         'current-user*',    // Matches current-user, current-user/profile, etc.
@@ -515,6 +515,7 @@ You can exclude routes from ABAC checks using the configuration:
 ```
 
 The excluded routes support:
+
 - Wildcard patterns (`*`) in paths
 - Method-specific exclusions
 - Multiple methods per route

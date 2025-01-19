@@ -19,33 +19,33 @@ use zennit\ABAC\Observers\PolicyConditionObserver;
 use zennit\ABAC\Observers\PolicyObserver;
 use zennit\ABAC\Observers\ResourceAttributeObserver;
 use zennit\ABAC\Observers\UserAttributeObserver;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Services\ZennitAbacService;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Services\AbacCacheManager;
+use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
-class ZennitAbacServiceProvider extends ServiceProvider
+class AbacServiceProvider extends ServiceProvider
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     /**
      * Register services and dependencies.
      */
     public function register(): void
     {
-        $this->app->register(ZennitConfigurationServiceProvider::class);
-        $this->app->register(ZennitServicesServiceProvider::class);
-        $this->app->register(ZennitMiddlewareServiceProvider::class);
-        $this->app->register(ZennitCommandServiceProvider::class);
-        $this->app->register(ZennitEventServiceProvider::class);
+        $this->app->register(ConfigurationServiceProvider::class);
+        $this->app->register(ServicesServiceProvider::class);
+        $this->app->register(MiddlewareServiceProvider::class);
+        $this->app->register(CommandServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
 
         // Register the facade
         $this->app->bind('zennit.abac.facade', function ($app) {
-            return $app->make(ZennitAbacService::class);
+            return $app->make(AbacService::class);
         });
 
         // Register the cache manager
         $this->app->bind('zennit.abac.cache', function ($app) {
-            return $app->make(ZennitAbacCacheManager::class);
+            return $app->make(AbacCacheManager::class);
         });
     }
 

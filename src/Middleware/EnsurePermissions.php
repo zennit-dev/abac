@@ -9,9 +9,9 @@ use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Exceptions\ValidationException;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Services\ZennitAbacService;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Services\AbacCacheManager;
+use zennit\ABAC\Services\AbacService;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 /**
  * Class EnsurePermissions
@@ -21,11 +21,11 @@ use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
  */
 readonly class EnsurePermissions implements EnsurePermissionsInterface
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     public function __construct(
-        protected ZennitAbacService $abac,
-        protected ZennitAbacCacheManager $cacheManager,
+        protected AbacService      $abac,
+        protected AbacCacheManager $cacheManager,
     ) {
     }
 

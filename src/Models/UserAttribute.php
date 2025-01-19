@@ -4,11 +4,11 @@ namespace zennit\ABAC\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 class UserAttribute extends Model
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     protected $fillable = [
         'subject_type',

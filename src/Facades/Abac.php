@@ -20,12 +20,12 @@ use zennit\ABAC\Exceptions\ValidationException;
  * @throws ValidationException If the access context is invalid
  * @throws InvalidArgumentException If cache operations fail
  *
- * @see \zennit\ABAC\Services\ZennitAbacService
+ * @see \zennit\ABAC\Services\AbacService
  */
 class Abac extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'zennit.abac.facade';
+        return 'abac.facade';
     }
 }

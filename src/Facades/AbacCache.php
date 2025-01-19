@@ -5,7 +5,7 @@ namespace zennit\ABAC\Facades;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Psr\SimpleCache\InvalidArgumentException;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
+use zennit\ABAC\Services\AbacCacheManager;
 
 /**
  * Facade for interacting with the ABAC caching system.
@@ -23,12 +23,12 @@ use zennit\ABAC\Services\ZennitAbacCacheManager;
  *
  * @throws InvalidArgumentException When cache operations fail
  *
- * @see ZennitAbacCacheManager
+ * @see AbacCacheManager
  */
 class AbacCache extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return 'zennit.abac.cache';
+        return 'abac.cache';
     }
 }

@@ -11,7 +11,7 @@ use Throwable;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
+use zennit\ABAC\Services\AbacCacheManager;
 
 class DatabaseSeeder extends Seeder
 {
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->command->info('Warming ABAC cache...');
 
-        $cacheManager = app(ZennitAbacCacheManager::class);
+        $cacheManager = app(AbacCacheManager::class);
 
         // Cache policies and their relationships
         $cacheManager->warmPolicies(Policy::all());

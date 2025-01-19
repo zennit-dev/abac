@@ -7,20 +7,20 @@ use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Logging\AuditLogger;
-use zennit\ABAC\Services\Evaluators\ZennitAbacPolicyEvaluator;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Services\Evaluators\AbacPolicyEvaluator;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 use zennit\ABAC\Validators\AccessContextValidator;
 
-readonly class ZennitAbacService
+readonly class AbacService
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     public function __construct(
-        private ZennitAbacCacheManager $cache,
-        private ZennitAbacAttributeLoader $attributeLoader,
-        private ZennitAbacPolicyEvaluator $evaluator,
-        private AuditLogger $logger,
-        private ZennitAbacPerformanceMonitor $monitor
+        private AbacCacheManager       $cache,
+        private AbacAttributeLoader    $attributeLoader,
+        private AbacPolicyEvaluator    $evaluator,
+        private AuditLogger            $logger,
+        private AbacPerformanceMonitor $monitor
     ) {
     }
 

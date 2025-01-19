@@ -11,13 +11,13 @@ use Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Repositories\PolicyRepository;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Services\AbacCacheManager;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 class PolicyCacheJob implements ShouldQueue
 {
     use Dispatchable;
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
@@ -32,12 +32,12 @@ class PolicyCacheJob implements ShouldQueue
      * Execute the cache management job.
      * Handles both cache warming and invalidation operations.
      *
-     * @param ZennitAbacCacheManager $cache The cache manager service
+     * @param AbacCacheManager $cache The cache manager service
      * @param PolicyRepository $repository The policy repository
      *
      * @throws InvalidArgumentException If cache operations fail
      */
-    public function handle(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
+    public function handle(AbacCacheManager $cache, PolicyRepository $repository): void
     {
         if (!$this->getCacheEnabled() || !$this->getCacheWarmingEnabled()) {
             return;
@@ -73,12 +73,12 @@ class PolicyCacheJob implements ShouldQueue
      * Warm the cache with policies.
      * Loads and caches policies either for a specific resource or all resources.
      *
-     * @param ZennitAbacCacheManager $cache The cache manager service
+     * @param AbacCacheManager $cache The cache manager service
      * @param PolicyRepository $repository The policy repository
      *
      * @throws InvalidArgumentException If cache operations fail
      */
-    private function warmCache(ZennitAbacCacheManager $cache, PolicyRepository $repository): void
+    private function warmCache(AbacCacheManager $cache, PolicyRepository $repository): void
     {
         $policies = $this->resource
             ? $repository->getPoliciesForResourceGrouped($this->resource)

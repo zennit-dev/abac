@@ -14,11 +14,11 @@ use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\ResourceAttribute;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
-readonly class ZennitAbacCacheManager
+readonly class AbacCacheManager
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     private Repository $cache;
 

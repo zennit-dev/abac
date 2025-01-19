@@ -5,11 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 return new class () extends Migration
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     public function up(): void
     {

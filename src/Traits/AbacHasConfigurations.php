@@ -2,7 +2,7 @@
 
 namespace zennit\ABAC\Traits;
 
-trait ZennitAbacHasConfigurations
+trait AbacHasConfigurations
 {
     // Cache Configuration
     public function getCacheEnabled(): bool

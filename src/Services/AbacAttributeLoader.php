@@ -7,14 +7,14 @@ use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
-readonly class ZennitAbacAttributeLoader
+readonly class AbacAttributeLoader
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     public function __construct(
-        private ZennitAbacCacheManager $cache,
+        private AbacCacheManager $cache,
     ) {
     }
 

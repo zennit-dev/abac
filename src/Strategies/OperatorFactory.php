@@ -22,11 +22,11 @@ use zennit\ABAC\Strategies\Operators\String\NotContainsOperator;
 use zennit\ABAC\Strategies\Operators\String\NotEndsWithOperator;
 use zennit\ABAC\Strategies\Operators\String\NotStartsWithOperator;
 use zennit\ABAC\Strategies\Operators\String\StartsWithOperator;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 class OperatorFactory
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     private array $operators;
 

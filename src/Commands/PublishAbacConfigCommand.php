@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 
 class PublishAbacConfigCommand extends Command
 {
-    protected $signature = 'zennit_abac:publish-config {--force : Force the operation to run without confirmation}';
+    protected $signature = 'abac:publish-config {--force : Force the operation to run without confirmation}';
 
     protected $description = 'Publish ABAC configuration file';
 
@@ -28,7 +28,7 @@ class PublishAbacConfigCommand extends Command
             return true;
         }
 
-        if (File::exists(config_path('zennit_abac.php'))) {
+        if (File::exists(config_path('abac.php'))) {
             return $this->confirm('Config file already exists. Do you want to overwrite it?');
         }
 

@@ -4,11 +4,11 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class ZennitConfigurationServiceProvider extends ServiceProvider
+class ConfigurationServiceProvider extends ServiceProvider
 {
-    public const CONFIG_PATH = __DIR__ . '/../../config/zennit_abac.php';
+    public const CONFIG_PATH = __DIR__ . '/../../config/abac.php';
 
-    public const CONFIG_KEY = 'zennit_abac';
+    public const CONFIG_KEY = 'abac';
 
     public function register(): void
     {
@@ -19,7 +19,7 @@ class ZennitConfigurationServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                self::CONFIG_PATH => config_path('zennit_abac.php'),
+                self::CONFIG_PATH => config_path('abac.php'),
             ], 'zennit-abac-config');
         }
     }

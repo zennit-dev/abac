@@ -7,15 +7,15 @@ use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Models\PolicyCollection;
 use zennit\ABAC\Models\PolicyCondition;
 use zennit\ABAC\Strategies\OperatorFactory;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
-readonly class ZennitAbacCollectionEvaluator
+readonly class AbacCollectionEvaluator
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     public function __construct(
-        private OperatorFactory $operatorFactory,
-        private ZennitAbacConditionEvaluator $conditionEvaluator,
+        private OperatorFactory        $operatorFactory,
+        private AbacConditionEvaluator $conditionEvaluator,
     ) {
     }
 

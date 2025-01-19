@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
+use zennit\ABAC\Services\AbacCacheManager;
 
 readonly class PolicyRepository
 {
     public function __construct(
         protected CacheRepository $cache,
-        protected ZennitAbacCacheManager $cacheManager
+        protected AbacCacheManager $cacheManager
     ) {
     }
 

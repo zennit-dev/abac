@@ -3,11 +3,11 @@
 namespace zennit\ABAC\Services;
 
 use Illuminate\Support\Facades\Log;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
-readonly class ZennitAbacPerformanceMonitor
+readonly class AbacPerformanceMonitor
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     private array $timers;
 

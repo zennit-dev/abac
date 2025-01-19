@@ -8,26 +8,26 @@ use Illuminate\Support\Facades\File;
 
 class PublishAbacEnvCommand extends Command
 {
-    protected $signature = 'zennit_abac:publish-env {--force : Force the operation to run without confirmation}';
+    protected $signature = 'abac:publish-env {--force : Force the operation to run without confirmation}';
 
     protected $description = 'Publish ABAC environment variables';
 
     private array $envVariables = [
-        'ZENNIT_ABAC_CACHE_ENABLED' => true,
-        'ZENNIT_ABAC_CACHE_STORE' => 'database',
-        'ZENNIT_ABAC_CACHE_TTL' => 3600,
-        'ZENNIT_ABAC_CACHE_PREFIX' => 'zennit_abac_',
-        'ZENNIT_ABAC_CACHE_WARMING_ENABLED' => true,
-        'ZENNIT_ABAC_CACHE_WARMING_SCHEDULE' => 100,
-        'ZENNIT_ABAC_STRICT_VALIDATION' => true,
-        'ZENNIT_ABAC_LOGGING_ENABLED' => true,
-        'ZENNIT_ABAC_LOG_CHANNEL' => 'zennit.abac',
-        'ZENNIT_ABAC_DETAILED_LOGGING' => false,
-        'ZENNIT_ABAC_PERFORMANCE_LOGGING' => true,
-        'ZENNIT_ABAC_SLOW_EVALUATION_THRESHOLD' => 100,
-        'ZENNIT_ABAC_EVENTS_ENABLED' => true,
-        'ZENNIT_ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
-        'ZENNIT_ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
+        'ABAC_CACHE_ENABLED' => true,
+        'ABAC_CACHE_STORE' => 'database',
+        'ABAC_CACHE_TTL' => 3600,
+        'ABAC_CACHE_PREFIX' => 'abac_',
+        'ABAC_CACHE_WARMING_ENABLED' => true,
+        'ABAC_CACHE_WARMING_SCHEDULE' => 100,
+        'ABAC_STRICT_VALIDATION' => true,
+        'ABAC_LOGGING_ENABLED' => true,
+        'ABAC_LOG_CHANNEL' => 'abac',
+        'ABAC_DETAILED_LOGGING' => false,
+        'ABAC_PERFORMANCE_LOGGING' => true,
+        'ABAC_SLOW_EVALUATION_THRESHOLD' => 100,
+        'ABAC_EVENTS_ENABLED' => true,
+        'ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
+        'ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
     ];
 
     public function handle(): void

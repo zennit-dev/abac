@@ -48,10 +48,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "zennit\\ABAC\\Providers\\ZennitAbacServiceProvider"
+                "AbacServiceProvider"
             ],
             "config": {
-                "zennit_abac": "config/zennit_abac.php"
+                "zennit_abac": "config/abac.php"
             },
             "aliases": {
                 "Abac": "zennit\\ABAC\\Facades\\Abac"

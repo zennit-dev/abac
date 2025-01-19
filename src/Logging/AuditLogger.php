@@ -5,11 +5,11 @@ namespace zennit\ABAC\Logging;
 use Illuminate\Support\Facades\Log;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\EvaluationResult;
-use zennit\ABAC\Traits\ZennitAbacHasConfigurations;
+use zennit\ABAC\Traits\AbacHasConfigurations;
 
 readonly class AuditLogger
 {
-    use ZennitAbacHasConfigurations;
+    use AbacHasConfigurations;
 
     /**
      * Log an access attempt with detailed context.

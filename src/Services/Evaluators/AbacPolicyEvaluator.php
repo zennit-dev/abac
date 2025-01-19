@@ -10,14 +10,14 @@ use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\PolicyCollection;
 use zennit\ABAC\Repositories\PolicyRepository;
-use zennit\ABAC\Services\ZennitAbacCacheManager;
+use zennit\ABAC\Services\AbacCacheManager;
 
-readonly class ZennitAbacPolicyEvaluator
+readonly class AbacPolicyEvaluator
 {
     public function __construct(
-        private PolicyRepository $policyRepository,
-        private ZennitAbacCacheManager $cache,
-        private ZennitAbacCollectionEvaluator $collectionEvaluator
+        private PolicyRepository              $policyRepository,
+        private AbacCacheManager              $cache,
+        private AbacCollectionEvaluator $collectionEvaluator
     ) {
     }
 

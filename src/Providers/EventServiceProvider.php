@@ -6,7 +6,7 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Listeners\CacheWarmingCompletedListener;
 
-class ZennitEventServiceProvider extends ServiceProvider
+class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
         CacheWarmed::class => [
