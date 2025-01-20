@@ -1,6 +1,18 @@
 <?php
 
 return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Cache Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for the ABAC cache, including whether
+    | caching is enabled, the cache store to use, the time-to-live (TTL) for
+    | cache entries, and cache warming options.
+    |
+    */
+
     'cache' => [
         'enabled' => env('ABAC_CACHE_ENABLED', true),
         'store' => env('ABAC_CACHE_STORE', 'database'),
@@ -11,9 +23,31 @@ return [
             'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Evaluation Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for ABAC evaluation, including whether
+    | strict validation is enabled.
+    |
+    */
+
     'evaluation' => [
         'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Monitoring Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for ABAC monitoring, including logging
+    | options, performance monitoring, and event handling.
+    |
+    */
+
     'monitoring' => [
         'logging' => [
             'enabled' => env('ABAC_LOGGING_ENABLED', true),
@@ -28,15 +62,49 @@ return [
             'enabled' => env('ABAC_EVENTS_ENABLED', true),
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Operators Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for ABAC operators, including any
+    | disabled or custom operators.
+    |
+    */
+
     'operators' => [
         'disabled' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
         'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Database Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for the ABAC database, including the
+    | user attribute subject type.
+    |
+    */
+
     'database' => [
         'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Middleware Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for ABAC middleware, including the
+    | method to retrieve the subject and any excluded routes.
+    |
+    */
+
     'middleware' => [
         'subject_method' => env('ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
         'excluded_routes' => [],
     ],
+
 ];
