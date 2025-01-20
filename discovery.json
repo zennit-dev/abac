@@ -1,7 +1,7 @@
 {
     "laravel": {
         "providers": [
-            "zennit\\ABAC\\Providers\\ZennitAbacServiceProvider"
+            "zennit\\ABAC\\Providers\\AbacServiceProvider"
         ],
         "aliases": {
             "Abac": "zennit\\ABAC\\Facades\\Abac"
