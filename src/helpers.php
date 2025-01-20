@@ -1,18 +1,11 @@
 <?php
 
-use zennit\ABAC\Services\AbacCacheManager;
+use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\Services\AbacService;
 
 if (!function_exists('abacPolicy')) {
     function abacPolicy(): AbacService
     {
-        return app('abac.facade');
-    }
-}
-
-if (!function_exists('abacCache')) {
-    function abacCache(): AbacCacheManager
-    {
-        return app('abac.cache');
+        return app(AbacManager::class);
     }
 }

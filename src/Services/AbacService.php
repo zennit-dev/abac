@@ -3,6 +3,7 @@
 namespace zennit\ABAC\Services;
 
 use Psr\SimpleCache\InvalidArgumentException;
+use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Exceptions\ValidationException;
@@ -11,23 +12,22 @@ use zennit\ABAC\Services\Evaluators\AbacPolicyEvaluator;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 use zennit\ABAC\Validators\AccessContextValidator;
 
-readonly class AbacService
+readonly class AbacService implements AbacManager
 {
     use AbacHasConfigurations;
 
     public function __construct(
-        private AbacCacheManager       $cache,
-        private AbacAttributeLoader    $attributeLoader,
-        private AbacPolicyEvaluator    $evaluator,
-        private AuditLogger            $logger,
+        private AbacCacheManager $cache,
+        private AbacAttributeLoader $attributeLoader,
+        private AbacPolicyEvaluator $evaluator,
+        private AuditLogger $logger,
         private AbacPerformanceMonitor $monitor
-    ) {
-    }
+    ) {}
 
     /**
      * Check if a subject has permission to perform an operation on a resource.
      *
-     * @param AccessContext $context The access context containing subject, resource, and operation
+     * @param  AccessContext  $context  The access context containing subject, resource, and operation
      *
      * @throws ValidationException If the context is invalid
      * @throws InvalidArgumentException If cache operations fail
@@ -41,7 +41,7 @@ readonly class AbacService
     /**
      * Evaluate an access request and return detailed results.
      *
-     * @param AccessContext $context The access context to evaluate
+     * @param  AccessContext  $context  The access context to evaluate
      *
      * @throws ValidationException If the context is invalid
      * @throws InvalidArgumentException If cache operations fail
@@ -68,7 +68,7 @@ readonly class AbacService
     /**
      * Perform the actual access evaluation logic.
      *
-     * @param AccessContext $context The access context to evaluate
+     * @param  AccessContext  $context  The access context to evaluate
      *
      * @throws ValidationException If the context is invalid
      * @throws InvalidArgumentException If cache operations fail
@@ -88,7 +88,7 @@ readonly class AbacService
     /**
      * Validate the access context.
      *
-     * @param AccessContext $context The context to validate
+     * @param  AccessContext  $context  The context to validate
      *
      * @throws ValidationException If the context is invalid
      */
