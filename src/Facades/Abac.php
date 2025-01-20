@@ -6,6 +6,8 @@ use BadMethodCallException;
 use Illuminate\Support\Facades\Facade;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
+use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Exceptions\ValidationException;
 
 /**
@@ -13,6 +15,9 @@ use zennit\ABAC\Exceptions\ValidationException;
  *
  * Provides methods for evaluating access permissions based on
  * subject attributes, resource attributes, and operations.
+ *
+ * @method static bool can(AccessContext $context)
+ * @method static EvaluationResult evaluate(AccessContext $context)
  *
  * @throws ValidationException If the access context is invalid
  * @throws InvalidArgumentException If cache operations fail
