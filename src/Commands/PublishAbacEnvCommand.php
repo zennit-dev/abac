@@ -28,6 +28,7 @@ class PublishAbacEnvCommand extends Command
         'ABAC_EVENTS_ENABLED' => true,
         'ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
         'ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
+        'ABAC_ROUTE_PREFIX' => 'abac',
     ];
 
     public function handle(): void

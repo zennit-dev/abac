@@ -22,8 +22,8 @@ class PermissionSeeder extends Seeder
                 'resource_attributes',
                 'user_attributes',
                 'policy_collections',
-                'policy_conditions',
-                'policy_conditions_attributes',
+                'condition_attributes',
+                'condition_attributes_attributes',
             ],
             'operation' => PermissionOperations::values(),
         ];

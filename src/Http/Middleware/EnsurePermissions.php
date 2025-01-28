@@ -1,6 +1,6 @@
 <?php
 
-namespace zennit\ABAC\Middleware;
+namespace zennit\ABAC\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
@@ -19,12 +19,12 @@ use zennit\ABAC\Traits\AbacHasConfigurations;
  * Middleware implementation for ABAC permission checking.
  * Validates user access to resources based on configured policies and subjects.
  */
-readonly class EnsurePermissions implements EnsurePermissionsInterface
+readonly class EnsurePermissions
 {
     use AbacHasConfigurations;
 
     public function __construct(
-        protected AbacService      $abac,
+        protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
     ) {
     }

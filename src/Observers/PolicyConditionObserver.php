@@ -3,39 +3,39 @@
 namespace zennit\ABAC\Observers;
 
 use zennit\ABAC\Jobs\PolicyCacheJob;
-use zennit\ABAC\Models\PolicyCondition;
+use zennit\ABAC\Models\CollectionCondition;
 
 class PolicyConditionObserver
 {
     /**
-     * Handle the PolicyCondition "created" event.
+     * Handle the CollectionCondition "created" event.
      * Invalidates and rewarms cache when a new condition is created.
      *
-     * @param PolicyCondition $condition The created condition
+     * @param CollectionCondition $condition The created condition
      */
-    public function created(PolicyCondition $condition): void
+    public function created(CollectionCondition $condition): void
     {
         $this->invalidateCache($condition);
     }
 
     /**
-     * Handle the PolicyCondition "updated" event.
+     * Handle the CollectionCondition "updated" event.
      * Invalidates and rewarms cache when a condition is updated.
      *
-     * @param PolicyCondition $condition The updated condition
+     * @param CollectionCondition $condition The updated condition
      */
-    public function updated(PolicyCondition $condition): void
+    public function updated(CollectionCondition $condition): void
     {
         $this->invalidateCache($condition);
     }
 
     /**
-     * Handle the PolicyCondition "deleted" event.
+     * Handle the CollectionCondition "deleted" event.
      * Invalidates and rewarms cache when a condition is deleted.
      *
-     * @param PolicyCondition $condition The deleted condition
+     * @param CollectionCondition $condition The deleted condition
      */
-    public function deleted(PolicyCondition $condition): void
+    public function deleted(CollectionCondition $condition): void
     {
         $this->invalidateCache($condition);
     }
@@ -43,9 +43,9 @@ class PolicyConditionObserver
     /**
      * Invalidate cache for the affected resource and schedule rewarming.
      *
-     * @param PolicyCondition $condition The condition that triggered the cache invalidation
+     * @param CollectionCondition $condition The condition that triggered the cache invalidation
      */
-    private function invalidateCache(PolicyCondition $condition): void
+    private function invalidateCache(CollectionCondition $condition): void
     {
         $resource = $condition->collection->policy->permission->resource;
         PolicyCacheJob::dispatch('invalidate', $resource);

@@ -22,7 +22,8 @@ readonly class AbacService implements AbacManager
         private AbacPolicyEvaluator $evaluator,
         private AuditLogger $logger,
         private AbacPerformanceMonitor $monitor
-    ) {}
+    ) {
+    }
 
     /**
      * Check if a subject has permission to perform an operation on a resource.

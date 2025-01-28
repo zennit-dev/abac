@@ -10,17 +10,18 @@ A flexible and powerful ABAC implementation for Laravel applications.
 2. [Installation](#installation)
 3. [Quick Start](#quick-start)
 4. [Basic Usage](#basic-usage)
-5. [Commands](#commands)
-6. [Configuration](#configuration)
-7. [Operators](#operators)
-8. [Middleware](#middleware)
-9. [Events](#events)
-10. [Advanced Usage](#advanced-usage)
-11. [Caching](#caching)
-12. [Requirements](#requirements)
-13. [Contributing](#contributing)
-14. [Security](#security)
-15. [License](#license)
+5. [API Routes](#api-routes)
+6. [Commands](#commands)
+7. [Configuration](#configuration)
+8. [Operators](#operators)
+9. [Middleware](#middleware)
+10. [Events](#events)
+11. [Advanced Usage](#advanced-usage)
+12. [Caching](#caching)
+13. [Requirements](#requirements)
+14. [Contributing](#contributing)
+15. [Security](#security)
+16. [License](#license)
 
 ---
 
@@ -117,6 +118,107 @@ The evaluation result is automatically cached using the subject ID, resource, an
 
 ---
 
+## API Routes
+
+The following API routes are available for managing ABAC-related data. These routes are protected by the `abac`
+middleware and can be prefixed using the `ABAC_ROUTE_PREFIX` environment variable:
+
+### User Attributes
+
+- **Endpoint**: `/{prefix}/user-attributes`
+- **Request Body**:
+  ```json
+  {
+    "subject_type": "string",
+    "subject_id": "string"
+  }
+  ```
+
+### Resource Attributes
+
+- **Endpoint**: `/{prefix}/resource-attributes`
+- **Request Body**:
+  ```json
+  {
+    "resource": "string",
+    "attribute_name": "string",
+    "attribute_value": "string"
+  }
+  ```
+
+### Permissions
+
+- **Endpoint**: `/{prefix}/permissions`
+- **Request Body**:
+  ```json
+  {
+    "resource": "string",
+    "operation": "string",
+    "policies": "array"
+  }
+  ```
+- `policies` is required only if query parameter `chain` is set to `true`
+- **Optional Query Parameter**: `chain`
+
+### Policies
+
+- **Endpoint**: `/{prefix}/permissions/{permission}/policies`
+- **Request Body**:
+  ```json
+  {
+    "name": "string",
+    "permission_id": "integer",
+    "policy_collection": "array"
+  }
+  ```
+
+- `policy_collection` is required only if query parameter `chain` is set to `true`
+- **Optional Query Parameter**: `chain`
+
+### Policy Collections
+
+- **Endpoint**: `/{prefix}/permissions/{permission}/policies/{policy}/collections`
+- **Request Body**:
+  ```json
+  {
+    "operator": "string",
+    "policy_id": "integer",
+    "collection_conditions": "array"
+  }
+  ```
+- `collection_conditions` is required only if query parameter `chain` is set to `true`
+- **Optional Query Parameter**: `chain`
+
+### Collection Conditions
+
+- **Endpoint**: `/{prefix}/permissions/{permission}/policies/{policy}/collections/{collection}/conditions`
+- **Request Body**:
+  ```json
+  {
+    "operator": "string",
+    "policy_collection_id": "integer",
+    "condition_attributes": "array"
+  }
+  ```
+- `condition_attributes` is required only if query parameter `chain` is set to `true`
+- **Optional Query Parameter**: `chain`
+
+### Condition Attributes
+
+- **Endpoint**:
+  `/{prefix}/permissions/{permission}/policies/{policy}/collections/{collection}/conditions/{condition}/attributes`
+- **Request Body**:
+  ```json
+  {
+    "condition_attribute_id": "integer",
+    "operator": "string",
+    "attribute_name": "string",
+    "attribute_value": "string"
+  }
+  ```
+
+---
+
 ## Commands
 
 ### Publishing Commands
@@ -169,6 +271,7 @@ ABAC_SLOW_EVALUATION_THRESHOLD=100
 ABAC_EVENTS_ENABLED=true
 ABAC_USER_ATTRIBUTE_SUBJECT_TYPE='users'
 ABAC_SUBJECT_METHOD='user'
+ABAC_ROUTE_PREFIX='abac' # New environment variable for route prefix
 ```
 
 ### Force Options
@@ -213,6 +316,9 @@ ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC operations
 # ABAC Model Configuration
 ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
 ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
+
+# ABAC Route Configuration
+ABAC_ROUTE_PREFIX=abac # Sets the prefix for the package's API routes.
 ```
 
 ### Full Configuration Options
@@ -281,6 +387,10 @@ return [
             ]
         ],
     ],
+    'routes' => [
+        'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
+        'middleware' => ['abac'],
+    ],
 ];
 ```
 
@@ -316,7 +426,7 @@ The package creates the following tables:
 ### Policy Condition Attributes
 
 - `id` - Primary key
-- `policy_condition_id` - Foreign key to policy_conditions table
+- `condition_attribute_id` - Foreign key to condition_attributes table
 - `operator` - Comparison operator
 - `attribute_name` - Name of the attribute to compare
 - `attribute_value` - Value to compare against
@@ -381,38 +491,38 @@ $collection = PolicyCollection::create([
 
 # Relationships
 $collection->policy();     # BelongsTo Policy
-$collection->conditions(); # HasMany PolicyCondition
+$collection->conditions(); # HasMany CollectionCondition
 ```
 
 ### PolicyCondition
 
 ```php
-use zennit\ABAC\Models\PolicyCondition;
+use zennit\ABAC\Models\CollectionCondition;
 
-$condition = PolicyCondition::create([
+$condition = CollectionCondition::create([
     'operator' => 'AND',
     'policy_collection_id' => $collectionId
 ]);
 
 # Relationships
 $condition->collection(); # BelongsTo PolicyCollection
-$condition->attributes(); # HasMany PolicyConditionAttribute
+$condition->attributes(); # HasMany ConditionAttribute
 ```
 
 ### PolicyConditionAttribute
 
 ```php
-use zennit\ABAC\Models\PolicyConditionAttribute;
+use zennit\ABAC\Models\ConditionAttribute;
 
-$attribute = PolicyConditionAttribute::create([
-    'policy_condition_id' => $conditionId,
+$attribute = ConditionAttribute::create([
+    'condition_attribute_id' => $conditionId,
     'attribute_name' => 'owner_id',
     'attribute_value' => '$subject.id',
     'operator' => 'EQUALS'
 ]);
 
 # Relationships
-$attribute->condition(); # BelongsTo PolicyCondition
+$attribute->condition(); # BelongsTo CollectionCondition
 ```
 
 ### ResourceAttribute
@@ -475,7 +585,7 @@ Protect your routes with ABAC middleware:
 
 ```php
 # In RouteServiceProvider
-Route::middleware(['abac.permissions'])
+Route::middleware(['abac'])
     ->group(function () {
         # Protected routes
     });

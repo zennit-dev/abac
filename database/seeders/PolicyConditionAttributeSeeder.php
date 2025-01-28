@@ -5,10 +5,10 @@ namespace zennit\ABAC\Database\Seeders;
 use Illuminate\Database\Seeder;
 use zennit\ABAC\Enums\Operators\ArithmeticOperators;
 use zennit\ABAC\Enums\Operators\ListOperators;
+use zennit\ABAC\Models\CollectionCondition;
+use zennit\ABAC\Models\ConditionAttribute;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\PolicyCollection;
-use zennit\ABAC\Models\PolicyCondition;
-use zennit\ABAC\Models\PolicyConditionAttribute;
 
 class PolicyConditionAttributeSeeder extends Seeder
 {
@@ -50,15 +50,15 @@ class PolicyConditionAttributeSeeder extends Seeder
                 continue;
             }
 
-            $condition = PolicyCondition::where('policy_collection_id', $collection->id)->first();
+            $condition = CollectionCondition::where('policy_collection_id', $collection->id)->first();
             if (!$condition) {
                 continue;
             }
 
             foreach ($attributes as [$name, $value, $operation]) {
-                PolicyConditionAttribute::updateOrCreate(
+                ConditionAttribute::updateOrCreate(
                     [
-                        'policy_condition_id' => $condition->id,
+                        'condition_attribute_id' => $condition->id,
                         'attribute_name' => $name,
                     ],
                     [

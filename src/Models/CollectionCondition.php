@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use zennit\ABAC\Database\Factories\PolicyConditionFactory;
 
-class PolicyCondition extends Model
+class CollectionCondition extends Model
 {
     use HasFactory;
 
@@ -35,6 +35,6 @@ class PolicyCondition extends Model
 
     public function attributes(): HasMany
     {
-        return $this->hasMany(PolicyConditionAttribute::class, 'policy_condition_id');
+        return $this->hasMany(ConditionAttribute::class, 'collection_condition_id');
     }
 }

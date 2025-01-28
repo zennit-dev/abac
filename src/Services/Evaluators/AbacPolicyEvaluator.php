@@ -15,8 +15,8 @@ use zennit\ABAC\Services\AbacCacheManager;
 readonly class AbacPolicyEvaluator
 {
     public function __construct(
-        private PolicyRepository              $policyRepository,
-        private AbacCacheManager              $cache,
+        private PolicyRepository $policyRepository,
+        private AbacCacheManager $cache,
         private AbacCollectionEvaluator $collectionEvaluator
     ) {
     }
@@ -24,8 +24,8 @@ readonly class AbacPolicyEvaluator
     /**
      * Evaluate access based on policies.
      *
-     * @param AccessContext $context The access context to evaluate
-     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @param  AccessContext  $context  The access context to evaluate
+     * @param  AttributeCollection  $attributes  The attributes to evaluate against
      *
      * @throws InvalidArgumentException If cache operations fail
      * @return EvaluationResult The result of the policy evaluation
@@ -50,9 +50,9 @@ readonly class AbacPolicyEvaluator
     /**
      * Evaluate a set of policies against attributes.
      *
-     * @param Collection $policies The policies to evaluate
-     * @param AttributeCollection $attributes The attributes to evaluate against
-     * @param AccessContext $context The access context
+     * @param  Collection  $policies  The policies to evaluate
+     * @param  AttributeCollection  $attributes  The attributes to evaluate against
+     * @param  AccessContext  $context  The access context
      *
      * @return EvaluationResult The evaluation result
      */
@@ -71,11 +71,6 @@ readonly class AbacPolicyEvaluator
 
         $matched = $policies
             ->filter(fn (Policy $policy) => $this->evaluatePolicy($policy, $attributes))
-            ->map(fn (Policy $policy) => [
-                'id' => $policy->id,
-                'name' => $policy->name,
-                'permission_d' => $policy->permission_id,
-            ])
             ->values()
             ->all();
 
@@ -94,8 +89,8 @@ readonly class AbacPolicyEvaluator
     /**
      * Evaluate a single policy against attributes.
      *
-     * @param Policy $policy The policy to evaluate
-     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @param  Policy  $policy  The policy to evaluate
+     * @param  AttributeCollection  $attributes  The attributes to evaluate against
      *
      * @return bool True if policy conditions are met
      */

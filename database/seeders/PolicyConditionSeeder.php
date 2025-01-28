@@ -5,9 +5,9 @@ namespace zennit\ABAC\Database\Seeders;
 use Illuminate\Database\Seeder;
 use zennit\ABAC\Enums\Operators\ArithmeticOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
+use zennit\ABAC\Models\CollectionCondition;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\PolicyCollection;
-use zennit\ABAC\Models\PolicyCondition;
 
 class PolicyConditionSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class PolicyConditionSeeder extends Seeder
             if ($policy) {
                 $collection = PolicyCollection::where('policy_id', $policy->id)->first();
                 if ($collection) {
-                    PolicyCondition::firstOrCreate([
+                    CollectionCondition::firstOrCreate([
                         'policy_collection_id' => $collection->id,
                         'operator' => $operator->value,
                     ]);

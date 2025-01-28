@@ -4,8 +4,8 @@ namespace zennit\ABAC\Services\Evaluators;
 
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
+use zennit\ABAC\Models\CollectionCondition;
 use zennit\ABAC\Models\PolicyCollection;
-use zennit\ABAC\Models\PolicyCondition;
 use zennit\ABAC\Strategies\OperatorFactory;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
@@ -14,7 +14,7 @@ readonly class AbacCollectionEvaluator
     use AbacHasConfigurations;
 
     public function __construct(
-        private OperatorFactory        $operatorFactory,
+        private OperatorFactory $operatorFactory,
         private AbacConditionEvaluator $conditionEvaluator,
     ) {
     }
@@ -22,8 +22,8 @@ readonly class AbacCollectionEvaluator
     /**
      * Evaluate a policy collection against attributes.
      *
-     * @param PolicyCollection $collection The collection to evaluate
-     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @param  PolicyCollection  $collection  The collection to evaluate
+     * @param  AttributeCollection  $attributes  The attributes to evaluate against
      *
      * @throws UnsupportedOperatorException If an operator is not supported
      * @return bool True if collection conditions are met
@@ -38,9 +38,9 @@ readonly class AbacCollectionEvaluator
 
         return $operator->evaluate(
             $collection->conditions->map(
-                fn (PolicyCondition $condition) => $this->conditionEvaluator->evaluate($condition, $attributes)
+                fn (CollectionCondition $condition) => $this->conditionEvaluator->evaluate($condition, $attributes)
             )->toArray(),
-            null
+            $attributes
         );
     }
 }

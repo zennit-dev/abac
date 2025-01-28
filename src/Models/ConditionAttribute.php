@@ -6,20 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PolicyConditionAttribute extends Model
+class ConditionAttribute extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'policy_condition_id',
+        'collection_condition_id',
+        'operator',
         'attribute_name',
         'attribute_value',
-        'operator',
     ];
 
     protected $casts = [
         'id' => 'integer',
-        'policy_condition_id' => 'integer',
+        'condition_attribute_id' => 'integer',
         'operator' => 'string',
         'attribute_name' => 'string',
         'attribute_value' => 'string',
@@ -27,6 +27,6 @@ class PolicyConditionAttribute extends Model
 
     public function condition(): BelongsTo
     {
-        return $this->belongsTo(PolicyCondition::class, 'policy_condition_id');
+        return $this->belongsTo(CollectionCondition::class, 'condition_attribute_id');
     }
 }

@@ -4,7 +4,7 @@ namespace zennit\ABAC\Services\Evaluators;
 
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Models\PolicyCondition;
+use zennit\ABAC\Models\CollectionCondition;
 use zennit\ABAC\Strategies\OperatorFactory;
 
 readonly class AbacConditionEvaluator
@@ -17,13 +17,13 @@ readonly class AbacConditionEvaluator
     /**
      * Evaluate a policy condition against attributes.
      *
-     * @param PolicyCondition $condition The condition to evaluate
-     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @param  CollectionCondition  $condition  The condition to evaluate
+     * @param  AttributeCollection  $attributes  The attributes to evaluate against
      *
      * @throws UnsupportedOperatorException If an operator is not supported
      * @return bool True if condition is met
      */
-    public function evaluate(PolicyCondition $condition, AttributeCollection $attributes): bool
+    public function evaluate(CollectionCondition $condition, AttributeCollection $attributes): bool
     {
         if ($condition->attributes->isEmpty()) {
             return false;
@@ -38,7 +38,7 @@ readonly class AbacConditionEvaluator
 
                 return $attributeOperator->evaluate($attributes->get($attribute->attribute_name), $attribute->attribute_value);
             })->toArray(),
-            null
+            $attributes
         );
     }
 }

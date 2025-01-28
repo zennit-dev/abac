@@ -90,6 +90,7 @@ return [
 
     'database' => [
         'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
+        'user_soft_deletes_column' => 'deleted_at',
     ],
 
     /*
@@ -107,4 +108,18 @@ return [
         'excluded_routes' => [],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | ABAC Route Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the settings for ABAC routes, including the
+    | route prefix and any route middleware.
+    |
+    */
+
+    'routes' => [
+        'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
+        'middleware' => ['abac'],
+    ],
 ];

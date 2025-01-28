@@ -5,13 +5,12 @@ namespace zennit\ABAC\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Contracts\AbacManager;
-use zennit\ABAC\Facades\Abac;
 use zennit\ABAC\Jobs\PolicyCacheJob;
+use zennit\ABAC\Models\CollectionCondition;
+use zennit\ABAC\Models\ConditionAttribute;
 use zennit\ABAC\Models\Permission;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\PolicyCollection;
-use zennit\ABAC\Models\PolicyCondition;
-use zennit\ABAC\Models\PolicyConditionAttribute;
 use zennit\ABAC\Models\ResourceAttribute;
 use zennit\ABAC\Models\UserAttribute;
 use zennit\ABAC\Observers\PermissionObserver;
@@ -38,6 +37,7 @@ class AbacServiceProvider extends ServiceProvider
         $this->app->register(MiddlewareServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
         $this->app->register(EventServiceProvider::class);
+        $this->app->register(RouteProvider::class);
 
         // Register the facade
         $this->app->bind(AbacManager::class, function ($app) {
@@ -90,7 +90,7 @@ class AbacServiceProvider extends ServiceProvider
         Permission::observe(PermissionObserver::class);
         Policy::observe(PolicyObserver::class);
         PolicyCollection::observe(PolicyCollectionObserver::class);
-        PolicyCondition::observe(PolicyConditionObserver::class);
-        PolicyConditionAttribute::observe(PolicyConditionAttributeObserver::class);
+        CollectionCondition::observe(PolicyConditionObserver::class);
+        ConditionAttribute::observe(PolicyConditionAttributeObserver::class);
     }
 }

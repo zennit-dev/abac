@@ -29,6 +29,6 @@ class PolicyCollection extends Model
 
     public function conditions(): HasMany
     {
-        return $this->hasMany(PolicyCondition::class, 'policy_collection_id');
+        return $this->hasMany(CollectionCondition::class, 'policy_collection_id');
     }
 }

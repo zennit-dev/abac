@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
+use zennit\ABAC\Enums\PermissionOperations;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 return new class () extends Migration
@@ -39,7 +40,7 @@ return new class () extends Migration
             $table->id();
             $table->timestamps();
             $table->string('resource');
-            $table->string('operation');
+            $table->enum('operation', PermissionOperations::values());
 
             $table->unique(['resource', 'operation']);
         });
@@ -62,7 +63,7 @@ return new class () extends Migration
                 ->cascadeOnDelete();
         });
 
-        Schema::create('policy_conditions', function (Blueprint $table) {
+        Schema::create('collection_conditions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->enum('operator', LogicalOperators::values());
@@ -71,11 +72,11 @@ return new class () extends Migration
                 ->cascadeOnDelete();
         });
 
-        Schema::create('policy_condition_attributes', function (Blueprint $table) {
+        Schema::create('condition_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('policy_condition_id')
-                ->constrained('policy_conditions')
+            $table->foreignId('collection_condition_id')
+                ->constrained('collection_conditions')
                 ->cascadeOnDelete();
             $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
             $table->string('attribute_name');
@@ -85,8 +86,8 @@ return new class () extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('policy_condition_attributes');
-        Schema::dropIfExists('policy_conditions');
+        Schema::dropIfExists('condition_attributes');
+        Schema::dropIfExists('collection_conditions');
         Schema::dropIfExists('policy_collections');
         Schema::dropIfExists('policies');
         Schema::dropIfExists('permissions');
