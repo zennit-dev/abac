@@ -164,13 +164,14 @@ middleware and can be prefixed using the `ABAC_ROUTE_PREFIX` environment variabl
 
 - **Endpoint**: `/{prefix}/permissions/{permission}/policies`
 - **Request Body**:
-  ```json
-  {
-    "name": "string",
-    "permission_id": "integer",
-    "policy_collection": "array"
-  }
-  ```
+
+```json
+{
+  "name": "string",
+  "permission_id": "integer",
+  "policy_collection": "array"
+}
+```
 
 - `policy_collection` is required only if query parameter `chain` is set to `true`
 - **Optional Query Parameter**: `chain`
