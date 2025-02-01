@@ -69,7 +69,7 @@ class ConditionAttributeSeeder extends Seeder
                     ],
                     [
                         'attribute_value' => $value,
-                        'operator' => $operation,
+                        'operator' => $operation->value,
                     ]
                 );
             }
