@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\RequestMethods;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 return new class () extends Migration
@@ -40,7 +40,7 @@ return new class () extends Migration
             $table->id();
             $table->timestamps();
             $table->string('resource');
-            $table->enum('operation', PermissionOperations::values());
+            $table->enum('operation', RequestMethods::values());
 
             $table->unique(['resource', 'operation']);
         });
@@ -57,7 +57,7 @@ return new class () extends Migration
         Schema::create('policy_collections', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->enum('operator', LogicalOperators::values());
+            $table->enum('operator', AllOperators::values());
             $table->foreignId('policy_id')
                 ->constrained('policies')
                 ->cascadeOnDelete();
@@ -66,7 +66,7 @@ return new class () extends Migration
         Schema::create('collection_conditions', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->enum('operator', LogicalOperators::values());
+            $table->enum('operator',  AllOperators::values());
             $table->foreignId('policy_collection_id')
                 ->constrained('policy_collections')
                 ->cascadeOnDelete();

@@ -3,7 +3,7 @@
 namespace zennit\ABAC\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\RequestMethods;
 use zennit\ABAC\Models\Permission;
 
 class PermissionSeeder extends Seeder
@@ -25,7 +25,7 @@ class PermissionSeeder extends Seeder
                 'condition_attributes',
                 'condition_attributes_attributes',
             ],
-            'operation' => PermissionOperations::values(),
+            'operation' => RequestMethods::values(),
         ];
 
         foreach ($basePermissions['resource'] as $resource) {

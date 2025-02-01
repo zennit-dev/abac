@@ -3,7 +3,7 @@
 namespace zennit\ABAC\Http\Requests;
 
 use Illuminate\Validation\Rule;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\RequestMethods;
 use zennit\ABAC\Http\Requests\Core\Request;
 
 class PermissionRequest extends Request
@@ -12,7 +12,7 @@ class PermissionRequest extends Request
     {
         return [
             'resource' => ['required', 'string'],
-            'operation' => ['required', 'string', Rule::enum(PermissionOperations::class)],
+            'operation' => ['required', 'string', Rule::enum(RequestMethods::class)],
             'policies' => [
                 'sometimes',
                 'array',

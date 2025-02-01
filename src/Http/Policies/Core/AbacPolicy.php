@@ -5,7 +5,7 @@ namespace zennit\ABAC\Http\Policies\Core;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\RequestMethods;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Http\Controllers\Core\Controller;
 
@@ -52,9 +52,9 @@ abstract class AbacPolicy
     {
         return abacPolicy()->can(
             new AccessContext(
-                static::getResourceClass(),
-                PermissionOperations::CREATE->value,
-                $subject
+	            static::getResourceClass(),
+	            RequestMethods::CREATE->value,
+	            $subject
             )
         );
     }
@@ -73,10 +73,10 @@ abstract class AbacPolicy
     {
         return abacPolicy()->can(
             new AccessContext(
-                static::getResourceClass(),
-                PermissionOperations::SHOW->value,
-                $subject,
-                [$modelId]
+	            static::getResourceClass(),
+	            RequestMethods::SHOW->value,
+	            $subject,
+	            [$modelId]
             )
         );
     }
@@ -95,10 +95,10 @@ abstract class AbacPolicy
     {
         return abacPolicy()->can(
             new AccessContext(
-                static::getResourceClass(),
-                PermissionOperations::UPDATE->value,
-                $subject,
-                [$modelId]
+	            static::getResourceClass(),
+	            RequestMethods::UPDATE->value,
+	            $subject,
+	            [$modelId]
             )
         );
     }
@@ -117,10 +117,10 @@ abstract class AbacPolicy
     {
         return abacPolicy()->can(
             new AccessContext(
-                static::getResourceClass(),
-                PermissionOperations::DELETE->value,
-                $subject,
-                [$modelId]
+	            static::getResourceClass(),
+	            RequestMethods::DELETE->value,
+	            $subject,
+	            [$modelId]
             )
         );
     }

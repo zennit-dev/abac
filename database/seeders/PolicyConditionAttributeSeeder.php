@@ -4,7 +4,6 @@ namespace zennit\ABAC\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use zennit\ABAC\Enums\Operators\ArithmeticOperators;
-use zennit\ABAC\Enums\Operators\ListOperators;
 use zennit\ABAC\Models\CollectionCondition;
 use zennit\ABAC\Models\ConditionAttribute;
 use zennit\ABAC\Models\Policy;
@@ -20,20 +19,27 @@ class PolicyConditionAttributeSeeder extends Seeder
             ],
             'Organization Admin Access' => [
                 ['role', 'org_admin', ArithmeticOperators::EQUALS],
-                ['organizationId', '1', ListOperators::IN],
+                ['organizationId', '1', ArithmeticOperators::EQUALS],
             ],
             'Team Member Task Access' => [
-                ['role', 'team_member,team_lead', ListOperators::IN],
+                ['role', 'team_member,team_lead', ArithmeticOperators::EQUALS],
+                ['experience', '1', ArithmeticOperators::GREATER_THAN_EQUALS],
+                ['teamId', '1', ArithmeticOperators::EQUALS],
+                ['organizationId', '1', ArithmeticOperators::EQUALS],
                 ['teamId', '1', ArithmeticOperators::EQUALS],
                 ['organizationId', '1', ArithmeticOperators::EQUALS],
             ],
             'Senior Team Member Task Deletion' => [
                 ['role', 'team_member', ArithmeticOperators::EQUALS],
-                ['experience', '2', 'greater_than_equals'],
+                ['experience', '2', ArithmeticOperators::GREATER_THAN_EQUALS],
+                ['teamId', '1', ArithmeticOperators::EQUALS],
+                ['organizationId', '1', ArithmeticOperators::EQUALS],
                 ['teamId', '1', ArithmeticOperators::EQUALS],
             ],
             'Project View Access' => [
-                ['visibility', 'public,internal', ListOperators::IN],
+                ['visibility', 'public', ArithmeticOperators::EQUALS],
+                ['visibility', 'private', ArithmeticOperators::EQUALS],
+                ['organizationId', '1', ArithmeticOperators::EQUALS],
                 ['teamId', '1', ArithmeticOperators::EQUALS],
                 ['status', 'active', ArithmeticOperators::EQUALS],
             ],
@@ -58,7 +64,7 @@ class PolicyConditionAttributeSeeder extends Seeder
             foreach ($attributes as [$name, $value, $operation]) {
                 ConditionAttribute::updateOrCreate(
                     [
-                        'condition_attribute_id' => $condition->id,
+                        'collection_condition_id' => $condition->id,
                         'attribute_name' => $name,
                     ],
                     [

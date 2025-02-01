@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\RequestMethods;
 use zennit\ABAC\Http\Requests\Core\IndexRequest;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
@@ -181,10 +181,10 @@ abstract class Controller
     protected function evaluateIndex(IndexRequest $request, string $resource, array $context): array
     {
         $context = new AccessContext(
-            $resource,
-            PermissionOperations::INDEX->value,
-            $request->{$this->getSubjectMethod()},
-            $context,
+	        $resource,
+	        RequestMethods::INDEX->value,
+	        $request->{$this->getSubjectMethod()},
+	        $context,
         );
 
         return abacPolicy()->evaluate($context)->matched;

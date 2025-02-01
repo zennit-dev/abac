@@ -18,7 +18,6 @@ readonly class AllOperators
         $operatorClasses = array_filter([
             LogicalOperators::class,
             ArithmeticOperators::class,
-            ListOperators::class,
             StringOperators::class,
         ], fn ($class) => !in_array($class, $excludes));
 
