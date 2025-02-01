@@ -211,7 +211,7 @@ middleware and can be prefixed using the `ABAC_ROUTE_PREFIX` environment variabl
 - **Request Body**:
   ```json
   {
-    "condition_attribute_id": "integer",
+    "collection_condition_id": "integer",
     "operator": "string",
     "attribute_name": "string",
     "attribute_value": "string"
@@ -427,7 +427,7 @@ The package creates the following tables:
 ### Policy Condition Attributes
 
 - `id` - Primary key
-- `condition_attribute_id` - Foreign key to condition_attributes table
+- `collection_condition_id` - Foreign key to condition_attributes table
 - `operator` - Comparison operator
 - `attribute_name` - Name of the attribute to compare
 - `attribute_value` - Value to compare against
@@ -516,7 +516,7 @@ $condition->attributes(); # HasMany ConditionAttribute
 use zennit\ABAC\Models\ConditionAttribute;
 
 $attribute = ConditionAttribute::create([
-    'condition_attribute_id' => $conditionId,
+    'collection_condition_id' => $conditionId,
     'attribute_name' => 'owner_id',
     'attribute_value' => '$subject.id',
     'operator' => 'EQUALS'

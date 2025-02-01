@@ -14,7 +14,7 @@ readonly class ConditionAttributeService
 
     public function store(array $data, int $condition): array
     {
-        return ConditionAttribute::create([...$data, 'condition_attribute_id' => $condition])->toArray();
+        return ConditionAttribute::create([...$data, 'collection_condition_id' => $condition])->toArray();
     }
 
     public function show(int $condition): ConditionAttribute

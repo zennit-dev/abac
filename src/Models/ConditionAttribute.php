@@ -19,7 +19,7 @@ class ConditionAttribute extends Model
 
     protected $casts = [
         'id' => 'integer',
-        'condition_attribute_id' => 'integer',
+        'collection_condition_id' => 'integer',
         'operator' => 'string',
         'attribute_name' => 'string',
         'attribute_value' => 'string',
@@ -27,6 +27,6 @@ class ConditionAttribute extends Model
 
     public function condition(): BelongsTo
     {
-        return $this->belongsTo(CollectionCondition::class, 'condition_attribute_id');
+        return $this->belongsTo(CollectionCondition::class, 'collection_condition_id');
     }
 }
