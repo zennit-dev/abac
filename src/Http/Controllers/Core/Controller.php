@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\Enums\RequestMethods;
+use zennit\ABAC\Enums\PermissionOperations;
 use zennit\ABAC\Http\Requests\Core\IndexRequest;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
@@ -182,7 +182,7 @@ abstract class Controller
     {
         $context = new AccessContext(
 	        $resource,
-	        RequestMethods::INDEX->value,
+	        PermissionOperations::INDEX->value,
 	        $request->{$this->getSubjectMethod()},
 	        $context,
         );

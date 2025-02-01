@@ -2,7 +2,7 @@
 
 namespace zennit\ABAC\Enums;
 
-enum RequestMethods: string
+enum PermissionOperations: string
 {
     case INDEX = 'index';
     case SHOW = 'show';
