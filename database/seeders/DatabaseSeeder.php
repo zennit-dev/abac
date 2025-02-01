@@ -31,8 +31,8 @@ class DatabaseSeeder extends Seeder
                         PermissionSeeder::class,
                         PolicySeeder::class,
                         PolicyCollectionSeeder::class,
-                        PolicyConditionSeeder::class,
-                        PolicyConditionAttributeSeeder::class,
+                        CollectionConditionSeeder::class,
+                        ConditionAttributeSeeder::class,
                     ]);
 
                     // Warm the ABAC cache after ABAC seeders are complete

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use zennit\ABAC\Database\Factories\PolicyConditionFactory;
+use zennit\ABAC\Database\Factories\CollectionConditionFactory;
 
 class CollectionCondition extends Model
 {
@@ -23,9 +23,9 @@ class CollectionCondition extends Model
         'policy_collection_id' => 'integer',
     ];
 
-    protected static function newFactory(): PolicyConditionFactory
+    protected static function newFactory(): CollectionConditionFactory
     {
-        return PolicyConditionFactory::new();
+        return CollectionConditionFactory::new();
     }
 
     public function collection(): BelongsTo

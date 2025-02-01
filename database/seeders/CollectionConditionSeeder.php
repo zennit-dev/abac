@@ -9,7 +9,7 @@ use zennit\ABAC\Models\CollectionCondition;
 use zennit\ABAC\Models\Policy;
 use zennit\ABAC\Models\PolicyCollection;
 
-class PolicyConditionSeeder extends Seeder
+class CollectionConditionSeeder extends Seeder
 {
     public function run(): void
     {
