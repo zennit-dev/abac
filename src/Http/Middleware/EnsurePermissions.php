@@ -54,8 +54,6 @@ readonly class EnsurePermissions
             }
         }
 
-        logger($this->defineSubject($request));
-
         try {
             $cacheKey = $this->buildCacheKey($request);
             $hasAccess = $this->cacheManager->remember(
@@ -127,7 +125,7 @@ readonly class EnsurePermissions
     {
         $method = $this->getSubjectMethod();
 
-        if (!method_exists($request, $method)) {
+        if (!(method_exists($method, $request) || property_exists($method, $request))) {
             throw new RuntimeException("Subject method '$method' does not exist on Request object");
         }
 
