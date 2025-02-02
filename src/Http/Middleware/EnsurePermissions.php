@@ -34,8 +34,8 @@ readonly class EnsurePermissions
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws InvalidArgumentException If cache operations fail
      * @throws ValidationException If context validation fails
+     * @throws InvalidArgumentException If cache operations fail
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -125,8 +125,8 @@ readonly class EnsurePermissions
     {
         $method = $this->getSubjectMethod();
 
-        if (!(method_exists($method, $request) || property_exists($method, $request))) {
-            throw new RuntimeException("Subject method '$method' does not exist on Request object");
+        if (!is_callable([$request, $method])) {
+            throw new RuntimeException("Subject method '$method' is not callable on request");
         }
 
         return $request->$method();
