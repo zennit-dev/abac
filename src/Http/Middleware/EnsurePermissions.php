@@ -26,8 +26,7 @@ readonly class EnsurePermissions
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
@@ -35,8 +34,8 @@ readonly class EnsurePermissions
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws ValidationException If context validation fails
      * @throws InvalidArgumentException If cache operations fail
+     * @throws ValidationException If context validation fails
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
@@ -54,6 +53,8 @@ readonly class EnsurePermissions
                 return $next($request);
             }
         }
+
+        logger($this->defineSubject($request));
 
         try {
             $cacheKey = $this->buildCacheKey($request);
