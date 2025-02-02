@@ -11,8 +11,6 @@ use zennit\ABAC\Strategies\Operators\Arithmetic\GreaterThanOperator;
 use zennit\ABAC\Strategies\Operators\Arithmetic\LessThanEqualsOperator;
 use zennit\ABAC\Strategies\Operators\Arithmetic\LessThanOperator;
 use zennit\ABAC\Strategies\Operators\Arithmetic\NotEqualsOperator;
-use zennit\ABAC\Strategies\Operators\List\InOperator;
-use zennit\ABAC\Strategies\Operators\List\NotInOperator;
 use zennit\ABAC\Strategies\Operators\Logical\AndOperator;
 use zennit\ABAC\Strategies\Operators\Logical\NotOperator;
 use zennit\ABAC\Strategies\Operators\Logical\OrOperator;
@@ -34,22 +32,20 @@ class OperatorFactory
     {
         $this->operators = [
             'equals' => new EqualsOperator(),
-            'not_equals' => new NotEqualsOperator(),
-            'greater_than' => new GreaterThanOperator(),
-            'greater_than_equals' => new GreaterThanEqualsOperator(),
-            'less_than' => new LessThanOperator(),
-            'less_than_equals' => new LessThanEqualsOperator(),
-            'in' => new InOperator(),
-            'not_in' => new NotInOperator(),
-            'contains' => new ContainsOperator(),
-            'not_contains' => new NotContainsOperator(),
-            'starts_with' => new StartsWithOperator(),
-            'not_starts_with' => new NotStartsWithOperator(),
-            'ends_with' => new EndsWithOperator(),
-            'not_ends_with' => new NotEndsWithOperator(),
-            'and' => new AndOperator(),
+	        'greater_than' => new GreaterThanOperator(),
+	        'greater_than_equals' => new GreaterThanEqualsOperator(),
+	        'less_than_equals' => new LessThanEqualsOperator(),
+	        'less_than' => new LessThanOperator(),
+	        'not_equals' => new NotEqualsOperator(),
+	        'and' => new AndOperator(),
             'or' => new OrOperator(),
             'not' => new NotOperator(),
+            'contains' => new ContainsOperator(),
+            'ends_with' => new EndsWithOperator(),
+            'not_contains' => new NotContainsOperator(),
+            'not_starts_with' => new NotStartsWithOperator(),
+            'not_ends_with' => new NotEndsWithOperator(),
+            'starts_with' => new StartsWithOperator(),
         ];
 
         $this->registerCustomOperators();
