@@ -1,7 +1,7 @@
 {
     "name": "zennit/abac",
     "description": "Attribute-Based Access Control (ABAC) for Laravel",
-    "version": "6.3.2",
+    "version": "6.3.3",
     "type": "library",
     "license": "MIT",
     "keywords": [
