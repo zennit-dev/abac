@@ -12,7 +12,7 @@ class RouteProvider extends ServiceProvider
         $config = config('abac.routes');
 
         // Convert middleware string to array if it's a string
-        $middleware = $config['middleware'] ?? ['abac'];
+        $middleware = $config['middleware'];
         if (is_string($middleware)) {
             $middleware = array_filter(explode(',', $middleware));
         }
