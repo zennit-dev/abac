@@ -8,23 +8,12 @@ use zennit\ABAC\Http\Controllers\PolicyController;
 use zennit\ABAC\Http\Controllers\ResourceAttributeController;
 use zennit\ABAC\Http\Controllers\UserAttributeController;
 
-Route::apiResource('user-attributes', UserAttributeController::class)
-    ->middleware('abac');
-
-Route::apiResource('resource-attributes', ResourceAttributeController::class)
-    ->middleware('abac');
-
-Route::apiResource('permissions', PermissionController::class)
-    ->middleware('abac');
-
-Route::apiResource('permissions.policies', PolicyController::class)
-    ->middleware('abac');
-
-Route::apiResource('permissions.policies.collections', PolicyCollectionController::class)
-    ->middleware('abac');
-
-Route::apiResource('permissions.policies.collections.conditions', CollectionConditionController::class)
-    ->middleware('abac');
-
-Route::apiResource('permissions.policies.collections.conditions.attributes', ConditionAttributeController::class)
-    ->middleware('abac');
+Route::middleware(['auth:sanctum', 'abac'])->group(function () {
+    Route::apiResource('user-attributes', UserAttributeController::class);
+    Route::apiResource('resource-attributes', ResourceAttributeController::class);
+    Route::apiResource('permissions', PermissionController::class);
+    Route::apiResource('permissions.policies', PolicyController::class);
+    Route::apiResource('permissions.policies.collections', PolicyCollectionController::class);
+    Route::apiResource('permissions.policies.collections.conditions', CollectionConditionController::class);
+    Route::apiResource('permissions.policies.collections.conditions.attributes', ConditionAttributeController::class);
+});
