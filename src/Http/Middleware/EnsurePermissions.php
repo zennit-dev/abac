@@ -8,6 +8,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Enums\PermissionOperations;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Services\AbacService;
@@ -104,12 +105,26 @@ readonly class EnsurePermissions
         // If not excluded, check ABAC permissions
         $context = new AccessContext(
             resource: $this->getResourceFromPath($request->path()),
-            operation: strtolower($request->method()),
+            operation: $this->matchRequestOperation($request->method()),
             subject: $this->defineSubject($request),
             context: []
         );
 
         return $this->abac->can($context);
+    }
+
+    /**
+     * Match the request methods against PermissionOperations
+     */
+    private function matchRequestOperation(string $method): ?string
+    {
+        return match ($method) {
+            'GET' => PermissionOperations::INDEX->value,
+            'POST' => PermissionOperations::CREATE->value,
+            'PUT', 'PATCH' => PermissionOperations::UPDATE->value,
+            'DELETE' => PermissionOperations::DELETE->value,
+            default => null,
+        };
     }
 
     /**
