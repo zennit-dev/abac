@@ -7,13 +7,11 @@ use zennit\ABAC\Models\Permission;
 
 readonly class PermissionService
 {
-    public function __construct(protected PolicyService $service)
-    {
-    }
+    public function __construct(protected PolicyService $service) {}
 
     public function index(): array
     {
-        return Permission::all()->toArray();
+        return Permission::with('policies.collections.conditions.attributes')->get()->toArray();
     }
 
     public function store(array $data, bool $chain = false): array

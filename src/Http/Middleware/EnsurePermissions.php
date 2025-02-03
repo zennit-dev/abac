@@ -26,21 +26,24 @@ readonly class EnsurePermissions
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
      *
-     * @param Request $request The incoming HTTP request
-     * @param Closure $next The next middleware in the pipeline
+     * @param  Request  $request  The incoming HTTP request
+     * @param  Closure  $next  The next middleware in the pipeline
      *
-     * @throws InvalidArgumentException If cache operations fail
      * @throws ValidationException If context validation fails
+     * @throws InvalidArgumentException If cache operations fail
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!$request->user()) {
+            return $this->unauthorizedResponse('Unauthorized, you need to sign in');
+        }
+
         $currentPath = $request->path();
         $excludedRoutes = $this->getExcludedRoutes();
 
@@ -74,29 +77,6 @@ readonly class EnsurePermissions
     }
 
     /**
-     * Match path against pattern, supporting wildcards
-     */
-    private function matchPath(string $path, string $pattern): bool
-    {
-        $path = trim($path, '/');
-        $pattern = trim($pattern, '/');
-
-        // Direct match check
-        if ($path === $pattern) {
-            return true;
-        }
-
-        // Wildcard check
-        if (str_ends_with($pattern, '*')) {
-            $basePattern = rtrim($pattern, '*');
-
-            return str_starts_with($path, $basePattern);
-        }
-
-        return false;
-    }
-
-    /**
      * Build a unique cache key for the request
      */
     private function buildCacheKey(Request $request): string
@@ -123,13 +103,95 @@ readonly class EnsurePermissions
 
         // If not excluded, check ABAC permissions
         $context = new AccessContext(
-            resource:  $this->getResourceFromPath($request->path()),
+            resource: $this->getResourceFromPath($request->path()),
             operation: strtolower($request->method()),
-            subject:   $this->defineSubject($request),
-            context:   []
+            subject: $this->defineSubject($request),
+            context: []
         );
 
         return $this->abac->can($context);
+    }
+
+    /**
+     * Define the subject for permission checking.
+     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
+     *
+     * @param  Request  $request  The incoming HTTP request
+     *
+     * @throws RuntimeException When the configured subject method doesn't exist
+     * @return object|null The subject for permission checking
+     */
+    public function defineSubject(Request $request): ?object
+    {
+        $method = $this->getSubjectMethod();
+
+        if (!is_callable([$request, $method])) {
+            throw new RuntimeException("Subject method '$method' is not callable on request");
+        }
+
+        return $request->$method();
+    }
+
+    /**
+     * Return a standardized unauthorized response.
+     * Creates a JSON response with error message for unauthorized access.
+     *
+     * @param  string  $message  The error message to return
+     *
+     * @return Response The HTTP response with 401 status
+     */
+    private function unauthorizedResponse(string $message): Response
+    {
+        return response()->json(
+            ['error' => $message],
+            Response::HTTP_UNAUTHORIZED
+        );
+    }
+
+    /**
+     * Extract the resource name from the request path.
+     * Handles API versioning and removes IDs from the path.
+     *
+     * @param  string  $path  The request path
+     *
+     * @return string The extracted resource name
+     */
+    private function getResourceFromPath(string $path): string
+    {
+        // Remove API version prefix if exists
+        $segments = explode('/', trim($path, '/'));
+
+        // Skip api/v1 or similar prefixes
+        if (isset($segments[0]) && $segments[0] === 'api') {
+            array_shift($segments);
+        }
+        if (!empty($segments) && str_starts_with($segments[0], 'v')) {
+            array_shift($segments);
+        }
+
+        // Get the last non-empty segment that's not an ID
+        $segments = array_filter(
+            $segments,
+            fn ($segment) => !empty($segment) && !is_numeric($segment) && !$this->isUuid($segment)
+        );
+
+        return !empty($segments) ? end($segments) : '';
+    }
+
+    /**
+     * Check if a string matches UUID format.
+     * Used to identify and remove UUIDs from resource paths.
+     *
+     * @param  string  $string  The string to check
+     *
+     * @return bool True if the string is a valid UUID
+     */
+    private function isUuid(string $string): bool
+    {
+        return preg_match(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
+            strtolower($string)
+        ) === 1;
     }
 
     /**
@@ -170,84 +232,25 @@ readonly class EnsurePermissions
     }
 
     /**
-     * Extract the resource name from the request path.
-     * Handles API versioning and removes IDs from the path.
-     *
-     * @param string $path The request path
-     *
-     * @return string The extracted resource name
+     * Match path against pattern, supporting wildcards
      */
-    private function getResourceFromPath(string $path): string
+    private function matchPath(string $path, string $pattern): bool
     {
-        // Remove API version prefix if exists
-        $segments = explode('/', trim($path, '/'));
+        $path = trim($path, '/');
+        $pattern = trim($pattern, '/');
 
-        // Skip api/v1 or similar prefixes
-        if (isset($segments[0]) && $segments[0] === 'api') {
-            array_shift($segments);
-        }
-        if (!empty($segments) && str_starts_with($segments[0], 'v')) {
-            array_shift($segments);
+        // Direct match check
+        if ($path === $pattern) {
+            return true;
         }
 
-        // Get the last non-empty segment that's not an ID
-        $segments = array_filter(
-            $segments,
-            fn ($segment) => !empty($segment) && !is_numeric($segment) && !$this->isUuid($segment)
-        );
+        // Wildcard check
+        if (str_ends_with($pattern, '*')) {
+            $basePattern = rtrim($pattern, '*');
 
-        return !empty($segments) ? end($segments) : '';
-    }
-
-    /**
-     * Check if a string matches UUID format.
-     * Used to identify and remove UUIDs from resource paths.
-     *
-     * @param string $string The string to check
-     *
-     * @return bool True if the string is a valid UUID
-     */
-    private function isUuid(string $string): bool
-    {
-        return preg_match(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
-            strtolower($string)
-        ) === 1;
-    }
-
-    /**
-     * Define the subject for permission checking.
-     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
-     *
-     * @param Request $request The incoming HTTP request
-     *
-     * @throws RuntimeException When the configured subject method doesn't exist
-     * @return object|null The subject for permission checking
-     */
-    public function defineSubject(Request $request): ?object
-    {
-        $method = $this->getSubjectMethod();
-
-        if (!is_callable([$request, $method])) {
-            throw new RuntimeException("Subject method '$method' is not callable on request");
+            return str_starts_with($path, $basePattern);
         }
 
-        return $request->$method();
-    }
-
-    /**
-     * Return a standardized unauthorized response.
-     * Creates a JSON response with error message for unauthorized access.
-     *
-     * @param string $message The error message to return
-     *
-     * @return Response The HTTP response with 401 status
-     */
-    private function unauthorizedResponse(string $message): Response
-    {
-        return response()->json(
-            ['error' => $message],
-            Response::HTTP_UNAUTHORIZED
-        );
+        return false;
     }
 }
