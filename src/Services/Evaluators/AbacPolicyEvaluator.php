@@ -18,7 +18,8 @@ readonly class AbacPolicyEvaluator
         private PolicyRepository $policyRepository,
         private AbacCacheManager $cache,
         private AbacCollectionEvaluator $collectionEvaluator
-    ) {}
+    ) {
+    }
 
     /**
      * Evaluate access based on policies.

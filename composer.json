@@ -70,6 +70,9 @@
         ],
         "version-major": [
             "php -f scripts/version.php major"
+        ],
+        "pint": [
+            "vendor/bin/pint"
         ]
     },
     "config": {

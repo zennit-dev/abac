@@ -32,12 +32,12 @@ class OperatorFactory
     {
         $this->operators = [
             'equals' => new EqualsOperator(),
-	        'greater_than' => new GreaterThanOperator(),
-	        'greater_than_equals' => new GreaterThanEqualsOperator(),
-	        'less_than_equals' => new LessThanEqualsOperator(),
-	        'less_than' => new LessThanOperator(),
-	        'not_equals' => new NotEqualsOperator(),
-	        'and' => new AndOperator(),
+            'greater_than' => new GreaterThanOperator(),
+            'greater_than_equals' => new GreaterThanEqualsOperator(),
+            'less_than_equals' => new LessThanEqualsOperator(),
+            'less_than' => new LessThanOperator(),
+            'not_equals' => new NotEqualsOperator(),
+            'and' => new AndOperator(),
             'or' => new OrOperator(),
             'not' => new NotOperator(),
             'contains' => new ContainsOperator(),

@@ -4,6 +4,8 @@ namespace zennit\ABAC\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +28,8 @@ readonly class EnsurePermissions
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
-    ) {}
+    ) {
+    }
 
     /**
      * Handle an incoming request.
@@ -40,7 +43,16 @@ readonly class EnsurePermissions
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user()) {
+        // Debug logging to understand the request state
+        Log::debug('ABAC Middleware: Handling request');
+
+        // Try multiple ways to get the authenticated user
+        $user = $this->getAuthenticatedUser();
+        Log::debug('ABAC Middleware: User context', ['user' => $user]);
+
+        if (!$user) {
+            Log::debug('ABAC Middleware: No user found in request');
+
             return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
 
@@ -62,18 +74,57 @@ readonly class EnsurePermissions
             );
 
             if (!$hasAccess) {
+                Log::debug('ABAC Middleware: Access denied for path: ' . $currentPath);
+
                 return $this->unauthorizedResponse('Unauthorized to access this route');
             }
 
             return $next($request);
         } catch (InvalidArgumentException $e) {
             report($e);
+            Log::error('ABAC Middleware Error: ' . $e->getMessage());
+
             if (!$this->checkAccess($request)) {
                 return $this->unauthorizedResponse('Unauthorized to access this route');
             }
 
             return $next($request);
         }
+    }
+
+    /**
+     * Try multiple authentication methods to get the user
+     */
+    private function getAuthenticatedUser(): ?object
+    {
+        // Try session auth first
+        if (Auth::check()) {
+            $user = Auth::user();
+            Log::debug('ABAC Middleware: Found user via Auth::check()', ['user' => $user]);
+
+            return $user;
+        }
+
+        // Try getting from request
+        if (request()->user()) {
+            $user = request()->user();
+            Log::debug('ABAC Middleware: Found user via request()->user()', ['user' => $user]);
+
+            return $user;
+        }
+
+        // Try getting from guard directly
+        $guard = Auth::guard(config('auth.defaults.guard'));
+        if ($guard && $guard->check()) {
+            $user = $guard->user();
+            Log::debug('ABAC Middleware: Found user via guard', ['user' => $user]);
+
+            return $user;
+        }
+
+        Log::debug('ABAC Middleware: No authenticated user found');
+
+        return null;
     }
 
     /**
@@ -114,22 +165,45 @@ readonly class EnsurePermissions
 
     /**
      * Define the subject for permission checking.
-     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     *
-     * @throws RuntimeException When the configured subject method doesn't exist
-     * @return object|null The subject for permission checking
      */
     public function defineSubject(Request $request): ?object
     {
         $method = $this->getSubjectMethod();
+        Log::debug('ABAC Middleware: Getting subject using method', ['method' => $method]);
 
-        if (!is_callable([$request, $method])) {
-            throw new RuntimeException("Subject method '$method' is not callable on request");
+        // Get authenticated user first
+        $user = $this->getAuthenticatedUser();
+        if (!$user) {
+            Log::error('ABAC Middleware: No authenticated user found');
+
+            return null;
         }
 
-        return $request->$method();
+        // If method is 'user', return user directly
+        if ($method === 'user') {
+            Log::debug('ABAC Middleware: Using user as subject directly');
+
+            return $user;
+        }
+
+        // Try to get the profile or other subject method from user
+        if (method_exists($user, $method)) {
+            $subject = $user->$method;
+            Log::debug('ABAC Middleware: Retrieved subject from user', ['method' => $method, 'subject' => $subject]);
+
+            return $subject;
+        }
+
+        // Try to get from request if not found on user
+        if (is_callable([$request, $method])) {
+            $subject = $request->$method();
+            Log::debug('ABAC Middleware: Retrieved subject from request', ['method' => $method, 'subject' => $subject]);
+
+            return $subject;
+        }
+
+        Log::error('ABAC Middleware: Subject method not found', ['method' => $method]);
+        throw new RuntimeException("Subject method '$method' not found on user or request");
     }
 
     /**

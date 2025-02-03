@@ -134,6 +134,6 @@ return [
 
     'routes' => [
         'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
-        'middleware' => ['abac'],
+        'middleware' => ['auth:sanctum', 'abac'],
     ],
 ];

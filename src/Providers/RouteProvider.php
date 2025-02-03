@@ -11,7 +11,13 @@ class RouteProvider extends ServiceProvider
     {
         $config = config('abac.routes');
 
-        Route::middleware($config['middleware'] ?? ['abac'])->group(function () use ($config) {
+        // Convert middleware string to array if it's a string
+        $middleware = $config['middleware'] ?? ['abac'];
+        if (is_string($middleware)) {
+            $middleware = array_filter(explode(',', $middleware));
+        }
+
+        Route::middleware($middleware)->group(function () use ($config) {
             // API routes with prefix
             if (file_exists(__DIR__ . '/../../routes/api.php')) {
                 Route::prefix($config['prefix'] ?? 'abac')->group(function () {

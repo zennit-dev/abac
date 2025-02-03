@@ -181,10 +181,10 @@ abstract class Controller
     protected function evaluateIndex(IndexRequest $request, string $resource, array $context): array
     {
         $context = new AccessContext(
-	        $resource,
-	        PermissionOperations::INDEX->value,
-	        $request->{$this->getSubjectMethod()},
-	        $context,
+            $resource,
+            PermissionOperations::INDEX->value,
+            $request->{$this->getSubjectMethod()},
+            $context,
         );
 
         return abacPolicy()->evaluate($context)->matched;

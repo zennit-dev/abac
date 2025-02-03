@@ -14,14 +14,11 @@ A flexible and powerful ABAC implementation for Laravel applications.
 6. [Commands](#commands)
 7. [Configuration](#configuration)
 8. [Operators](#operators)
-9. [Middleware](#middleware)
-10. [Events](#events)
-11. [Advanced Usage](#advanced-usage)
-12. [Caching](#caching)
-13. [Requirements](#requirements)
-14. [Contributing](#contributing)
-15. [Security](#security)
-16. [License](#license)
+9. [Context Value Resolution](#context-value-resolution)
+10. [Database Schema](#database-schema)
+11. [Models](#models)
+12. [License](#license)
+13. [Contributing](#contributing)
 
 ---
 
@@ -363,6 +360,11 @@ ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware su
 
 # ABAC Route Configuration
 ABAC_ROUTE_PREFIX=abac # Sets the prefix for the package's API routes.
+
+# ABAC File Configuration
+ABAC_USER_ATTRIBUTE_PATH=stubs/abac/user_attributes.json # Path to the user attributes JSON file.
+ABAC_RESOURCE_ATTRIBUTE_PATH=stubs/abac/resource_attributes.json # Path to the resource attributes JSON file.
+ABAC_PERMISSION_PATH=stubs/abac/permissions.json # Path to the permissions JSON file.
 ```
 
 ### Full Configuration Options
@@ -433,7 +435,7 @@ return [
     ],
     'routes' => [
         'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
-        'middleware' => ['abac'],
+        'middleware' => ['auth:sanctum', 'abac'], or 'auth:sanctum,abac'
     ],
 ];
 ```
@@ -702,16 +704,37 @@ $attribute->subject(); # MorphTo
 
 Available operators:
 
+### Arithmetic Operators
+
 - `EQUALS`
 - `NOT_EQUALS`
 - `GREATER_THAN`
-- `
+- `LESS_THAN`
+- `GREATER_THAN_EQUALS`
+- `LESS_THAN_EQUALS`
+
+### String Operators
+
+- `CONTAINS`
+- `NOT_CONTAINS`
+- `STARTS_WITH`
+- `NOT_STARTS_WITH`
+- `ENDS_WITH`
+- `NOT_ENDS_WITH`
+
+### Logical Operators
+
+- `AND`
+- `OR`
+- `NOT`
 
 ## Context Value Resolution
 
-The ABAC system supports dynamic context value resolution in attribute comparisons. You can use special syntax to reference values from the access context:
+The ABAC system supports dynamic context value resolution in attribute comparisons. You can use special syntax to
+reference values from the access context:
 
 ### Subject Values
+
 ```php
 '$subject.id'              // Gets user ID
 '$subject.profile.name'    // Gets nested user property
@@ -719,6 +742,7 @@ The ABAC system supports dynamic context value resolution in attribute compariso
 ```
 
 ### Resource Values
+
 ```php
 '$resource'                // Gets resource name
 '$resource.file.name'      // Gets file name from resource context
@@ -726,11 +750,13 @@ The ABAC system supports dynamic context value resolution in attribute compariso
 ```
 
 ### Operation Value
+
 ```php
 '$operation'               // Gets current operation
 ```
 
 ### Custom Context Values
+
 ```php
 '$context.custom_value'    // Gets value from context array
 ```
@@ -769,4 +795,44 @@ $context = new AccessContext(
 );
 ```
 
-All operators (Arithmetic, String, and Logical) support context value resolution through the `HandlesContextValues` trait.
+All operators (Arithmetic, String, and Logical) support context value resolution through the `HandlesContextValues`
+trait.
+
+
+## License
+
+This package is open-sourced software licensed under the MIT license. See [LICENSE.md](LICENSE.md) for more details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+Before contributing, please read our [Contributing Guide](CONTRIBUTING.md) which covers:
+- Code of conduct and etiquette
+- Feature request guidelines
+- Pull request process
+- Coding standards
+
+### Development Setup
+
+1. Clone the repository
+2. Install dependencies: `composer install`
+3. Format code: `./vendor/bin/pint`
+
+### Coding Standards
+
+This package follows Laravel's coding standards using Laravel Pint. To format your code:
+
+```bash
+./vendor/bin/pint
+```
+
+To check the code without making changes:
+
+```bash
+./vendor/bin/pint --test
+```
+
+### Security
+
+If you discover any security-related issues, please email security@example.com instead of using the issue tracker.
