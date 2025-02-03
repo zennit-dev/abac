@@ -13,7 +13,7 @@ readonly class PolicyCollectionService
 
     public function index(int $policy): array
     {
-        return PolicyCollection::where('policy_id', $policy)->get();
+        return PolicyCollection::where('policy_id', $policy)->get()->toArray();
     }
 
     public function store(array $data, int $policy, bool $chain = false): array

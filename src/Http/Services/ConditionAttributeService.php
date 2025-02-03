@@ -9,7 +9,7 @@ readonly class ConditionAttributeService
 {
     public function index(int $condition): array
     {
-        return ConditionAttribute::where('collection_condition_id', $condition)->get();
+        return ConditionAttribute::where('collection_condition_id', $condition)->get()->toArray();
     }
 
     public function store(array $data, int $condition): array

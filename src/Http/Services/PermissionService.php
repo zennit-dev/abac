@@ -13,7 +13,7 @@ readonly class PermissionService
 
     public function index(): array
     {
-        return Permission::all();
+        return Permission::all()->toArray();
     }
 
     public function store(array $data, bool $chain = false): array
