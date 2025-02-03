@@ -18,8 +18,7 @@ readonly class AbacPolicyEvaluator
         private PolicyRepository $policyRepository,
         private AbacCacheManager $cache,
         private AbacCollectionEvaluator $collectionEvaluator
-    ) {
-    }
+    ) {}
 
     /**
      * Evaluate access based on policies.
@@ -70,7 +69,7 @@ readonly class AbacPolicyEvaluator
         }
 
         $matched = $policies
-            ->filter(fn (Policy $policy) => $this->evaluatePolicy($policy, $attributes))
+            ->filter(fn (Policy $policy) => $this->evaluatePolicy($policy, $attributes, $context))
             ->values()
             ->all();
 
@@ -91,13 +90,18 @@ readonly class AbacPolicyEvaluator
      *
      * @param  Policy  $policy  The policy to evaluate
      * @param  AttributeCollection  $attributes  The attributes to evaluate against
+     * @param  AccessContext  $context  The access context
      *
      * @return bool True if policy conditions are met
      */
-    private function evaluatePolicy(Policy $policy, AttributeCollection $attributes): bool
+    private function evaluatePolicy(Policy $policy, AttributeCollection $attributes, AccessContext $context): bool
     {
         return $policy->collections->every(
-            fn (PolicyCollection $collection) => $this->collectionEvaluator->evaluate($collection, $attributes)
+            fn (PolicyCollection $collection) => $this->collectionEvaluator->evaluate(
+                $collection,
+                $attributes,
+                $context
+            )
         );
     }
 }

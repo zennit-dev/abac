@@ -95,6 +95,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | ABAC Seeders Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This section defines the paths to the json files used by the ABAC seeders.
+    | These paths are relative to the resources' directory.
+    */
+    'seeders' => [
+        'user_attribute_path' => env('ABAC_USER_ATTRIBUTE_PATH', 'stubs/abac/user_attributes.json'),
+        'resource_attribute_path' => env('ABAC_RESOURCE_ATTRIBUTE_PATH', 'stubs/abac/resource_attributes.json'),
+        'permission_path' => env('ABAC_PERMISSION_PATH', 'stubs/abac/permissions.json'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | ABAC Middleware Configuration
     |--------------------------------------------------------------------------
     |

@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Services\Evaluators;
 
+use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AttributeCollection;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Models\CollectionCondition;
@@ -24,12 +25,16 @@ readonly class AbacCollectionEvaluator
      *
      * @param  PolicyCollection  $collection  The collection to evaluate
      * @param  AttributeCollection  $attributes  The attributes to evaluate against
+     * @param  AccessContext  $context  The access context for contextual evaluation
      *
      * @throws UnsupportedOperatorException If an operator is not supported
      * @return bool True if collection conditions are met
      */
-    public function evaluate(PolicyCollection $collection, AttributeCollection $attributes): bool
-    {
+    public function evaluate(
+        PolicyCollection $collection,
+        AttributeCollection $attributes,
+        AccessContext $context
+    ): bool {
         if ($collection->conditions->isEmpty()) {
             return false;
         }
@@ -38,7 +43,11 @@ readonly class AbacCollectionEvaluator
 
         return $operator->evaluate(
             $collection->conditions->map(
-                fn (CollectionCondition $condition) => $this->conditionEvaluator->evaluate($condition, $attributes)
+                fn (CollectionCondition $condition) => $this->conditionEvaluator->evaluate(
+                    $condition,
+                    $attributes,
+                    $context
+                )
             )->toArray(),
             $attributes
         );

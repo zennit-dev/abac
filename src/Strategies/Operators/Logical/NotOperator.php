@@ -2,20 +2,21 @@
 
 namespace zennit\ABAC\Strategies\Operators\Logical;
 
-use Illuminate\Support\Collection;
+use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Strategies\Contracts\LogicalOperatorInterface;
+use zennit\ABAC\Strategies\Traits\HandlesContextValues;
 
 class NotOperator implements LogicalOperatorInterface
 {
-    public function evaluate(mixed $values, mixed $against = []): bool
+    use HandlesContextValues;
+
+    public function evaluate(mixed $values, mixed $against = [], ?AccessContext $context = null): bool
     {
-        if ($values instanceof Collection) {
-            return !$values->every(fn ($value) => $value === true);
+        if (!$context) {
+            return false;
         }
 
-        if (is_array($values)) {
-            return in_array(false, $values, true) || empty($values);
-        }
+        $values = $this->resolveIfContextValue($values, $context);
 
         return !$values;
     }

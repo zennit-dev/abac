@@ -29,6 +29,9 @@ class PublishAbacEnvCommand extends Command
         'ABAC_USER_ATTRIBUTE_SUBJECT_TYPE' => 'users',
         'ABAC_MIDDLEWARE_SUBJECT_METHOD' => 'user',
         'ABAC_ROUTE_PREFIX' => 'abac',
+        'ABAC_USER_ATTRIBUTE_PATH' => 'stubs/abac/user_attributes.json',
+        'ABAC_RESOURCE_ATTRIBUTE_PATH' => 'stubs/abac/resource_attributes.json',
+        'ABAC_PERMISSION_PATH' => 'stubs/abac/permissions.json',
     ];
 
     public function handle(): void

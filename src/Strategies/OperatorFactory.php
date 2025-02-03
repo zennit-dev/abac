@@ -4,7 +4,7 @@ namespace zennit\ABAC\Strategies;
 
 use InvalidArgumentException;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Strategies\Contracts\OperatorInterface;
+use zennit\ABAC\Strategies\Contracts\Core\OperatorInterface;
 use zennit\ABAC\Strategies\Operators\Arithmetic\EqualsOperator;
 use zennit\ABAC\Strategies\Operators\Arithmetic\GreaterThanEqualsOperator;
 use zennit\ABAC\Strategies\Operators\Arithmetic\GreaterThanOperator;

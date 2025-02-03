@@ -64,6 +64,49 @@ return [
    php artisan migrate
    ```
 
+3. Create permissions using JSON:
+   ```json
+   {
+     "permissions": [
+       {
+         "resource": "posts",
+         "operation": "view"
+       }
+     ],
+     "policies": [
+       {
+         "name": "Can view user 5 posts",
+         "permission_id": 1
+       }
+     ],
+     "collections": [
+       {
+         "operator": "and",
+         "policy_id": 1
+       }
+     ],
+     "conditions": [
+       {
+         "operator": "and",
+         "policy_collection_id": 1
+       }
+     ],
+     "attributes": [
+       {
+         "collection_condition_id": 1,
+         "operator": "equals",
+         "attribute_name": "post_owner_id",
+         "attribute_value": "5"
+       }
+     ]
+   }
+   ```
+
+4. Run the seeder:
+   ```bash
+   php artisan db:seed
+   ```
+
 ---
 
 ## Basic Usage
@@ -395,6 +438,105 @@ return [
 ];
 ```
 
+### Permission JSON Structure
+
+The package supports defining permissions through JSON files. The structure should follow:
+
+```json
+{
+  "permissions": [
+    {
+      "resource": "string",
+      "operation": "string"
+    }
+  ],
+  "policies": [
+    {
+      "name": "string",
+      "permission_id": "integer"
+    }
+  ],
+  "collections": [
+    {
+      "operator": "string",
+      "policy_id": "integer"
+    }
+  ],
+  "conditions": [
+    {
+      "operator": "string",
+      "policy_collection_id": "integer"
+    }
+  ],
+  "attributes": [
+    {
+      "collection_condition_id": "integer",
+      "operator": "string",
+      "attribute_name": "string",
+      "attribute_value": "string"
+    }
+  ]
+}
+```
+
+The JSON file path can be configured in your `.env`:
+
+```bash
+ABAC_PERMISSION_PATH=permissions.json
+```
+
+### Resource Attributes JSON Structure
+
+The package supports defining resource attributes through JSON files. Create a JSON file with the following structure:
+
+```json
+[
+  {
+    "resource": "posts",
+    "attribute_name": "post_owner_id",
+    "attribute_value": "5"
+  },
+  {
+    "resource": "posts",
+    "attribute_name": "status",
+    "attribute_value": "published"
+  }
+]
+```
+
+The resource attributes JSON file path can be configured in your `.env`:
+
+```bash
+ABAC_RESOURCE_ATTRIBUTE_PATH=resource-attributes.json
+```
+
+### User Attributes JSON Structure
+
+The package supports defining user attributes through JSON files. Create a JSON file with the following structure:
+
+```json
+[
+  {
+    "subject_id": 1,
+    "attribute_name": "role",
+    "attribute_value": "admin"
+  },
+  {
+    "subject_id": 5,
+    "attribute_name": "department",
+    "attribute_value": "engineering"
+  }
+]
+```
+
+The user attributes JSON file path can be configured in your `.env`:
+
+```bash
+ABAC_USER_ATTRIBUTE_PATH=user-attributes.json
+```
+
+Note: The `subject_type` is automatically set from your configuration `ABAC_USER_ATTRIBUTE_SUBJECT_TYPE`.
+
 ## Database Schema
 
 The package creates the following tables:
@@ -563,207 +705,68 @@ Available operators:
 - `EQUALS`
 - `NOT_EQUALS`
 - `GREATER_THAN`
-- `LESS_THAN`
-- `GREATER_THAN_EQUALS`
-- `LESS_THAN_EQUALS`
-- `IN`
-- `NOT_IN`
-- `CONTAINS`
-- `NOT_CONTAINS`
-- `STARTS_WITH`
-- `NOT_STARTS_WITH`
-- `ENDS_WITH`
-- `NOT_ENDS_WITH`
-- `AND`
-- `OR`
-- `NOT`
+- `
 
----
+## Context Value Resolution
 
-## Middleware
+The ABAC system supports dynamic context value resolution in attribute comparisons. You can use special syntax to reference values from the access context:
 
-Protect your routes with ABAC middleware:
-
+### Subject Values
 ```php
-# In RouteServiceProvider
-Route::middleware(['abac'])
-    ->group(function () {
-        # Protected routes
-    });
+'$subject.id'              // Gets user ID
+'$subject.profile.name'    // Gets nested user property
+'$subject.department'      // Gets user department
 ```
 
-### Excluding Routes
+### Resource Values
+```php
+'$resource'                // Gets resource name
+'$resource.file.name'      // Gets file name from resource context
+'$resource.metadata.type'  // Gets resource metadata
+```
 
-You can exclude routes from ABAC checks using the configuration:
+### Operation Value
+```php
+'$operation'               // Gets current operation
+```
+
+### Custom Context Values
+```php
+'$context.custom_value'    // Gets value from context array
+```
+
+### Example Usage
 
 ```php
-'middleware' => [
-    'subject_method' => env('ABAC_SUBJECT_METHOD', 'user'),
-    'excluded_routes' => [
-        // Simple wildcard pattern - excludes all methods
-        'current-user*',    // Matches current-user, current-user/profile, etc.
-        'stats*',           // Matches stats, stats/daily, etc.
-        
-        // Exclude specific methods for a route pattern
-        [
-            'path' => 'cities*',  // Wildcard support
-            'method' => ['GET', 'POST', 'PUT']  // Array of methods to exclude
+// Define a policy condition
+$condition = [
+    'operator' => 'equals',
+    'attribute_name' => 'owner_id',
+    'attribute_value' => '$subject.id'  // Will be replaced with actual user ID
+];
+
+// Check if file type matches
+$condition = [
+    'operator' => 'contains',
+    'attribute_name' => '$resource.file.type',
+    'attribute_value' => 'image'
+];
+
+// Access context with custom values
+$context = new AccessContext(
+    resource: 'files',
+    operation: 'view',
+    subject: $user,
+    context: [
+        'resource' => [
+            'file' => [
+                'name' => 'document.pdf',
+                'type' => 'document'
+            ]
         ],
-        
-        // Exclude all methods for a specific path
-        [
-            'path' => 'countries*',
-            'method' => '*'
-        ],
-        
-        // Exclude single method
-        [
-            'path' => 'states*',
-            'method' => 'GET'
-        ]
-    ],
-],
+        'custom_value' => 'test'
+    ]
+);
 ```
 
-The excluded routes support:
-
-- Wildcard patterns (`*`) in paths
-- Method-specific exclusions
-- Multiple methods per route
-- Case-insensitive matching
-- Trailing slash handling
-
----
-
-## Events
-
-The following events are dispatched:
-
-- `CacheWarmed` - When cache warming completes with:
-    - Policy count
-    - Duration
-    - Next warming schedule
-    - Resource information
-
----
-
-## Advanced Usage
-
-### Subject Attributes
-
-```php
-use zennit\ABAC\Models\UserAttribute;
-
-# Add attributes to a subject
-UserAttribute::create([
-    'subject_type' => get_class($subject),
-    'subject_id' => $subject->id,
-    'attribute_name' => 'role',
-    'attribute_value' => 'admin'
-]);
-```
-
-### Resource Attributes
-
-```php
-use zennit\ABAC\Models\ResourceAttribute;
-
-# Add attributes to a resource
-ResourceAttribute::create([
-    'resource' => 'posts',
-    'attribute_name' => 'status',
-    'attribute_value' => 'published'
-]);
-```
-
-### Batch Processing
-
-```php
-use zennit\ABAC\Jobs\PolicyCacheJob;
-
-# Warm cache for all policies
-PolicyCacheJob::dispatch('warm');
-
-# Warm cache for specific resource
-PolicyCacheJob::dispatch('warm', 'posts');
-
-# Invalidate cache
-PolicyCacheJob::dispatch('invalidate');
-```
-
----
-
-## Caching
-
-### Cache System
-
-The package includes a comprehensive caching system that caches:
-
-- Policy definitions and conditions
-- User attributes
-- Resource attributes
-- Policy evaluation results
-- Attribute collections
-
-### Cache Management
-
-```php
-use zennit\ABAC\Jobs\PolicyCacheJob;
-
-# Invalidate all caches
-PolicyCacheJob::dispatch('invalidate');
-
-# Invalidate specific resource
-PolicyCacheJob::dispatch('invalidate', 'posts');
-
-# Warm all caches
-PolicyCacheJob::dispatch('warm');
-
-# Warm specific resource
-PolicyCacheJob::dispatch('warm', 'posts');
-```
-
-### Automatic Cache Invalidation
-
-The cache automatically invalidates when:
-
-- Policies are modified
-- User attributes change
-- Resource attributes change
-- Permissions are updated
-
-### Cache Events
-
-```php
-use zennit\ABAC\Events\CacheWarmed;
-
-Event::listen(CacheWarmed::class, function (CacheWarmed $event) {
-    Log::info("Cache warmed: {$event->policiesCount} policies");
-    Log::info("Next warming: {$event->getNextWarming()}");
-});
-```
-
----
-
-## Requirements
-
-- PHP ^8.2
-- Laravel ^11.2
-
----
-
-## Contributing
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
----
-
-## Security
-
-If you discover any security-related issues, please email contact@zennit.dev.
-
----
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+All operators (Arithmetic, String, and Logical) support context value resolution through the `HandlesContextValues` trait.
