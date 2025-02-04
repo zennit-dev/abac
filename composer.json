@@ -11,10 +11,10 @@
         "authorization",
         "permissions"
     ],
-    "homepage": "https://github.com/somethim/abac",
+    "homepage": "https://github.com/zennit-dev/abac",
     "support": {
-        "issues": "https://github.com/somethim/abac/issues",
-        "source": "https://github.com/somethim/abac"
+        "issues": "https://github.com/zennit-dev/abac/issues",
+        "source": "https://github.com/zennit-dev/abac"
     },
     "readme": "README.md",
     "authors": [
@@ -81,7 +81,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/somethim/abac"
+            "url": "https://github.com/zennit-dev/abac"
         }
     ]
 }
