@@ -835,4 +835,4 @@ To check the code without making changes:
 
 ### Security
 
-If you discover any security-related issues, please email security@example.com instead of using the issue tracker.
+If you discover any security-related issues, please email support@zennit.dev instead of using the issue tracker.
