@@ -89,7 +89,7 @@ return [
     */
 
     'database' => [
-        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
+        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', App\Models\User::class),
         'user_soft_deletes_column' => 'deleted_at',
     ],
 

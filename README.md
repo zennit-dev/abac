@@ -373,6 +373,7 @@ ABAC_PERMISSION_PATH=stubs/abac/permissions.json # Path to the permissions JSON 
 <?php
 
 return [
+   
     'cache' => [
         'enabled' => env('ABAC_CACHE_ENABLED', true),
         'store' => env('ABAC_CACHE_STORE', 'database'),
@@ -405,10 +406,16 @@ return [
         'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
     'database' => [
-        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', 'users'),
+        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', App\Models\User::class),
+        'user_soft_deletes_column' => 'deleted_at',
+    ],
+    'seeders' => [
+        'user_attribute_path' => env('ABAC_USER_ATTRIBUTE_PATH', 'stubs/abac/user_attributes.json'),
+        'resource_attribute_path' => env('ABAC_RESOURCE_ATTRIBUTE_PATH', 'stubs/abac/resource_attributes.json'),
+        'permission_path' => env('ABAC_PERMISSION_PATH', 'stubs/abac/permissions.json'),
     ],
     'middleware' => [
-        'subject_method' => env('ABAC_SUBJECT_METHOD', 'user'),
+        'subject_method' => env('ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
         'excluded_routes' => [
             // Simple wildcard pattern - excludes all methods
             'current-user*',    // Matches current-user, current-user/profile, etc.
@@ -435,7 +442,7 @@ return [
     ],
     'routes' => [
         'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
-        'middleware' => ['auth:sanctum', 'abac'], or 'auth:sanctum,abac'
+        'middleware' => ['auth:sanctum', 'abac'],
     ],
 ];
 ```

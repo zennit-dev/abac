@@ -41,15 +41,18 @@ readonly class AbacCollectionEvaluator
 
         $operator = $this->operatorFactory->create($collection->operator);
 
+        $checks = $collection->conditions->map(
+            fn (CollectionCondition $condition) => $this->conditionEvaluator->evaluate(
+                $condition,
+                $attributes,
+                $context
+            )
+        )->toArray();
+
         return $operator->evaluate(
-            $collection->conditions->map(
-                fn (CollectionCondition $condition) => $this->conditionEvaluator->evaluate(
-                    $condition,
-                    $attributes,
-                    $context
-                )
-            )->toArray(),
-            $attributes
+            $checks,
+            $attributes,
+            $context
         );
     }
 }

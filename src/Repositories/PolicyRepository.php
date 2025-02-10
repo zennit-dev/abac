@@ -50,7 +50,7 @@ readonly class PolicyRepository
     public function getQuery(): Builder
     {
         return Policy::query()
-            ->with(['permission', 'conditions.attributes']);
+            ->with(['permission', 'collections.conditions.attributes']);
     }
 
     /**

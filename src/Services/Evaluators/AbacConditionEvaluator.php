@@ -36,17 +36,18 @@ readonly class AbacConditionEvaluator
 
         $operator = $this->operatorFactory->create($condition->operator);
 
-        return $operator->evaluate(
-            $condition->attributes->map(function ($attribute) use ($attributes, $context) {
-                $attributeOperator = $this->operatorFactory->create($attribute->operator);
+        $checks =  $condition->attributes->map(
+            fn ($attribute) => $this->operatorFactory->create($attribute->operator)->evaluate(
+                $attributes->get($attribute->attribute_name),
+                $attribute->attribute_value,
+                $context
+            )
+        )->toArray();
 
-                return $attributeOperator->evaluate(
-                    $attributes->get($attribute->attribute_name),
-                    $attribute->attribute_value,
-                    $context
-                );
-            })->toArray(),
-            $attributes
+        return $operator->evaluate(
+            $checks,
+            $attributes,
+            $context
         );
     }
 }
