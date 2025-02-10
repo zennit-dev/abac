@@ -40,6 +40,10 @@ readonly class AbacPolicyEvaluator
             $attributes->hash()
         );
 
+        logger($cacheKey);
+        $policies = $this->policyRepository->getPoliciesFor($context->resource, $context->operation);
+        logger('Policies', $policies->toArray());
+
         return $this->cache->rememberPolicyEvaluation($cacheKey, function () use ($context, $attributes) {
             $policies = $this->policyRepository->getPoliciesFor($context->resource, $context->operation);
 
@@ -89,9 +93,9 @@ readonly class AbacPolicyEvaluator
     /**
      * Evaluate a single policy against attributes.
      *
-     * @param  Policy  $policy  The policy to evaluate
-     * @param  AttributeCollection  $attributes  The attributes to evaluate against
-     * @param  AccessContext  $context  The access context
+     * @param Policy $policy The policy to evaluate
+     * @param AttributeCollection $attributes The attributes to evaluate against
+     * @param AccessContext $context The access context
      *
      * @return bool True if policy conditions are met
      */

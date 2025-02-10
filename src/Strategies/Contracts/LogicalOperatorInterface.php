@@ -10,5 +10,5 @@ interface LogicalOperatorInterface extends OperatorInterface
     /**
      * Evaluates a collection of boolean values
      */
-    public function evaluate(mixed $values, mixed $against = null, AccessContext $context): bool;
+    public function evaluate(mixed $values, mixed $against, AccessContext $context): bool;
 }

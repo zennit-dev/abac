@@ -28,7 +28,6 @@ readonly class AbacAttributeLoader
      */
     public function loadForContext(AccessContext $context): AttributeCollection
     {
-        // Cache user attributes
         $subjectAttributes = $this->cache->rememberUserAttributes(
             $context->subject->id,
             get_class($context->subject),
@@ -54,9 +53,13 @@ readonly class AbacAttributeLoader
     private function loadUserAttributes(AccessContext $context): array
     {
         $attributes = [];
+
+        $subjectType = get_class($context->subject);
+        $subjectId = $context->subject->id;
+
         $subjectAttributes = UserAttribute::query()
-            ->where('subject_type', get_class($context->subject))
-            ->where('subject_id', $context->subject->id)
+            ->where('subject_type', $subjectType)
+            ->where('subject_id', $subjectId)
             ->get();
 
         foreach ($subjectAttributes as $attribute) {

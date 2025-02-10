@@ -27,7 +27,8 @@ readonly class EnsurePermissions
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
-    ) {}
+    ) {
+    }
 
     /**
      * Handle an incoming request.
@@ -41,12 +42,16 @@ readonly class EnsurePermissions
      */
     public function handle(Request $request, Closure $next): Response
     {
+
         if (!$request->user()) {
             return $this->unauthorizedResponse('Unauthorized, you need to sign in');
         }
 
+
+
         $currentPath = $request->path();
         $excludedRoutes = $this->getExcludedRoutes();
+
 
         // Check each excluded route
         foreach ($excludedRoutes as $pattern) {
@@ -75,6 +80,45 @@ readonly class EnsurePermissions
 
             return $next($request);
         }
+    }
+
+    /**
+     * Return a standardized unauthorized response.
+     * Creates a JSON response with error message for unauthorized access.
+     *
+     * @param  string  $message  The error message to return
+     *
+     * @return Response The HTTP response with 401 status
+     */
+    private function unauthorizedResponse(string $message): Response
+    {
+        return response()->json(
+            ['error' => $message],
+            Response::HTTP_UNAUTHORIZED
+        );
+    }
+
+    /**
+     * Match path against pattern, supporting wildcards
+     */
+    private function matchPath(string $path, string $pattern): bool
+    {
+        $path = trim($path, '/');
+        $pattern = trim($pattern, '/');
+
+        // Direct match check
+        if ($path === $pattern) {
+            return true;
+        }
+
+        // Wildcard check
+        if (str_ends_with($pattern, '*')) {
+            $basePattern = rtrim($pattern, '*');
+
+            return str_starts_with($path, $basePattern);
+        }
+
+        return false;
     }
 
     /**
@@ -110,57 +154,47 @@ readonly class EnsurePermissions
             context: []
         );
 
+
+
+
         return $this->abac->can($context);
     }
 
     /**
-     * Match the request methods against PermissionOperations
+     * Check if the current route is in the excluded routes list
      */
-    private function matchRequestOperation(string $method): ?string
+    private function isExcludedRoute(Request $request): bool
     {
-        return match ($method) {
-            'GET' => PermissionOperations::INDEX->value,
-            'POST' => PermissionOperations::CREATE->value,
-            'PUT', 'PATCH' => PermissionOperations::UPDATE->value,
-            'DELETE' => PermissionOperations::DELETE->value,
-            default => null,
-        };
-    }
+        $currentPath = $request->path();
+        $currentMethod = strtoupper($request->method());
+        $excludedRoutes = $this->getExcludedRoutes();
 
-    /**
-     * Define the subject for permission checking.
-     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
-     *
-     * @param  Request  $request  The incoming HTTP request
-     *
-     * @throws RuntimeException When the configured subject method doesn't exist
-     * @return object|null The subject for permission checking
-     */
-    public function defineSubject(Request $request): ?object
-    {
-        $method = $this->getSubjectMethod();
+        foreach ($excludedRoutes as $route) {
+            // If route is string, exclude all methods
+            if (is_string($route) && $this->matchPath($currentPath, $route)) {
+                return true;
+            }
 
-        if (!is_callable([$request, $method])) {
-            throw new RuntimeException("Subject method '$method' is not callable on request");
+            // If route is array with method and path
+            if (is_array($route) && isset($route['path'])) {
+                if (!$this->matchPath($currentPath, $route['path'])) {
+                    continue;
+                }
+
+                // If method is not specified or is '*', exclude all methods
+                if (!isset($route['method']) || $route['method'] === '*') {
+                    return true;
+                }
+
+                // Handle both string and array method definitions
+                $methods = (array) $route['method'];
+                if (in_array($currentMethod, array_map('strtoupper', $methods))) {
+                    return true;
+                }
+            }
         }
 
-        return $request->$method();
-    }
-
-    /**
-     * Return a standardized unauthorized response.
-     * Creates a JSON response with error message for unauthorized access.
-     *
-     * @param  string  $message  The error message to return
-     *
-     * @return Response The HTTP response with 401 status
-     */
-    private function unauthorizedResponse(string $message): Response
-    {
-        return response()->json(
-            ['error' => $message],
-            Response::HTTP_UNAUTHORIZED
-        );
+        return false;
     }
 
     /**
@@ -210,62 +244,36 @@ readonly class EnsurePermissions
     }
 
     /**
-     * Check if the current route is in the excluded routes list
+     * Match the request methods against PermissionOperations
      */
-    private function isExcludedRoute(Request $request): bool
+    private function matchRequestOperation(string $method): ?string
     {
-        $currentPath = $request->path();
-        $currentMethod = strtoupper($request->method());
-        $excludedRoutes = $this->getExcludedRoutes();
-
-        foreach ($excludedRoutes as $route) {
-            // If route is string, exclude all methods
-            if (is_string($route) && $this->matchPath($currentPath, $route)) {
-                return true;
-            }
-
-            // If route is array with method and path
-            if (is_array($route) && isset($route['path'])) {
-                if (!$this->matchPath($currentPath, $route['path'])) {
-                    continue;
-                }
-
-                // If method is not specified or is '*', exclude all methods
-                if (!isset($route['method']) || $route['method'] === '*') {
-                    return true;
-                }
-
-                // Handle both string and array method definitions
-                $methods = (array) $route['method'];
-                if (in_array($currentMethod, array_map('strtoupper', $methods))) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return match ($method) {
+            'GET' => PermissionOperations::INDEX->value,
+            'POST' => PermissionOperations::CREATE->value,
+            'PUT', 'PATCH' => PermissionOperations::UPDATE->value,
+            'DELETE' => PermissionOperations::DELETE->value,
+            default => null,
+        };
     }
 
     /**
-     * Match path against pattern, supporting wildcards
+     * Define the subject for permission checking.
+     * Retrieves the subject from the request using the method configured in abac.middleware.subject_method.
+     *
+     * @param  Request  $request  The incoming HTTP request
+     *
+     * @throws RuntimeException When the configured subject method doesn't exist
+     * @return object|null The subject for permission checking
      */
-    private function matchPath(string $path, string $pattern): bool
+    public function defineSubject(Request $request): ?object
     {
-        $path = trim($path, '/');
-        $pattern = trim($pattern, '/');
+        $method = $this->getSubjectMethod();
 
-        // Direct match check
-        if ($path === $pattern) {
-            return true;
+        if (!is_callable([$request, $method])) {
+            throw new RuntimeException("Subject method '$method' is not callable on request");
         }
 
-        // Wildcard check
-        if (str_ends_with($pattern, '*')) {
-            $basePattern = rtrim($pattern, '*');
-
-            return str_starts_with($path, $basePattern);
-        }
-
-        return false;
+        return $request->$method();
     }
 }

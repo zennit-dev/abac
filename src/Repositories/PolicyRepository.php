@@ -43,17 +43,6 @@ readonly class PolicyRepository
     }
 
     /**
-     * Get the base query builder for policies.
-     *
-     * @return Builder Query builder for policies
-     */
-    public function getQuery(): Builder
-    {
-        return Policy::query()
-            ->with(['permission', 'collections.conditions.attributes']);
-    }
-
-    /**
      * Get the query builder for policies filtered by resource.
      *
      * @param  string  $resource  The resource to filter by
@@ -67,6 +56,17 @@ readonly class PolicyRepository
                 'permission',
                 fn ($query) => $query->where('resource', $resource)
             );
+    }
+
+    /**
+     * Get the base query builder for policies.
+     *
+     * @return Builder Query builder for policies
+     */
+    public function getQuery(): Builder
+    {
+        return Policy::query()
+            ->with(['permission', 'collections.conditions.attributes']);
     }
 
     /**

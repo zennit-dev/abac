@@ -79,6 +79,9 @@ readonly class AbacService implements AbacManager
     {
         $attributes = $this->attributeLoader->loadForContext($context);
 
+        logger('attributes', $attributes->all());
+
+
         if ($this->getStrictValidation()) {
             $this->validateContext($context);
         }

@@ -7,7 +7,9 @@ use zennit\ABAC\Models\Permission;
 
 readonly class PermissionService
 {
-    public function __construct(protected PolicyService $service) {}
+    public function __construct(protected PolicyService $service)
+    {
+    }
 
     public function index(): array
     {
