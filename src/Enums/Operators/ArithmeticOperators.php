@@ -10,7 +10,6 @@ enum ArithmeticOperators: string
     case LESS_THAN = 'less_than';
     case GREATER_THAN_EQUALS = 'greater_than_equals';
     case LESS_THAN_EQUALS = 'less_than_equals';
-    case NOT = 'not';
 
     public static function values(): array
     {

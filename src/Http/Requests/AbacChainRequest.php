@@ -30,7 +30,6 @@ class AbacChainRequest extends Request
                 if (!$this->filled('policy_id') && !$value) {
                     $fail('You must set either chain_id or policy_id');
                 }
-
             }],
             'checks' => ['array'],
         ];

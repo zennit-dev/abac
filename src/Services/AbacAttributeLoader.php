@@ -42,13 +42,13 @@ readonly class AbacAttributeLoader
     /**
      * Load attributes associated with a resource.
      *
-     * @param object $subject
+     * @param object|null $subject
      *
      * @return array Array of resource attributes
      */
-    public function loadAllSubjectAttributes(object $subject): array
+    public function loadAllSubjectAttributes(?object $subject): array
     {
-        $attributes = $subject->toArray();
+        $attributes = $subject?->toArray() ?? [];
         $additionalAttributes = $this->loadAdditionalSubjectAttributes($subject);
 
         return [...$attributes, ...$additionalAttributes];

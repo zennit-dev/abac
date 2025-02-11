@@ -32,10 +32,6 @@ readonly class AbacChainEvaluator
         AbacChain $link,
         AccessContext $context
     ): bool {
-        if (!$context->subject || !$context->object) {
-            return false;
-        }
-
         $operator = $this->operatorFactory->create($link->operator);
 
         $related_chains = array_map(function ($chain) {

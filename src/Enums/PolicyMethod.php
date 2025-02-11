@@ -4,8 +4,7 @@ namespace zennit\ABAC\Enums;
 
 enum PolicyMethod: string
 {
-    case INDEX = 'index';
-    case SHOW = 'show';
+    case READ = 'read';
     case CREATE = 'create';
     case UPDATE = 'update';
     case DELETE = 'delete';

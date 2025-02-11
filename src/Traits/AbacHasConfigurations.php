@@ -113,18 +113,8 @@ trait AbacHasConfigurations
         return config('abac.middleware.excluded_routes', []);
     }
 
-    public function getPathResources(): array
+    public function getPathPatterns(): array
     {
-        return array_merge($this->getCollectionPathResources(), $this->getSinglePathResources());
-    }
-
-    public function getCollectionPathResources(): array
-    {
-        return config('abac.middleware.path_resources.collections', []);
-    }
-
-    public function getSinglePathResources(): array
-    {
-        return config('abac.middleware.path_resources.singles', []);
+        return config('abac.middleware.path_patterns', []);
     }
 }

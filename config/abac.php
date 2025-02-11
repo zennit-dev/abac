@@ -120,9 +120,6 @@ return [
     'middleware' => [
         'object_method' => env('ABAC_MIDDLEWARE_OBJECT_METHOD', 'user'),
         'excluded_routes' => [],
-        'path_resources' => [
-            'collections' => [], // regex => class name in the format of 'App\Models\ModelName'; for collection resources
-            'singles' => [], // regex => class name in the format of 'App\Models\ModelName'; for single resources
-        ],
+        'path_patterns' => [], // key => resource path eg.
     ],
 ];

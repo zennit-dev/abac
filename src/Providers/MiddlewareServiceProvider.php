@@ -3,12 +3,12 @@
 namespace zennit\ABAC\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use zennit\ABAC\Http\Middleware\EnsurePermissions;
+use zennit\ABAC\Http\Middleware\EnsureAccess;
 
 class MiddlewareServiceProvider extends ServiceProvider
 {
     protected array $middlewareAliases = [
-        'abac' => EnsurePermissions::class,
+        'abac' => EnsureAccess::class,
     ];
 
     public function boot(): void

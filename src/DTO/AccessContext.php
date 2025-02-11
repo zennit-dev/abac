@@ -26,6 +26,8 @@ class AccessContext implements JsonSerializable
             'method' => $this->method,
             'subject' => $this->subject,
             'object' => $this->object,
+            'object_type' => $this->object_type,
+            'subject_type' => $this->subject_type,
         ];
     }
 }

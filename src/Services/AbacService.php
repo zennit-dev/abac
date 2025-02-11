@@ -32,20 +32,21 @@ readonly class AbacService implements AbacManager
      *
      * @param AccessContext $context The access context containing subject, resource, and operation
      *
-     * @throws InvalidArgumentException If cache operations fail
      * @throws UnsupportedOperatorException
      * @throws ValidationException If the context is invalid
+     * @throws InvalidArgumentException If cache operations fail
      * @return bool True if access is granted, false otherwise
      */
     public function can(AccessContext $context): bool
     {
         return $this->monitor->measure('policy_evaluation', function () use ($context) {
-            $cacheKey = "access:{$context->object['id']}:{$context->subject['id']}:$context->method";
+            $subject = $context->subject['id'] ?? $context->method;
+            $cacheKey = "access:{$context->object['id']}:$subject:$context->method";
 
             /** @var bool $result */
             $result = $this->cache->remember(
                 $cacheKey,
-                fn () => $this->evaluateAccess($context)
+                fn (): bool => $this->evaluateAccess($context)
             );
 
             if ($this->getLoggingEnabled()) {
@@ -61,8 +62,8 @@ readonly class AbacService implements AbacManager
      *
      * @param AccessContext $context The access context to evaluate
      *
-     * @throws UnsupportedOperatorException
      * @throws ValidationException If the context is invalid
+     * @throws UnsupportedOperatorException
      * @return bool The evaluation result with detailed information
      */
     private function evaluateAccess(AccessContext $context): bool
@@ -83,17 +84,12 @@ readonly class AbacService implements AbacManager
     /**
      * Validate the access context.
      *
-     * @param  AccessContext  $context  The context to validate
+     * @param AccessContext $context The context to validate
      *
      * @throws ValidationException If the context is invalid
      */
     private function validateContext(AccessContext $context): void
     {
         app(AccessContextValidator::class)->validate($context);
-    }
-
-    public function evaluate(AccessContext $context)
-    {
-        // todo: return the matched resources
     }
 }

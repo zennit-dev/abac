@@ -9,6 +9,7 @@ use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\DTO\EmptyObject;
 use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Exceptions\ValidationException;
@@ -23,7 +24,7 @@ use zennit\ABAC\Traits\AbacHasConfigurations;
  * Middleware implementation for ABAC permission checking.
  * Validates user access to resources based on configured policies and subjects.
  */
-readonly class EnsurePermissions
+readonly class EnsureAccess
 {
     use AbacHasConfigurations;
 
@@ -49,13 +50,7 @@ readonly class EnsurePermissions
                 return $this->unauthorizedResponse();
             }
 
-            $cacheKey = $this->buildCacheKey($request);
-            $hasAccess = $this->cacheManager->remember(
-                $cacheKey,
-                fn () => $this->checkAccess($request)
-            );
-
-            if (!$hasAccess) {
+            if (!$this->checkAccess($request)) {
                 return $this->unauthorizedResponse();
             }
 
@@ -76,21 +71,9 @@ readonly class EnsurePermissions
     private function unauthorizedResponse(): Response
     {
         return response()->json(
-            ['error' => 'Unauthorized to access this route'],
+            ['error' => 'Unauthorized to access this route.'],
             Response::HTTP_UNAUTHORIZED
         );
-    }
-
-    /**
-     * Build a unique cache key for the request
-     */
-    private function buildCacheKey(Request $request): string
-    {
-        $user = $request->user();
-        $path = $request->path();
-        $method = $request->method();
-
-        return "permission_check:$user->id:$path:$method";
     }
 
     /**
@@ -188,32 +171,13 @@ readonly class EnsurePermissions
      */
     private function matchRequestOperation(Request $request): ?string
     {
-        $method = strtoupper($request->method());
-        $path = trim($request->path(), '/');
-        if ($method === 'GET') {
-            return $this->isSingleResource($path) ? PolicyMethod::SHOW->value : PolicyMethod::INDEX->value;
-        }
-
-        return match ($method) {
+        return match (strtoupper($request->method())) {
+            'GET', 'HEAD' => PolicyMethod::READ->value,
             'POST' => PolicyMethod::CREATE->value,
             'PUT', 'PATCH' => PolicyMethod::UPDATE->value,
             'DELETE' => PolicyMethod::DELETE->value,
             default => null,
         };
-    }
-
-    private function isSingleResource(string $path): bool
-    {
-        $resources = $this->getPathResources();
-        $singlePatterns = $resources['singles'] ?? [];
-
-        foreach ($singlePatterns as $pattern => $modelClass) {
-            if (preg_match("#$pattern#", $path)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -222,37 +186,54 @@ readonly class EnsurePermissions
      *
      * @param Request $request The incoming HTTP request
      *
-     * @return object|null The subject for permission checking
+     * @return object The subject for permission checking
      */
-    private function defineSubject(Request $request): ?object
+    private function defineSubject(Request $request): object
     {
         $path = trim($request->path(), '/');
-        $resources = $this->getPathResources();
+        $patterns = $this->getPathPatterns();
 
-        // Check singles first (they're more specific)
-        $modelClass = $this->findMatchingModelClass($path, $resources['singles'] ?? []);
-
-        // If no single resource matched, check collections
-        if (!$modelClass) {
-            return $this->findMatchingModelClass($path, $resources['collections'] ?? []);
-        }
-
-        return $modelClass;
+        return $this->findMatchingSubject($path, $patterns);
     }
 
     /**
-     * Find the matching model class for a given path
+     * Find the matching model class for a given path and handle different ID types
      */
-    private function findMatchingModelClass(string $path, array $patterns): ?object
+    private function findMatchingSubject(string $path, array $patterns): object
     {
         foreach ($patterns as $pattern => $modelClass) {
             $escapedPattern = preg_quote($pattern, '#');
             if (preg_match("#$escapedPattern#", $path)) {
-                return new $modelClass();
+                $pathParts = explode('/', $path);
+                $id = end($pathParts);
+
+                if (empty($id)) {
+                    continue;
+                }
+
+                if ($this->isValidUuid($id)) {
+                    return $modelClass::where('id', $id)->first();
+                }
+
+                if (is_numeric($id)) {
+                    return $modelClass::find($id);
+                }
+
+                if (method_exists($modelClass, 'findBySlug')) {
+                    return $modelClass::findBySlug($id);
+                }
             }
         }
 
-        return null;
+        return new EmptyObject();
+    }
+
+    /**
+     * Check if a string is a valid UUID
+     */
+    private function isValidUuid(string $uuid): bool
+    {
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $uuid) === 1;
     }
 
     /**
@@ -262,9 +243,9 @@ readonly class EnsurePermissions
      * @param Request $request The incoming HTTP request
      *
      * @throws RuntimeException When the configured object method doesn't exist
-     * @return object|null The object for permission checking
+     * @return object The object for permission checking
      */
-    private function defineObject(Request $request): ?object
+    private function defineObject(Request $request): object
     {
         $method = $this->getObjectMethod();
 
@@ -272,6 +253,12 @@ readonly class EnsurePermissions
             throw new RuntimeException("Object method '$method' is not callable on request");
         }
 
-        return $request->$method();
+        $object = $request->$method();
+
+        if (is_null($object)) {
+            throw new RuntimeException("Object method '$method' returned null");
+        }
+
+        return $object;
     }
 }

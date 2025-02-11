@@ -27,9 +27,6 @@ readonly class AbacCheckEvaluator
         AbacCheck $check,
         AccessContext $context
     ): bool {
-        if (!$context->subject || !$context->object) {
-            return false;
-        }
         $operator = $this->operatorFactory->create($check->operator);
 
         return $operator->evaluate(
