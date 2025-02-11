@@ -108,7 +108,7 @@ readonly class EnsurePermissions
         }
 
         // If not excluded, check ABAC permissions
-        $method = $this->matchRequestOperation($request->method(), $this->isSingleResource($request));
+        $method = $this->matchRequestOperation($request);
 
         $context = new AccessContext(
             method:       $method,
@@ -186,10 +186,12 @@ readonly class EnsurePermissions
     /**
      * Match the request methods against PermissionOperations
      */
-    private function matchRequestOperation(string $method, bool $isSingleResource = false): ?string
+    private function matchRequestOperation(Request $request): ?string
     {
+        $method = strtoupper($request->method());
+        $path = trim($request->path(), '/');
         if ($method === 'GET') {
-            return $isSingleResource ? PolicyMethod::SHOW->value : PolicyMethod::INDEX->value;
+            return $this->isSingleResource($path) ? PolicyMethod::SHOW->value : PolicyMethod::INDEX->value;
         }
 
         return match ($method) {
@@ -200,9 +202,8 @@ readonly class EnsurePermissions
         };
     }
 
-    private function isSingleResource(Request $request): bool
+    private function isSingleResource(string $path): bool
     {
-        $path = trim($request->path(), '/');
         $resources = $this->getPathResources();
         $singlePatterns = $resources['singles'] ?? [];
 

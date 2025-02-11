@@ -44,7 +44,6 @@ return new class () extends Migration
             $table->unique(['resource', 'method']);
         });
 
-        // chain always evaluates to bool
         Schema::create('abac_chains', function (Blueprint $table) {
             $table->id();
             $table->enum('operator', LogicalOperators::values());
