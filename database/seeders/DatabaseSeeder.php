@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Psr\SimpleCache\InvalidArgumentException;
 use Throwable;
-use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Models\ResourceAttribute;
-use zennit\ABAC\Models\UserAttribute;
+use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 use zennit\ABAC\Services\AbacCacheManager;
 
 class DatabaseSeeder extends Seeder
@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                         // Access Control Base (arbitrary dependencies on other tables)
                         UserAttributeSeeder::class,
                         ResourceAttributeSeeder::class,
-                        PermissionSeeder::class,
+                        PolicySeeder::class,
                     ]);
 
                     // Warm the ABAC cache after ABAC seeders are complete
@@ -58,10 +58,10 @@ class DatabaseSeeder extends Seeder
         $cacheManager = app(AbacCacheManager::class);
 
         // Cache policies and their relationships
-        $cacheManager->warmPolicies(Policy::all());
+        $cacheManager->warmPolicies(AbacPolicy::all());
 
         // Cache resource attributes
-        $resources = ResourceAttribute::all()->groupBy('resource');
+        $resources = AbacSubjectAdditionalAttribute::all()->groupBy('resource');
         foreach ($resources as $resource => $attributes) {
             $cacheManager->remember(
                 'resource_attributes:' . $resource,
@@ -70,7 +70,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Cache user attributes
-        $userAttributes = UserAttribute::all()->groupBy(function ($attribute) {
+        $userAttributes = AbacObjectAdditionalAttributes::all()->groupBy(function ($attribute) {
             return "user_attributes:$attribute->subject_type:$attribute->subject_id";
         });
         foreach ($userAttributes as $key => $attributes) {

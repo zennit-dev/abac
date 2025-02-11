@@ -97,19 +97,34 @@ trait AbacHasConfigurations
     }
 
     // Database Configuration
-    public function getUserAttributeSubjectType(): string
+    public function getObjectAdditionalAttributes(): string
     {
-        return config('abac.database.user_attribute_subject_type', 'users');
+        return config('abac.database.object_additional_attributes', 'App\Models\User');
     }
 
     // Middleware Configuration
-    public function getSubjectMethod(): string
+    public function getObjectMethod(): string
     {
-        return config('abac.middleware.subject_method', 'user');
+        return config('abac.middleware.object_method', 'user');
     }
 
     public function getExcludedRoutes(): array
     {
         return config('abac.middleware.excluded_routes', []);
+    }
+
+    public function getPathResources(): array
+    {
+        return array_merge($this->getCollectionPathResources(), $this->getSinglePathResources());
+    }
+
+    public function getCollectionPathResources(): array
+    {
+        return config('abac.middleware.path_resources.collections', []);
+    }
+
+    public function getSinglePathResources(): array
+    {
+        return config('abac.middleware.path_resources.singles', []);
     }
 }

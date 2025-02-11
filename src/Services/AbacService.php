@@ -5,10 +5,12 @@ namespace zennit\ABAC\Services;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\EvaluationResult;
+use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Logging\AuditLogger;
-use zennit\ABAC\Services\Evaluators\AbacPolicyEvaluator;
+use zennit\ABAC\Models\AbacChain;
+use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 use zennit\ABAC\Validators\AccessContextValidator;
 
@@ -19,40 +21,28 @@ readonly class AbacService implements AbacManager
     public function __construct(
         private AbacCacheManager $cache,
         private AbacAttributeLoader $attributeLoader,
-        private AbacPolicyEvaluator $evaluator,
+        private AbacChainEvaluator $evaluator,
         private AuditLogger $logger,
         private AbacPerformanceMonitor $monitor
     ) {
     }
 
     /**
-     * Check if a subject has permission to perform an operation on a resource.
+     * AbacCheck if a subject has permission to perform an operation on a resource.
      *
-     * @param  AccessContext  $context  The access context containing subject, resource, and operation
+     * @param AccessContext $context The access context containing subject, resource, and operation
      *
-     * @throws ValidationException If the context is invalid
      * @throws InvalidArgumentException If cache operations fail
+     * @throws UnsupportedOperatorException
+     * @throws ValidationException If the context is invalid
      * @return bool True if access is granted, false otherwise
      */
     public function can(AccessContext $context): bool
     {
-        return $this->evaluate($context)->granted;
-    }
-
-    /**
-     * Evaluate an access request and return detailed results.
-     *
-     * @param  AccessContext  $context  The access context to evaluate
-     *
-     * @throws ValidationException If the context is invalid
-     * @throws InvalidArgumentException If cache operations fail
-     * @return EvaluationResult The detailed evaluation result
-     */
-    public function evaluate(AccessContext $context): EvaluationResult
-    {
         return $this->monitor->measure('policy_evaluation', function () use ($context) {
-            $cacheKey = "access:{$context->subject->id}:$context->resource:$context->operation";
+            $cacheKey = "access:{$context->object['id']}:{$context->subject['id']}:$context->method";
 
+            /** @var bool $result */
             $result = $this->cache->remember(
                 $cacheKey,
                 fn () => $this->evaluateAccess($context)
@@ -69,24 +59,25 @@ readonly class AbacService implements AbacManager
     /**
      * Perform the actual access evaluation logic.
      *
-     * @param  AccessContext  $context  The access context to evaluate
+     * @param AccessContext $context The access context to evaluate
      *
+     * @throws UnsupportedOperatorException
      * @throws ValidationException If the context is invalid
-     * @throws InvalidArgumentException If cache operations fail
-     * @return EvaluationResult The evaluation result with detailed information
+     * @return bool The evaluation result with detailed information
      */
-    private function evaluateAccess(AccessContext $context): EvaluationResult
+    private function evaluateAccess(AccessContext $context): bool
     {
-        $attributes = $this->attributeLoader->loadForContext($context);
-
-        logger('attributes', $attributes->all());
-
-
         if ($this->getStrictValidation()) {
             $this->validateContext($context);
         }
 
-        return $this->evaluator->evaluate($context, $attributes);
+        $policy = AbacPolicy::where('method', $context->method)
+            ->where('resource', $context->subject_type)
+            ->first();
+
+        $chain = AbacChain::whereIn('policy_id', $policy->id)->first();
+
+        return $this->evaluator->evaluate($chain, $context);
     }
 
     /**
@@ -99,5 +90,10 @@ readonly class AbacService implements AbacManager
     private function validateContext(AccessContext $context): void
     {
         app(AccessContextValidator::class)->validate($context);
+    }
+
+    public function evaluate(AccessContext $context)
+    {
+        // todo: return the matched resources
     }
 }

@@ -1,17 +1,13 @@
 <?php
 
-use zennit\ABAC\Http\Controllers\CollectionConditionController;
-use zennit\ABAC\Http\Controllers\ConditionAttributeController;
-use zennit\ABAC\Http\Controllers\PermissionController;
-use zennit\ABAC\Http\Controllers\PolicyCollectionController;
-use zennit\ABAC\Http\Controllers\PolicyController;
-use zennit\ABAC\Http\Controllers\ResourceAttributeController;
-use zennit\ABAC\Http\Controllers\UserAttributeController;
+use zennit\ABAC\Http\Controllers\AbacChainController;
+use zennit\ABAC\Http\Controllers\AbacCheckController;
+use zennit\ABAC\Http\Controllers\AbacObjectAdditionalAttributesController;
+use zennit\ABAC\Http\Controllers\AbacPolicyController;
+use zennit\ABAC\Http\Controllers\AbacSubjectAdditionalAttributeController;
 
-Route::apiResource('user-attributes', UserAttributeController::class);
-Route::apiResource('resource-attributes', ResourceAttributeController::class);
-Route::apiResource('permissions', PermissionController::class);
-Route::apiResource('permissions.policies', PolicyController::class)->except('index');
-Route::apiResource('permissions.policies.collections', PolicyCollectionController::class)->except('index');
-Route::apiResource('permissions.policies.collections.conditions', CollectionConditionController::class)->except('index');
-Route::apiResource('permissions.policies.collections.conditions.attributes', ConditionAttributeController::class)->except('index');
+Route::apiResource('object-attributes', AbacObjectAdditionalAttributesController::class);
+Route::apiResource('subject-attributes', AbacSubjectAdditionalAttributeController::class);
+Route::apiResource('policies', AbacPolicyController::class);
+Route::apiResource('policies.chains', AbacChainController::class);
+Route::apiResource('policies.chains.checks', AbacCheckController::class);

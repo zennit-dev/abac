@@ -26,7 +26,7 @@ trait HandlesContextValues
         return match ($parts[0]) {
             'subject' => $this->resolveSubjectValue($parts, $context),
             'resource' => $this->resolveResourceValue($parts, $context),
-            'operation' => $context->operation,
+            'operation' => $context->method,
             'context' => $this->resolveCustomContextValue($parts, $context),
             default => $value
         };
@@ -41,28 +41,7 @@ trait HandlesContextValues
         array_shift($parts);
         $path = implode('.', $parts);
 
-        return $this->getNestedValue($context->subject, $path);
-    }
-
-    private function resolveResourceValue(array $parts, AccessContext $context): mixed
-    {
-        if (count($parts) === 1) {
-            return $context->resource;
-        }
-
-        array_shift($parts);
-        $path = implode('.', $parts);
-
-        return $this->getNestedValue($context->context['resource'] ?? [], $path);
-    }
-
-    private function resolveCustomContextValue(array $parts, AccessContext $context): mixed
-    {
-        if (!isset($parts[1])) {
-            return null;
-        }
-
-        return $context->context[$parts[1]] ?? null;
+        return $this->getNestedValue($context->object, $path);
     }
 
     /**
@@ -90,5 +69,26 @@ trait HandlesContextValues
         }
 
         return $current;
+    }
+
+    private function resolveResourceValue(array $parts, AccessContext $context): mixed
+    {
+        if (count($parts) === 1) {
+            return $context->subject;
+        }
+
+        array_shift($parts);
+        $path = implode('.', $parts);
+
+        return $this->getNestedValue($context->context['resource'] ?? [], $path);
+    }
+
+    private function resolveCustomContextValue(array $parts, AccessContext $context): mixed
+    {
+        if (!isset($parts[1])) {
+            return null;
+        }
+
+        return $context->context[$parts[1]] ?? null;
     }
 }

@@ -12,8 +12,8 @@ use Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Jobs\PolicyCacheJob;
-use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Models\ResourceAttribute;
+use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 readonly class AbacCacheManager
@@ -140,7 +140,7 @@ readonly class AbacCacheManager
     /**
      * Warm up the cache for policies and their related resource attributes.
      *
-     * @param  Collection<Policy>  $policies  Collection of Policy models to cache
+     * @param  Collection<AbacPolicy>  $policies  Collection of ABACPolicy models to cache
      *
      * @throws InvalidArgumentException
      */
@@ -151,7 +151,7 @@ readonly class AbacCacheManager
 
         /**
          * @var int|null|string $key
-         * @var Policy $groupPolicies
+         * @var AbacPolicy $groupPolicies
          */
         foreach ($policyGroups as $key => $groupPolicies) {
             [$resource] = explode(':', $key);
@@ -165,7 +165,7 @@ readonly class AbacCacheManager
             // Cache resource attributes
             $this->remember(
                 self::CACHE_KEYS['resource_attributes'] . ":$resource",
-                fn () => ResourceAttribute::where('resource', $resource)->get()->all()
+                fn () => AbacSubjectAdditionalAttribute::where('resource', $resource)->get()->all()
             );
         }
 

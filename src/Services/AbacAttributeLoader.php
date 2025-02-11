@@ -2,66 +2,36 @@
 
 namespace zennit\ABAC\Services;
 
-use Psr\SimpleCache\InvalidArgumentException;
-use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\AttributeCollection;
-use zennit\ABAC\Models\ResourceAttribute;
-use zennit\ABAC\Models\UserAttribute;
+use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 readonly class AbacAttributeLoader
 {
     use AbacHasConfigurations;
 
-    public function __construct(
-        private AbacCacheManager $cache,
-    ) {
-    }
-
-    /**
-     * Load all attributes required for evaluating an access context.
-     *
-     * @param AccessContext $context The context containing subject and resource
-     *
-     * @throws InvalidArgumentException If cache operations fail
-     * @return AttributeCollection Collection of all relevant attributes
-     */
-    public function loadForContext(AccessContext $context): AttributeCollection
-    {
-        $subjectAttributes = $this->cache->rememberUserAttributes(
-            $context->subject->id,
-            get_class($context->subject),
-            fn () => $this->loadUserAttributes($context)
-        );
-
-        // Cache resource attributes
-        $resourceAttributes = $this->cache->rememberResourceAttributes(
-            $context->resource,
-            fn () => $this->loadResourceAttributes($context)
-        );
-
-        return new AttributeCollection([...$subjectAttributes, ...$resourceAttributes]);
-    }
-
     /**
      * Load attributes associated with a user/subject.
      *
-     * @param AccessContext $context The context containing the subject
+     * @param object $object The context containing the subject
      *
      * @return array Array of user attributes
      */
-    private function loadUserAttributes(AccessContext $context): array
+    public function loadAllObjectAttributes(object $object): array
     {
-        $attributes = [];
+        $attributes = $object->toArray();
+        $additionalAttributes = $this->loadAdditionalObjectAttributes($object->id);
 
-        $subjectType = get_class($context->subject);
-        $subjectId = $context->subject->id;
+        return [...$attributes, ...$additionalAttributes];
+    }
 
-        $subjectAttributes = UserAttribute::query()
-            ->where('subject_type', $subjectType)
+    private function loadAdditionalObjectAttributes(int $subjectId): array
+    {
+        $subjectAttributes = AbacObjectAdditionalAttributes::query()
             ->where('subject_id', $subjectId)
             ->get();
 
+        $attributes = [];
         foreach ($subjectAttributes as $attribute) {
             $attributes["subject.$attribute->attribute_name"] = $attribute->attribute_value;
         }
@@ -72,18 +42,30 @@ readonly class AbacAttributeLoader
     /**
      * Load attributes associated with a resource.
      *
-     * @param AccessContext $context The context containing the resource
+     * @param object $subject
      *
      * @return array Array of resource attributes
      */
-    private function loadResourceAttributes(AccessContext $context): array
+    public function loadAllSubjectAttributes(object $subject): array
     {
-        $attributes = [];
-        $resourceAttributes = ResourceAttribute::query()
-            ->where('resource', $context->resource)
+        $attributes = $subject->toArray();
+        $additionalAttributes = $this->loadAdditionalSubjectAttributes($subject);
+
+        return [...$attributes, ...$additionalAttributes];
+    }
+
+    private function loadAdditionalSubjectAttributes(object $subject): array
+    {
+        $additionalAttributes = AbacSubjectAdditionalAttribute::query()
+            ->where('subject', get_class($subject))
+            ->where(function ($query) use ($subject) {
+                $query->where('subject_id', $subject->id)
+                    ->orWhere('subject_id', null);
+            })
             ->get();
 
-        foreach ($resourceAttributes as $attribute) {
+        $attributes = [];
+        foreach ($additionalAttributes as $attribute) {
             $attributes["resource.$attribute->attribute_name"] = $attribute->attribute_value;
         }
 

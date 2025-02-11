@@ -6,20 +6,16 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\Jobs\PolicyCacheJob;
-use zennit\ABAC\Models\CollectionCondition;
-use zennit\ABAC\Models\ConditionAttribute;
-use zennit\ABAC\Models\Permission;
-use zennit\ABAC\Models\Policy;
-use zennit\ABAC\Models\PolicyCollection;
-use zennit\ABAC\Models\ResourceAttribute;
-use zennit\ABAC\Models\UserAttribute;
-use zennit\ABAC\Observers\PermissionObserver;
-use zennit\ABAC\Observers\PolicyCollectionObserver;
-use zennit\ABAC\Observers\PolicyConditionAttributeObserver;
-use zennit\ABAC\Observers\PolicyConditionObserver;
-use zennit\ABAC\Observers\PolicyObserver;
-use zennit\ABAC\Observers\ResourceAttributeObserver;
-use zennit\ABAC\Observers\UserAttributeObserver;
+use zennit\ABAC\Models\AbacChain;
+use zennit\ABAC\Models\AbacCheck;
+use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
+use zennit\ABAC\Observers\AbacChainObserver;
+use zennit\ABAC\Observers\AbacCheckObserver;
+use zennit\ABAC\Observers\AbacObjectAdditionalAttributeObserver;
+use zennit\ABAC\Observers\AbacPolicyObserver;
+use zennit\ABAC\Observers\AbacSubjectAdditionalAttributeObserver;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
@@ -51,6 +47,8 @@ class AbacServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+
         if ($this->getCacheEnabled() && $this->getCacheWarmingEnabled()) {
             $this->registerCacheWarmingJob();
             $this->registerObservers();
@@ -85,12 +83,10 @@ class AbacServiceProvider extends ServiceProvider
      */
     protected function registerObservers(): void
     {
-        ResourceAttribute::observe(ResourceAttributeObserver::class);
-        UserAttribute::observe(UserAttributeObserver::class);
-        Permission::observe(PermissionObserver::class);
-        Policy::observe(PolicyObserver::class);
-        PolicyCollection::observe(PolicyCollectionObserver::class);
-        CollectionCondition::observe(PolicyConditionObserver::class);
-        ConditionAttribute::observe(PolicyConditionAttributeObserver::class);
+        AbacSubjectAdditionalAttribute::observe(AbacSubjectAdditionalAttributeObserver::class);
+        AbacObjectAdditionalAttributes::observe(AbacObjectAdditionalAttributeObserver::class);
+        AbacPolicy::observe(AbacPolicyObserver::class);
+        AbacChain::observe(AbacChainObserver::class);
+        AbacCheck::observe(AbacCheckObserver::class);
     }
 }

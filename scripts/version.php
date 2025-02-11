@@ -60,7 +60,7 @@ class VersionUpdater
 
     private function createGitTag(string $version): void
     {
-        // Check if we're in a git repository
+        // AbacCheck if we're in a git repository
         if (!is_dir(dirname(__DIR__) . '/.git')) {
             echo "Warning: Not a git repository\n";
 

@@ -3,11 +3,12 @@
 namespace zennit\ABAC\Facades;
 
 use BadMethodCallException;
+use Closure;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Facades\Route;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Exceptions\ValidationException;
 
 /**
@@ -17,7 +18,6 @@ use zennit\ABAC\Exceptions\ValidationException;
  * subject attributes, resource attributes, and operations.
  *
  * @method static bool can(AccessContext $context)
- * @method static EvaluationResult evaluate(AccessContext $context)
  *
  * @throws ValidationException If the access context is invalid
  * @throws InvalidArgumentException If cache operations fail
@@ -41,5 +41,28 @@ class Abac extends Facade
     protected static function getFacadeAccessor(): string
     {
         return AbacManager::class;
+    }
+
+    /**
+     * Register the ABAC routes.
+     *
+     * @param array $options Array of options, supports:
+     *                      - middleware: string|array of middleware to apply
+     *                      - prefix: string (optional) prefix for the routes, defaults to 'api'
+     *
+     * @return Closure
+     */
+    public static function routes(array $options = []): Closure
+    {
+        return function () use ($options) {
+            $middleware = $options['middleware'] ?? ['api'];
+            $prefix = $options['prefix'] ?? 'api';
+
+            Route::middleware($middleware)
+                ->prefix($prefix)
+                ->group(function () {
+                    require __DIR__ . '/../../routes/api.php';
+                });
+        };
     }
 }

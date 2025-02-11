@@ -7,10 +7,11 @@ use JsonSerializable;
 class AccessContext implements JsonSerializable
 {
     public function __construct(
-        public string $resource,
-        public string $operation,
-        public object $subject,
-        public ?array $context = []
+        public string $method,
+        public array $subject,
+        public array $object,
+        public string $object_type,
+        public string $subject_type,
     ) {
     }
 
@@ -22,12 +23,9 @@ class AccessContext implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'resource' => $this->resource,
-            'operation' => $this->operation,
-            'subject' => method_exists($this->subject, 'toArray')
-                ? $this->subject->toArray()
-                : get_object_vars($this->subject),
-            'context' => $this->context,
+            'method' => $this->method,
+            'subject' => $this->subject,
+            'object' => $this->object,
         ];
     }
 }

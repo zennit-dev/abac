@@ -4,13 +4,11 @@ namespace zennit\ABAC\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Logging\AuditLogger;
-use zennit\ABAC\Repositories\PolicyRepository;
 use zennit\ABAC\Services\AbacAttributeLoader;
 use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Services\AbacPerformanceMonitor;
 use zennit\ABAC\Services\AbacService;
-use zennit\ABAC\Services\Evaluators\AbacCollectionEvaluator;
-use zennit\ABAC\Services\Evaluators\AbacPolicyEvaluator;
+use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
 use zennit\ABAC\Strategies\OperatorFactory;
 use zennit\ABAC\Validators\AccessContextValidator;
 
@@ -18,13 +16,11 @@ class ServicesServiceProvider extends ServiceProvider
 {
     public array $singletons = [
         AbacCacheManager::class,
-        AbacPolicyEvaluator::class,
         AuditLogger::class,
         AbacPerformanceMonitor::class,
-        AbacCollectionEvaluator::class,
+        AbacChainEvaluator::class,
         OperatorFactory::class,
         AccessContextValidator::class,
-        PolicyRepository::class,
         AbacAttributeLoader::class,
         AbacService::class,
     ];

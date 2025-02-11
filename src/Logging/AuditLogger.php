@@ -4,7 +4,6 @@ namespace zennit\ABAC\Logging;
 
 use Illuminate\Support\Facades\Log;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 readonly class AuditLogger
@@ -16,15 +15,16 @@ readonly class AuditLogger
      * Records both successful and failed access attempts with relevant metadata.
      *
      * @param AccessContext $context The access context containing subject and resource
-     * @param EvaluationResult $result The result of the policy evaluation
+     * @param bool $result The result of the policy evaluation
      */
-    public function logAccess(AccessContext $context, EvaluationResult $result): void
+    public function logAccess(AccessContext $context, bool $result): void
     {
         $message = sprintf(
-            'Access %s for resource "%s" operation "%s"',
-            $result->granted ? 'granted' : 'denied',
-            $context->resource,
-            $context->operation
+            'Access %s for resource "%s" operation "%s" by %s',
+            $result ? 'granted' : 'denied',
+            $context->subject_type,
+            $context->method,
+            $context->object_type,
         );
 
         $this->log('info', $message, [

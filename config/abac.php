@@ -89,8 +89,8 @@ return [
     */
 
     'database' => [
-        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', App\Models\User::class),
-        'user_soft_deletes_column' => 'deleted_at',
+        'object_additional_attributes' => env('ABAC_OBJECT_ADDITIONAL_ATTRIBUTES', 'App\Models\User'),
+        'soft_deletes_column' => 'deleted_at',
     ],
 
     /*
@@ -102,9 +102,9 @@ return [
     | These paths are relative to the resources' directory.
     */
     'seeders' => [
-        'user_attribute_path' => env('ABAC_USER_ATTRIBUTE_PATH', 'stubs/abac/user_attributes.json'),
-        'resource_attribute_path' => env('ABAC_RESOURCE_ATTRIBUTE_PATH', 'stubs/abac/resource_attributes.json'),
-        'permission_path' => env('ABAC_PERMISSION_PATH', 'stubs/abac/permissions.json'),
+        'object_attribute_path' => 'stubs/abac/object_attribute_path.json',
+        'subject_attribute_path' => 'stubs/abac/subject_attribute_path.json',
+        'policy_file_path' => 'stubs/abac/abac_policy_file_path.json',
     ],
 
     /*
@@ -118,22 +118,11 @@ return [
     */
 
     'middleware' => [
-        'subject_method' => env('ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
+        'object_method' => env('ABAC_MIDDLEWARE_OBJECT_METHOD', 'user'),
         'excluded_routes' => [],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | ABAC Route Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This section defines the settings for ABAC routes, including the
-    | route prefix and any route middleware.
-    |
-    */
-
-    'routes' => [
-        'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
-        'middleware' => ['auth:sanctum', 'abac'],
+        'path_resources' => [
+            'collections' => [], // regex => class name in the format of 'App\Models\ModelName'; for collection resources
+            'singles' => [], // regex => class name in the format of 'App\Models\ModelName'; for single resources
+        ],
     ],
 ];

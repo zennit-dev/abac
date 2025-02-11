@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Events\CacheWarmed;
-use zennit\ABAC\Repositories\PolicyRepository;
+use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
@@ -33,11 +33,10 @@ class PolicyCacheJob implements ShouldQueue
      * Handles both cache warming and invalidation operations.
      *
      * @param AbacCacheManager $cache The cache manager service
-     * @param PolicyRepository $repository The policy repository
      *
      * @throws InvalidArgumentException If cache operations fail
      */
-    public function handle(AbacCacheManager $cache, PolicyRepository $repository): void
+    public function handle(AbacCacheManager $cache): void
     {
         if (!$this->getCacheEnabled() || !$this->getCacheWarmingEnabled()) {
             return;
@@ -49,15 +48,15 @@ class PolicyCacheJob implements ShouldQueue
         Log::info("Starting cache $this->action job" . ($resource ? " for resource: $resource" : ''));
 
         match ($this->action) {
-            'warm' => $this->warmCache($cache, $repository),
+            'warm' => $this->warmCache($cache),
             'invalidate' => $cache->flush(),
             default => null
         };
 
         if ($this->action === 'warm' && $this->getEventsEnabled()) {
             $count = $resource
-                ? $repository->getPoliciesQueryFor($resource)->count()
-                : $repository->getQuery()->count();
+                ? AbacPolicy::where('resource', $this->resource)->count()
+                : AbacPolicy::all()->count();
 
             $duration = microtime(true) - $startTime;
             $metadata = [
@@ -74,15 +73,14 @@ class PolicyCacheJob implements ShouldQueue
      * Loads and caches policies either for a specific resource or all resources.
      *
      * @param AbacCacheManager $cache The cache manager service
-     * @param PolicyRepository $repository The policy repository
      *
      * @throws InvalidArgumentException If cache operations fail
      */
-    private function warmCache(AbacCacheManager $cache, PolicyRepository $repository): void
+    private function warmCache(AbacCacheManager $cache): void
     {
         $policies = $this->resource
-            ? $repository->getPoliciesForResourceGrouped($this->resource)
-            : $repository->getPoliciesGrouped();
+            ? AbacPolicy::where('resource', $this->resource)->get()
+            : AbacPolicy::all();
 
         $policies->each(
             fn ($group) => $cache->warmPolicies($group->all())

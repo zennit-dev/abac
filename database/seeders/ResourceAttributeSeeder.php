@@ -3,7 +3,7 @@
 namespace zennit\ABAC\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use zennit\ABAC\Models\ResourceAttribute;
+use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 
 class ResourceAttributeSeeder extends Seeder
 {
@@ -26,7 +26,7 @@ class ResourceAttributeSeeder extends Seeder
         }
 
         foreach ($resourceAttributes as $attr) {
-            ResourceAttribute::create($attr);
+            AbacSubjectAdditionalAttribute::create($attr);
         }
     }
 }

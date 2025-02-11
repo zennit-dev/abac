@@ -63,41 +63,90 @@ return [
 
 3. Create permissions using JSON:
    ```json
-   {
-     "permissions": [
-       {
-         "resource": "posts",
-         "operation": "view"
-       }
-     ],
-     "policies": [
-       {
-         "name": "Can view user 5 posts",
-         "permission_id": 1
-       }
-     ],
-     "collections": [
-       {
-         "operator": "and",
-         "policy_id": 1
-       }
-     ],
-     "conditions": [
-       {
-         "operator": "and",
-         "policy_collection_id": 1
-       }
-     ],
-     "attributes": [
-       {
-         "collection_condition_id": 1,
-         "operator": "equals",
-         "attribute_name": "post_owner_id",
-         "attribute_value": "5"
-       }
-     ]
-   }
-   ```
+    "object_attributes": [{
+        "object_id": 1,
+        "attribute_name": "owner_id",
+        "attribute_value": "5"
+    }],
+    "subject_attributes": [{
+        "subject": "App\\Models\\User",
+        "subject_id": 1,
+        "attribute_name": "role",
+        "attribute_value": "admin"
+    }],
+    "policies": [{
+        "resource": "posts",
+        "method": "view",
+        "chains": [{
+            "operator": "and",
+            "chains": [
+                {
+                    "operator": "or",
+                    "chains": [
+                        {
+                            "operator": "and",
+                            "chains": [{
+                                "operator": "or",
+                                "checks": [
+                                    {
+                                        "operator": "greater_than",
+                                        "context_accessor": "object.view_count",
+                                        "value": "1000"
+                                    },
+                                    {
+                                        "operator": "contains",
+                                        "context_accessor": "object.title",
+                                        "value": "featured"
+                                    }
+                                ]
+                            }]
+                        },
+                        {
+                            "operator": "and",
+                            "checks": [
+                                {
+                                    "operator": "less_than_equals",
+                                    "context_accessor": "object.age_restriction",
+                                    "value": "18"
+                                },
+                                {
+                                    "operator": "starts_with",
+                                    "context_accessor": "subject.permission_level",
+                                    "value": "senior"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "operator": "or",
+                    "checks": [
+                        {
+                            "operator": "not_ends_with",
+                            "context_accessor": "object.category",
+                            "value": "restricted"
+                        },
+                        {
+                            "operator": "not",
+                            "context_accessor": "subject.access_level",
+                            "value": "0"
+                        }
+                    ]
+                }
+            ]
+        }]
+    }]
+
+```
+
+   This JSON structure follows the database schema:
+   - `object_attributes`: Maps to `abac_object_additional_attributes` table
+   - `subject_attributes`: Maps to `abac_subject_additional_attributes` table
+   - `policies`: Maps to `abac_policies` table
+   - `chains`: Maps to `abac_chains` table (supports nested chains via `chain_id`)
+   - `checks`: Maps to `abac_checks` table
+
+   Note: The `chains` array supports nested structures where a chain can reference another chain using the `chain_id` field. Either `chain_id` or `checks` must be provided in a chain, but not both.
 
 4. Run the seeder:
    ```bash
@@ -112,25 +161,22 @@ Here's an example of how to perform access control checks:
 
 ```php
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\EvaluationResult;
 use zennit\ABAC\Facades\Abac;
 
 # Using the Facade
 $context = new AccessContext(
-    subject: $user,
-    resource: 'posts',
-    operation: 'update',
-    resourceIds: [$postId] # null or [] for all
+    method:       $method,
+    subject:      (new AbacAttributeLoader())->loadAllSubjectAttributes(get_class('App\Models\User')),
+    object:       (new AbacAttributeLoader())->loadAllSubjectAttributes(get_class('App\Models\Post')),
+    object_type:  get_class('App\Models\User'),
+    subject_type: get_class('App\Models\Post'),
 );
 
-# Check returns boolean
+# AbacCheck returns boolean
 $hasAccess = Abac::can($context);
 
-# Detailed evaluation returns EvaluationResult
-$result = Abac::evaluate($context);
-
 # Using the helper functions
-$hasAccess = abacPolicy()->can($user, 'posts', 'update', [$postId]);
+$hasAccess = abacPolicy()->can($context);
 
 # Cache management helper
 abacCache()->warm('posts');  # Warm cache for posts
@@ -139,20 +185,6 @@ abacCache()->clear();        # Clear all cache
 ```
 
 The `can()` method evaluates the access request and returns a boolean indicating whether access is granted.
-
-The `evaluate()` method returns an `EvaluationResult` object with detailed information about the evaluation:
-
-```php
-class EvaluationResult
-{
-    public function __construct(
-        public readonly bool $granted,
-        public readonly array $matchedPolicies = [],
-        public readonly array $failedPolicies = [],
-        public readonly ?string $reason = null
-    ) {}
-}
-```
 
 The evaluation result is automatically cached using the subject ID, resource, and operation as the cache key.
 
@@ -163,100 +195,108 @@ The evaluation result is automatically cached using the subject ID, resource, an
 The following API routes are available for managing ABAC-related data. These routes are protected by the `abac`
 middleware and can be prefixed using the `ABAC_ROUTE_PREFIX` environment variable:
 
-### User Attributes
+### Object Attributes
 
-- **Endpoint**: `/{prefix}/user-attributes`
+- **Endpoint**: `/{prefix}/object-attributes`
 - **Request Body**:
   ```json
   {
-    "subject_type": "string",
-    "subject_id": "string"
-  }
-  ```
-
-### Resource Attributes
-
-- **Endpoint**: `/{prefix}/resource-attributes`
-- **Request Body**:
-  ```json
-  {
-    "resource": "string",
+    "object_id": "integer",
     "attribute_name": "string",
     "attribute_value": "string"
   }
   ```
 
-### Permissions
+### Subject Attributes
 
-- **Endpoint**: `/{prefix}/permissions`
+- **Endpoint**: `/{prefix}/subject-attributes`
 - **Request Body**:
   ```json
   {
-    "resource": "string",
-    "operation": "string",
-    "policies": "array"
+    "subject": "string",
+    "subject_id": "integer",
+    "attribute_name": "string",
+    "attribute_value": "string"
   }
   ```
-- `policies` is required only if query parameter `chain` is set to `true`
-- **Optional Query Parameter**: `chain`
 
 ### Policies
 
-- **Endpoint**: `/{prefix}/permissions/{permission}/policies`
+- **Endpoint**: `/{prefix}/policies`
 - **Request Body**:
+  ```json
+  {
+    "resource": "string",
+    "method": "string",
+    "chains": "array, optional"
+  }
+  ```
 
-```json
+### Chains
+
+- **Endpoint**: `/{prefix}/policies/{policy}/chains`
+- **Request Body**:
+  ```json
+  {
+    "operator": "string",
+    "chain_id": "integer|null",
+    "policy_id": "integer|null",
+    "checks": "array, optional"
+  }
+  ```
+
+    - **Either chain_id or policy_id must be provided. Providing both will result in an exception.**
+
+### Checks
+
+- **Endpoint**: `/{prefix}/policies/{policy}/chains/{chain}/checks`
+- **Request Body**:
+  ```json
+  {
+    "chain_id": "integer",
+    "operator": "string",
+    "context_accessor": "string",
+    "value": "string"
+  }
+  ```
+
+To register the ABAC routes in your application, create a new service provider:
+
+```bash
+php artisan make:provider AbacServiceProvider
+```
+
+Then update the provider to register the routes:
+
+```php
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use zennit\ABAC\Facades\Abac;
+
+class AbacRoutesServiceProvider extends ServiceProvider
 {
-  "name": "string",
-  "permission_id": "integer",
-  "policy_collection": "array"
+    public function boot()
+    {
+        // Register ABAC routes with custom middleware
+        Abac::routes([
+            'middleware' => ['api', 'auth'],  // Add your middleware here
+            'prefix' => 'abac'                // Optional: customize the route prefix
+        ]);
+    }
 }
 ```
 
-- `policy_collection` is required only if query parameter `chain` is set to `true`
-- **Optional Query Parameter**: `chain`
+Register your new service provider in `config/app.php`:
 
-### Policy Collections
-
-- **Endpoint**: `/{prefix}/permissions/{permission}/policies/{policy}/collections`
-- **Request Body**:
-  ```json
-  {
-    "operator": "string",
-    "policy_id": "integer",
-    "collection_conditions": "array"
-  }
-  ```
-- `collection_conditions` is required only if query parameter `chain` is set to `true`
-- **Optional Query Parameter**: `chain`
-
-### Collection Conditions
-
-- **Endpoint**: `/{prefix}/permissions/{permission}/policies/{policy}/collections/{collection}/conditions`
-- **Request Body**:
-  ```json
-  {
-    "operator": "string",
-    "policy_collection_id": "integer",
-    "condition_attributes": "array"
-  }
-  ```
-- `condition_attributes` is required only if query parameter `chain` is set to `true`
-- **Optional Query Parameter**: `chain`
-
-### Condition Attributes
-
-- **Endpoint**:
-  `/{prefix}/permissions/{permission}/policies/{policy}/collections/{collection}/conditions/{condition}/attributes`
-- **Request Body**:
-  ```json
-  {
-    "collection_condition_id": "integer",
-    "operator": "string",
-    "attribute_name": "string",
-    "attribute_value": "string"
-  }
-  ```
+```php
+'providers' => [
+    // ...
+    App\Providers\AbacRoutesServiceProvider::class,
+],
+```
 
 ---
 
@@ -333,38 +373,21 @@ php artisan abac:publish-env --force
 ### Environment Variables
 
 ```bash
-# ABAC Cache Configuration
-ABAC_CACHE_ENABLED=true # Enables or disables caching in the package.
-ABAC_CACHE_STORE=${CACHE_STORE} # Defines the cache store to use (e.g., database, file, redis).
-ABAC_CACHE_TTL=${SESSION_LIFETIME} # Sets the cache time-to-live (TTL) duration in seconds.
-ABAC_CACHE_PREFIX=abac_ # Prefix to use for cache keys.
-ABAC_CACHE_WARMING_ENABLED=true # Toggles automated cache warming functionality.
-ABAC_CACHE_WARMING_SCHEDULE=hourly # Specifies the cache warming schedule (e.g., hourly, daily).
-
-# ABAC Validation Configuration
-ABAC_STRICT_VALIDATION=true # Enforces strict validation of attributes and access configurations.
-
-# ABAC Logging Configuration
-ABAC_LOGGING_ENABLED=true # Enables or disables logging of ABAC activities.
-ABAC_LOG_CHANNEL=${LOG_CHANNEL} # Specifies the logging channel dedicated to ABAC logs.
-ABAC_DETAILED_LOGGING=false # Enables detailed logging of each access evaluation.
-ABAC_PERFORMANCE_LOGGING_ENABLED=true # Toggles logging of access evaluation performance metrics.
-ABAC_SLOW_EVALUATION_THRESHOLD=100 # Threshold (in milliseconds) for slow evaluation logging.
-
-# ABAC Events Configuration
-ABAC_EVENTS_ENABLED=true # Enables event-based notifications for ABAC operations.
-
-# ABAC Model Configuration
-ABAC_USER_ATTRIBUTE_SUBJECT_TYPE=App\Models\User # Default subject type for user attributes in the database (e.g., App\\Models\\User).
-ABAC_MIDDLEWARE_SUBJECT_METHOD=user # Default method for resolving middleware subjects (e.g., user).
-
-# ABAC Route Configuration
-ABAC_ROUTE_PREFIX=abac # Sets the prefix for the package's API routes.
-
-# ABAC File Configuration
-ABAC_USER_ATTRIBUTE_PATH=stubs/abac/user_attributes.json # Path to the user attributes JSON file.
-ABAC_RESOURCE_ATTRIBUTE_PATH=stubs/abac/resource_attributes.json # Path to the resource attributes JSON file.
-ABAC_PERMISSION_PATH=stubs/abac/permissions.json # Path to the permissions JSON file.
+ABAC_CACHE_ENABLED=true                    # Enable/disable the caching system
+ABAC_CACHE_STORE=database                  # Cache store to use (database, redis, file, etc.)
+ABAC_CACHE_TTL=3600                        # Cache time-to-live in seconds
+ABAC_CACHE_PREFIX=abac_                    # Prefix for cache keys
+ABAC_CACHE_WARMING_ENABLED=true            # Enable/disable automatic cache warming
+ABAC_CACHE_WARMING_SCHEDULE=hourly         # Schedule for cache warming (hourly, daily, etc.)
+ABAC_STRICT_VALIDATION=true                # Enable strict validation of attributes and policies
+ABAC_LOGGING_ENABLED=true                  # Enable/disable logging
+ABAC_LOG_CHANNEL=abac                      # Logging channel for ABAC events
+ABAC_DETAILED_LOGGING=false                # Enable detailed logging of evaluations
+ABAC_PERFORMANCE_LOGGING_ENABLED=true      # Enable performance metric logging
+ABAC_SLOW_EVALUATION_THRESHOLD=100         # Threshold (ms) for slow evaluation warnings
+ABAC_EVENTS_ENABLED=true                   # Enable/disable event dispatching
+ABAC_OBJECT_ADDITIONAL_ATTRIBUTES=App\Models\User    # Model class for object attributes
+ABAC_MIDDLEWARE_OBJECT_METHOD=user         # Method to retrieve object in middleware
 ```
 
 ### Full Configuration Options
@@ -440,10 +463,6 @@ return [
             ]
         ],
     ],
-    'routes' => [
-        'prefix' => env('ABAC_ROUTE_PREFIX', 'abac'),
-        'middleware' => ['auth:sanctum', 'abac'],
-    ],
 ];
 ```
 
@@ -518,328 +537,3 @@ The resource attributes JSON file path can be configured in your `.env`:
 ```bash
 ABAC_RESOURCE_ATTRIBUTE_PATH=resource-attributes.json
 ```
-
-### User Attributes JSON Structure
-
-The package supports defining user attributes through JSON files. Create a JSON file with the following structure:
-
-```json
-[
-  {
-    "subject_id": 1,
-    "attribute_name": "role",
-    "attribute_value": "admin"
-  },
-  {
-    "subject_id": 5,
-    "attribute_name": "department",
-    "attribute_value": "engineering"
-  }
-]
-```
-
-The user attributes JSON file path can be configured in your `.env`:
-
-```bash
-ABAC_USER_ATTRIBUTE_PATH=user-attributes.json
-```
-
-Note: The `subject_type` is automatically set from your configuration `ABAC_USER_ATTRIBUTE_SUBJECT_TYPE`.
-
-## Database Schema
-
-The package creates the following tables:
-
-### Permissions
-
-- `id` - Primary key
-- `resource` - Resource identifier
-- `operation` - Operation name
-- Unique constraint on `[resource, operation]`
-
-### Policies
-
-- `id` - Primary key
-- `name` - Policy name
-- `permission_id` - Foreign key to permissions table
-
-### Policy Collections
-
-- `id` - Primary key
-- `operator` - Logical operator (AND, OR)
-- `policy_id` - Foreign key to policies table
-
-### Policy Conditions
-
-- `id` - Primary key
-- `operator` - Logical operator
-- `policy_collection_id` - Foreign key to policy_collections table
-
-### Policy Condition Attributes
-
-- `id` - Primary key
-- `collection_condition_id` - Foreign key to condition_attributes table
-- `operator` - Comparison operator
-- `attribute_name` - Name of the attribute to compare
-- `attribute_value` - Value to compare against
-
-### Resource Attributes
-
-- `id` - Primary key
-- `resource` - Resource identifier
-- `attribute_name` - Name of the attribute
-- `attribute_value` - Value of the attribute
-- Index on `[resource, attribute_name]`
-
-### User Attributes
-
-- `id` - Primary key
-- `subject_type` - Morphable type (default: App\Models\User)
-- `subject_id` - Subject ID
-- `attribute_name` - Name of the attribute
-- `attribute_value` - Value of the attribute
-- Unique constraint on `[subject_type, subject_id, attribute_name]`
-
-## Models
-
-### Permission
-
-```php
-use zennit\ABAC\Models\Permission;
-
-$permission = Permission::create([
-    'resource' => 'posts',
-    'operation' => 'update'
-]);
-
-# Relationships
-$permission->policies(); # HasMany Policy
-```
-
-### Policy
-
-```php
-use zennit\ABAC\Models\Policy;
-
-$policy = Policy::create([
-    'name' => 'Edit Own Posts',
-    'permission_id' => $permissionId
-]);
-
-# Relationships
-$policy->permission();  # BelongsTo Permission
-$policy->collections(); # HasMany PolicyCollection
-```
-
-### PolicyCollection
-
-```php
-use zennit\ABAC\Models\PolicyCollection;
-
-$collection = PolicyCollection::create([
-    'operator' => 'AND',
-    'policy_id' => $policyId
-]);
-
-# Relationships
-$collection->policy();     # BelongsTo Policy
-$collection->conditions(); # HasMany CollectionCondition
-```
-
-### PolicyCondition
-
-```php
-use zennit\ABAC\Models\CollectionCondition;
-
-$condition = CollectionCondition::create([
-    'operator' => 'AND',
-    'policy_collection_id' => $collectionId
-]);
-
-# Relationships
-$condition->collection(); # BelongsTo PolicyCollection
-$condition->attributes(); # HasMany ConditionAttribute
-```
-
-### PolicyConditionAttribute
-
-```php
-use zennit\ABAC\Models\ConditionAttribute;
-
-$attribute = ConditionAttribute::create([
-    'collection_condition_id' => $conditionId,
-    'attribute_name' => 'owner_id',
-    'attribute_value' => '$subject.id',
-    'operator' => 'EQUALS'
-]);
-
-# Relationships
-$attribute->condition(); # BelongsTo CollectionCondition
-```
-
-### ResourceAttribute
-
-```php
-use zennit\ABAC\Models\ResourceAttribute;
-
-$attribute = ResourceAttribute::create([
-    'resource' => 'posts',
-    'attribute_name' => 'status',
-    'attribute_value' => 'published'
-]);
-```
-
-### UserAttribute
-
-```php
-use zennit\ABAC\Models\UserAttribute;
-
-$attribute = UserAttribute::create([
-    'subject_type' => 'App\\Models\\User',
-    'subject_id' => $userId,
-    'attribute_name' => 'role',
-    'attribute_value' => 'admin'
-]);
-
-# Relationships
-$attribute->subject(); # MorphTo
-```
-
----
-
-## Operators
-
-Available operators:
-
-### Arithmetic Operators
-
-- `EQUALS`
-- `NOT_EQUALS`
-- `GREATER_THAN`
-- `LESS_THAN`
-- `GREATER_THAN_EQUALS`
-- `LESS_THAN_EQUALS`
-
-### String Operators
-
-- `CONTAINS`
-- `NOT_CONTAINS`
-- `STARTS_WITH`
-- `NOT_STARTS_WITH`
-- `ENDS_WITH`
-- `NOT_ENDS_WITH`
-
-### Logical Operators
-
-- `AND`
-- `OR`
-- `NOT`
-
-## Context Value Resolution
-
-The ABAC system supports dynamic context value resolution in attribute comparisons. You can use special syntax to
-reference values from the access context:
-
-### Subject Values
-
-```php
-'$subject.id'              // Gets user ID
-'$subject.profile.name'    // Gets nested user property
-'$subject.department'      // Gets user department
-```
-
-### Resource Values
-
-```php
-'$resource'                // Gets resource name
-'$resource.file.name'      // Gets file name from resource context
-'$resource.metadata.type'  // Gets resource metadata
-```
-
-### Operation Value
-
-```php
-'$operation'               // Gets current operation
-```
-
-### Custom Context Values
-
-```php
-'$context.custom_value'    // Gets value from context array
-```
-
-### Example Usage
-
-```php
-// Define a policy condition
-$condition = [
-    'operator' => 'equals',
-    'attribute_name' => 'owner_id',
-    'attribute_value' => '$subject.id'  // Will be replaced with actual user ID
-];
-
-// Check if file type matches
-$condition = [
-    'operator' => 'contains',
-    'attribute_name' => '$resource.file.type',
-    'attribute_value' => 'image'
-];
-
-// Access context with custom values
-$context = new AccessContext(
-    resource: 'files',
-    operation: 'view',
-    subject: $user,
-    context: [
-        'resource' => [
-            'file' => [
-                'name' => 'document.pdf',
-                'type' => 'document'
-            ]
-        ],
-        'custom_value' => 'test'
-    ]
-);
-```
-
-All operators (Arithmetic, String, and Logical) support context value resolution through the `HandlesContextValues`
-trait.
-
-
-## License
-
-This package is open-sourced software licensed under the MIT license. See [LICENSE.md](LICENSE.md) for more details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-Before contributing, please read our [Contributing Guide](CONTRIBUTING.md) which covers:
-- Code of conduct and etiquette
-- Feature request guidelines
-- Pull request process
-- Coding standards
-
-### Development Setup
-
-1. Clone the repository
-2. Install dependencies: `composer install`
-3. Format code: `./vendor/bin/pint`
-
-### Coding Standards
-
-This package follows Laravel's coding standards using Laravel Pint. To format your code:
-
-```bash
-./vendor/bin/pint
-```
-
-To check the code without making changes:
-
-```bash
-./vendor/bin/pint --test
-```
-
-### Security
-
-If you discover any security-related issues, please email support@zennit.dev instead of using the issue tracker.

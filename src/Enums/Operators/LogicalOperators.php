@@ -6,7 +6,6 @@ enum LogicalOperators: string
 {
     case AND = 'and';
     case OR = 'or';
-    case NOT = 'not';
 
     public static function values(): array
     {

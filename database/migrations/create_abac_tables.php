@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
-use zennit\ABAC\Enums\PermissionOperations;
+use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Traits\AbacHasConfigurations;
 
 return new class () extends Migration
@@ -14,84 +14,63 @@ return new class () extends Migration
 
     public function up(): void
     {
-        Schema::create('user_attributes', function (Blueprint $table) {
+        Schema::create('abac_object_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('subject_type')->default($this->getUserAttributeSubjectType());
-            $table->unsignedBigInteger('subject_id');
+            $table->unsignedBigInteger('object_id');
             $table->string('attribute_name');
             $table->string('attribute_value');
 
-            $table->unique(['subject_type', 'subject_id', 'attribute_name']);
-            $table->index(['subject_type', 'subject_id']);
+            $table->index(['object_id']);
         });
 
-        Schema::create('resource_attributes', function (Blueprint $table) {
+        Schema::create('abac_subject_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('resource');
+            $table->string('subject');
+            $table->unsignedBigInteger('subject_id')->nullable();
             $table->string('attribute_name');
             $table->string('attribute_value');
 
-            $table->index(['resource', 'attribute_name']);
+            $table->index(['subject', 'subject_id']);
         });
 
-        Schema::create('permissions', function (Blueprint $table) {
+        Schema::create('abac_policies', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->string('resource');
-            $table->enum('operation', PermissionOperations::values());
+            $table->enum('method', PolicyMethod::values());
 
-            $table->unique(['resource', 'operation']);
+            $table->unique(['resource', 'method']);
         });
 
-        Schema::create('policies', function (Blueprint $table) {
+        // chain always evaluates to bool
+        Schema::create('abac_chains', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->string('name');
-            $table->foreignId('permission_id')
-                ->constrained('permissions')
-                ->cascadeOnDelete();
+            $table->enum('operator', LogicalOperators::values());
+            $table->foreignId('chain_id')->nullable()->constrained('chain')->cascadeOnDelete();
+            $table->foreignId('policy_id')->unique()->nullable()->constrained('policies')->cascadeOnDelete();
         });
+        DB::statement('ALTER TABLE abac_chain ADD CONSTRAINT check_null CHECK ((chain_id IS NULL AND policy_id IS NOT NULL) OR (chain_id IS NOT NULL AND policy_id IS NULL))');
 
-        Schema::create('policy_collections', function (Blueprint $table) {
+        Schema::create('abac_checks', function (Blueprint $table) { // check
             $table->id();
             $table->timestamps();
-            $table->enum('operator', AllOperators::values());
-            $table->foreignId('policy_id')
-                ->constrained('policies')
-                ->cascadeOnDelete();
-        });
-
-        Schema::create('collection_conditions', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->enum('operator', AllOperators::values());
-            $table->foreignId('policy_collection_id')
-                ->constrained('policy_collections')
-                ->cascadeOnDelete();
-        });
-
-        Schema::create('condition_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->foreignId('collection_condition_id')
-                ->constrained('collection_conditions')
+            $table->foreignId('chain_id')
+                ->constrained('abac_chain')
                 ->cascadeOnDelete();
             $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
-            $table->string('attribute_name');
-            $table->string('attribute_value');
+            $table->string('context_accessor');
+            $table->string('value');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('condition_attributes');
-        Schema::dropIfExists('collection_conditions');
-        Schema::dropIfExists('policy_collections');
-        Schema::dropIfExists('policies');
-        Schema::dropIfExists('permissions');
-        Schema::dropIfExists('resource_attributes');
-        Schema::dropIfExists('user_attributes');
+        Schema::dropIfExists('abac_subject_additional_attributes');
+        Schema::dropIfExists('abac_resource_additional_attributes');
+        Schema::dropIfExists('abac_policies');
+        Schema::dropIfExists('abac_chains');
+        Schema::dropIfExists('abac_checks');
     }
 };

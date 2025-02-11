@@ -17,8 +17,8 @@ readonly class AccessContextValidator
     public function validate(AccessContext $context): void
     {
         $this->validateSubject($context);
-        $this->validateResource($context->resource);
-        $this->validateOperation($context->operation);
+        $this->validateResource($context->subject);
+        $this->validateOperation($context->method);
     }
 
     /**
@@ -30,11 +30,11 @@ readonly class AccessContextValidator
      */
     private function validateSubject(AccessContext $context): void
     {
-        if (!isset($context->subject)) {
+        if (!isset($context->object)) {
             throw new ValidationException('Subject is required');
         }
 
-        if (!isset($context->subject->id)) {
+        if (!isset($context->object->id)) {
             throw new ValidationException('Subject must have an ID');
         }
     }
