@@ -4,23 +4,23 @@ namespace zennit\ABAC\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
-class AbacObjectAdditionalAttributes extends Model
+class AbacObjectAdditionalAttribute extends Model
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
     protected $fillable = [
         'object_id',
-        'attribute_name',
-        'attribute_value',
+        'key',
+        'value',
     ];
 
     protected $casts = [
         'id' => 'integer',
         'object_id' => 'integer',
-        'attribute_name' => 'string',
-        'attribute_value' => 'string',
+        'key' => 'string',
+        'value' => 'string',
     ];
 
     public function subject(): MorphTo

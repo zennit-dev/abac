@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Psr\SimpleCache\InvalidArgumentException;
 use Throwable;
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
 use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 use zennit\ABAC\Services\AbacCacheManager;
@@ -70,7 +70,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Cache user attributes
-        $userAttributes = AbacObjectAdditionalAttributes::all()->groupBy(function ($attribute) {
+        $userAttributes = AbacObjectAdditionalAttribute::all()->groupBy(function ($attribute) {
             return "user_attributes:$attribute->subject_type:$attribute->subject_id";
         });
         foreach ($userAttributes as $key => $attributes) {

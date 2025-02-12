@@ -8,7 +8,7 @@ use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\Jobs\PolicyCacheJob;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacCheck;
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
 use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 use zennit\ABAC\Observers\AbacChainObserver;
@@ -17,11 +17,11 @@ use zennit\ABAC\Observers\AbacObjectAdditionalAttributeObserver;
 use zennit\ABAC\Observers\AbacPolicyObserver;
 use zennit\ABAC\Observers\AbacSubjectAdditionalAttributeObserver;
 use zennit\ABAC\Services\AbacService;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 class AbacServiceProvider extends ServiceProvider
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
     /**
      * Register services and dependencies.
@@ -84,7 +84,7 @@ class AbacServiceProvider extends ServiceProvider
     protected function registerObservers(): void
     {
         AbacSubjectAdditionalAttribute::observe(AbacSubjectAdditionalAttributeObserver::class);
-        AbacObjectAdditionalAttributes::observe(AbacObjectAdditionalAttributeObserver::class);
+        AbacObjectAdditionalAttribute::observe(AbacObjectAdditionalAttributeObserver::class);
         AbacPolicy::observe(AbacPolicyObserver::class);
         AbacChain::observe(AbacChainObserver::class);
         AbacCheck::observe(AbacCheckObserver::class);

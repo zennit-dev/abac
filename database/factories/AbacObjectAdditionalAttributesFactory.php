@@ -3,14 +3,14 @@
 namespace zennit\ABAC\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 class AbacObjectAdditionalAttributesFactory extends Factory
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
-    protected $model = AbacObjectAdditionalAttributes::class;
+    protected $model = AbacObjectAdditionalAttribute::class;
 
     public function definition(): array
     {

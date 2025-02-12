@@ -12,7 +12,7 @@ class AbacCheck extends Model
     protected $fillable = [
         'chain_id',
         'operator',
-        'context_accessor',
+        'key',
         'value',
     ];
 
@@ -20,7 +20,7 @@ class AbacCheck extends Model
         'id' => 'integer',
         'chain_id' => 'integer',
         'operator' => 'string',
-        'context_accessor' => 'string',
+        'key' => 'string',
         'value' => 'string',
     ];
 }

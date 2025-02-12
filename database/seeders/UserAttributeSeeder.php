@@ -3,7 +3,7 @@
 namespace zennit\ABAC\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
 
 class UserAttributeSeeder extends Seeder
 {
@@ -27,7 +27,7 @@ class UserAttributeSeeder extends Seeder
         }
 
         foreach ($userAttributes as $attr) {
-            AbacObjectAdditionalAttributes::create([...$attr, 'subject_type' => $subject]);
+            AbacObjectAdditionalAttribute::create([...$attr, 'subject_type' => $subject]);
         }
     }
 }

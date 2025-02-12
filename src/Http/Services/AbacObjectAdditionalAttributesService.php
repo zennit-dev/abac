@@ -3,31 +3,31 @@
 namespace zennit\ABAC\Http\Services;
 
 use Throwable;
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
 
 readonly class AbacObjectAdditionalAttributesService
 {
     public function index(): array
     {
-        return AbacObjectAdditionalAttributes::all()->toArray();
+        return AbacObjectAdditionalAttribute::all()->toArray();
     }
 
     public function store(array $data): array
     {
-        return AbacObjectAdditionalAttributes::create($data)->toArray();
+        return AbacObjectAdditionalAttribute::create($data)->toArray();
     }
 
-    public function show(int $user_attribute): AbacObjectAdditionalAttributes
+    public function show(int $user_attribute): AbacObjectAdditionalAttribute
     {
-        return AbacObjectAdditionalAttributes::findOrFail($user_attribute);
+        return AbacObjectAdditionalAttribute::findOrFail($user_attribute);
     }
 
     /**
      * @throws Throwable
      */
-    public function update(array $data, int $user_attribute): AbacObjectAdditionalAttributes
+    public function update(array $data, int $user_attribute): AbacObjectAdditionalAttribute
     {
-        $user_attribute = AbacObjectAdditionalAttributes::findOrFail($user_attribute);
+        $user_attribute = AbacObjectAdditionalAttribute::findOrFail($user_attribute);
         $user_attribute->updateOrFail($data);
 
         return $user_attribute;
@@ -38,6 +38,6 @@ readonly class AbacObjectAdditionalAttributesService
      */
     public function destroy(int $user_attribute): void
     {
-        AbacObjectAdditionalAttributes::findOrFail($user_attribute)->deleteOrFail();
+        AbacObjectAdditionalAttribute::findOrFail($user_attribute)->deleteOrFail();
     }
 }

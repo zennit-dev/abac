@@ -12,11 +12,11 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 abstract class Controller
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
     use AuthorizesRequests;
 
     /**

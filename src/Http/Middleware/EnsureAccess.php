@@ -3,20 +3,21 @@
 namespace zennit\ABAC\Http\Middleware;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\DTO\EmptyObject;
 use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\AbacAttributeLoader;
 use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Services\AbacService;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 /**
  * Class EnsurePermissions
@@ -26,20 +27,19 @@ use zennit\ABAC\Traits\AbacHasConfigurations;
  */
 readonly class EnsureAccess
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
         protected AbacAttributeLoader $attributeLoader
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
      *
-     * @param Request $request The incoming HTTP request
-     * @param Closure $next The next middleware in the pipeline
+     * @param  Request  $request  The incoming HTTP request
+     * @param  Closure  $next  The next middleware in the pipeline
      *
      * @return Response The HTTP response
      */
@@ -82,6 +82,7 @@ readonly class EnsureAccess
      * @throws InvalidArgumentException
      * @throws ValidationException
      * @throws UnsupportedOperatorException
+     * @throws \Exception
      */
     private function checkAccess(Request $request): bool
     {
@@ -93,12 +94,18 @@ readonly class EnsureAccess
         // If not excluded, check ABAC permissions
         $method = $this->matchRequestOperation($request);
 
+        if (!$method) {
+            return true;
+        }
+
+        $subject = $this->defineSubject($request);
+        $object = $this->defineObject($request);
+
         $context = new AccessContext(
-            method:       $method,
-            subject:      $this->attributeLoader->loadAllSubjectAttributes($this->defineSubject($request)),
-            object:       $this->attributeLoader->loadAllObjectAttributes($this->defineObject($request)),
-            object_type:  get_class($this->defineObject($request)),
-            subject_type: get_class($this->defineSubject($request)),
+            method: $method,
+            subject: $subject,
+            object: $this->attributeLoader->loadAllObjectAttributes($object),
+            environment: $request->toArray()
         );
 
         return $this->abac->can($context);
@@ -169,13 +176,13 @@ readonly class EnsureAccess
     /**
      * Match the request methods against PermissionOperations
      */
-    private function matchRequestOperation(Request $request): ?string
+    private function matchRequestOperation(Request $request): ?PolicyMethod
     {
         return match (strtoupper($request->method())) {
-            'GET', 'HEAD' => PolicyMethod::READ->value,
-            'POST' => PolicyMethod::CREATE->value,
-            'PUT', 'PATCH' => PolicyMethod::UPDATE->value,
-            'DELETE' => PolicyMethod::DELETE->value,
+            'GET', 'HEAD' => PolicyMethod::READ,
+            'POST' => PolicyMethod::CREATE,
+            'PUT', 'PATCH' => PolicyMethod::UPDATE,
+            'DELETE' => PolicyMethod::DELETE,
             default => null,
         };
     }
@@ -184,11 +191,11 @@ readonly class EnsureAccess
      * Define the subject for permission checking.
      * Retrieves the subject from the request using the method configured in abac.middleware.path_resources
      *
-     * @param Request $request The incoming HTTP request
+     * @param  Request  $request  The incoming HTTP request
      *
-     * @return object The subject for permission checking
+     * @return Builder The subject for permission checking
      */
-    private function defineSubject(Request $request): object
+    private function defineSubject(Request $request): Builder
     {
         $path = trim($request->path(), '/');
         $patterns = $this->getPathPatterns();
@@ -199,53 +206,42 @@ readonly class EnsureAccess
     /**
      * Find the matching model class for a given path and handle different ID types
      */
-    private function findMatchingSubject(string $path, array $patterns): object
+    private function findMatchingSubject(string $path, array $patterns): Builder
     {
-        foreach ($patterns as $pattern => $modelClass) {
+        foreach ($patterns as $pattern => $model_class_string) {
             $escapedPattern = preg_quote($pattern, '#');
             if (preg_match("#$escapedPattern#", $path)) {
-                $pathParts = explode('/', $path);
-                $id = end($pathParts);
+                $parts = explode('/', $path);
+                $id = end($parts);
 
-                if (empty($id)) {
-                    continue;
+                if ($this->isValidId($id)) {
+                    return $model_class_string::where('id', $id);
                 }
 
-                if ($this->isValidUuid($id)) {
-                    return $modelClass::where('id', $id)->first();
-                }
-
-                if (is_numeric($id)) {
-                    return $modelClass::find($id);
-                }
-
-                if (method_exists($modelClass, 'findBySlug')) {
-                    return $modelClass::findBySlug($id);
-                }
+                return $model_class_string::query();
             }
         }
 
-        return new EmptyObject();
+        throw new RuntimeException("Unable to find matching subject for path: $path");
     }
 
     /**
      * Check if a string is a valid UUID
      */
-    private function isValidUuid(string $uuid): bool
+    private function isValidId(string $id): bool
     {
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $uuid) === 1;
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $id) === 1 || is_numeric($id);
     }
 
     /**
      * Define the object for permission checking.
      * Retrieves the object from the request using the method configured in abac.middleware.object_method.
      *
-     * @param Request $request The incoming HTTP request
+     * @param  Request  $request  The incoming HTTP request
      *
      * @throws RuntimeException When the configured object method doesn't exist
-     * @return object The object for permission checking
      */
-    private function defineObject(Request $request): object
+    private function defineObject(Request $request): Model
     {
         $method = $this->getObjectMethod();
 

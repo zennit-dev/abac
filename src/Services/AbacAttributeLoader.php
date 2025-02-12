@@ -2,73 +2,61 @@
 
 namespace zennit\ABAC\Services;
 
-use zennit\ABAC\Models\AbacObjectAdditionalAttributes;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
 use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacAttributeLoader
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
     /**
      * Load attributes associated with a user/subject.
      *
-     * @param object $object The context containing the subject
+     * @template TObject of Model
      *
-     * @return array Array of user attributes
+     * @param  TObject  $object  The context containing the subject
+     *
+     * @returns Model - the $object as it was + the additional attributes assigned through magic methods
+     *
+     * @throws Exception
      */
-    public function loadAllObjectAttributes(object $object): array
+    public function loadAllObjectAttributes(Model $object): Model
     {
-        $attributes = $object->toArray();
-        $additionalAttributes = $this->loadAdditionalObjectAttributes($object->id);
-
-        return [...$attributes, ...$additionalAttributes];
-    }
-
-    private function loadAdditionalObjectAttributes(int $subjectId): array
-    {
-        $subjectAttributes = AbacObjectAdditionalAttributes::query()
-            ->where('subject_id', $subjectId)
-            ->get();
-
-        $attributes = [];
-        foreach ($subjectAttributes as $attribute) {
-            $attributes["subject.$attribute->attribute_name"] = $attribute->attribute_value;
+        if (!isset($object->id)) {
+            throw new Exception('Object Model does not have an ID field');
         }
 
-        return $attributes;
+        $additions = $this->loadAdditionalObjectAttributes($object->id);
+        foreach ($additions as $key => $value) {
+            $object->$key = $value;
+        }
+
+        return $object;
+    }
+
+    private function loadAdditionalObjectAttributes(int $id): array
+    {
+        $attributes = AbacObjectAdditionalAttribute::where('object_id', $id)->get();
+
+        return $attributes->map(fn (AbacObjectAdditionalAttribute $attribute) => [$attribute->attribute_name, $attribute->attribute_value])->toArray();
     }
 
     /**
      * Load attributes associated with a resource.
      *
-     * @param object|null $subject
+     * @param string $model_class_string
+     * @param string|int $id
      *
-     * @return array Array of resource attributes
+     * @return Collection additional defined attributes
      */
-    public function loadAllSubjectAttributes(?object $subject): array
+    public function loadAdditionalSubjectAttributes(string $model_class_string, string|int $id): Collection
     {
-        $attributes = $subject?->toArray() ?? [];
-        $additionalAttributes = $this->loadAdditionalSubjectAttributes($subject);
+        return AbacSubjectAdditionalAttribute::where('subject', $model_class_string)
+            ->where('subject_id', $id)->get();
 
-        return [...$attributes, ...$additionalAttributes];
-    }
-
-    private function loadAdditionalSubjectAttributes(object $subject): array
-    {
-        $additionalAttributes = AbacSubjectAdditionalAttribute::query()
-            ->where('subject', get_class($subject))
-            ->where(function ($query) use ($subject) {
-                $query->where('subject_id', $subject->id)
-                    ->orWhere('subject_id', null);
-            })
-            ->get();
-
-        $attributes = [];
-        foreach ($additionalAttributes as $attribute) {
-            $attributes["resource.$attribute->attribute_name"] = $attribute->attribute_value;
-        }
-
-        return $attributes;
     }
 }

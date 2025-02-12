@@ -2,57 +2,41 @@
 
 namespace zennit\ABAC\Services\Evaluators;
 
+use Illuminate\Database\Eloquent\Builder;
 use zennit\ABAC\DTO\AccessContext;
-use zennit\ABAC\Exceptions\UnsupportedOperatorException;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacCheck;
-use zennit\ABAC\Strategies\OperatorFactory;
-use zennit\ABAC\Traits\AbacHasConfigurations;
 
 readonly class AbacChainEvaluator
 {
-    use AbacHasConfigurations;
-
     public function __construct(
-        private OperatorFactory $operatorFactory,
         private AbacCheckEvaluator $checkEvaluator,
-    ) {
-    }
+    ) {}
 
-    /**
-     * Evaluate a policy collection against attributes.
-     *
-     * @param AbacChain $link The attributes to evaluate against
-     * @param AccessContext $context The access context for contextual evaluation
-     *
-     * @throws UnsupportedOperatorException If an operator is not supported
-     * @return bool True if collection conditions are met
-     */
-    public function evaluate(
-        AbacChain $link,
-        AccessContext $context
-    ): bool {
-        $operator = $this->operatorFactory->create($link->operator);
+    public function evaluate(Builder $query, AbacChain $chain, AccessContext $context): Builder
+    {
+        // Get all related chains and checks
+        $related_chains = AbacChain::where('chain_id', $chain->id)->get();
+        $related_checks = AbacCheck::where('chain_id', $chain->id)->get();
 
-        $related_chains = array_map(function ($chain) {
-            return ['type' => 'chain'] + $chain;
-        }, AbacChain::where('chain_id', $link->id)->toArray());
+        // Determine the method based on operator
+        $method = match ($chain->operator) {
+            'and' => 'where',
+            'or' => 'orWhere',
+            default => 'where'
+        };
 
-        $related_checks = array_map(function ($check) {
-            return ['type' => 'check'] + $check;
-        }, AbacCheck::where('chain_id', $link->id)->toArray());
+        // Apply the constraints using a closure to maintain proper grouping
+        return $query->{$method}(function ($subQuery) use ($related_chains, $related_checks, $context) {
+            // Apply nested chains
+            foreach ($related_chains as $nested_chain) {
+                $this->evaluate($subQuery, $nested_chain, $context);
+            }
 
-        $related = [...$related_checks, ...$related_chains];
-
-        $results = array_map(function ($item) use ($context) {
-            return $item['type'] === 'chain'
-                ? $this->evaluate($item, $context)
-                : $this->checkEvaluator->evaluate($item, $context);
-        }, $related);
-
-        return $operator->evaluate(
-            values: $results,
-            context: $context
-        );
+            // Apply checks
+            foreach ($related_checks as $check) {
+                $this->checkEvaluator->evaluate($subQuery, $check, $context);
+            }
+        });
     }
 }

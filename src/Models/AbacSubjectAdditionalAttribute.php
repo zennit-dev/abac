@@ -7,17 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class AbacSubjectAdditionalAttribute extends Model
 {
     protected $fillable = [
-        'subject',
-        'subject_id',
-        'attribute_name',
-        'attribute_value',
+        'subject_class_string',
+        '_id',
+        'key',
+        'value',
     ];
 
     protected $casts = [
         'id' => 'integer',
-        'subject' => 'string',
-        'subject_id' => 'integer',
-        'attribute_name' => 'string',
-        'attribute_value' => 'string',
+        'subject_class_string' => 'string',
+        '_id' => 'integer',
+        'key' => 'string',
+        'value' => 'string',
     ];
 }

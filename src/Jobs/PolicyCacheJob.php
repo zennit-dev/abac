@@ -12,12 +12,12 @@ use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Events\CacheWarmed;
 use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Services\AbacCacheManager;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 class PolicyCacheJob implements ShouldQueue
 {
     use Dispatchable;
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;

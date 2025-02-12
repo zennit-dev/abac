@@ -6,20 +6,22 @@ use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Enums\Operators\AllOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Enums\PolicyMethod;
-use zennit\ABAC\Traits\AbacHasConfigurations;
+use zennit\ABAC\Traits\AccessesAbacConfiguration;
+
+// TODO: match column names to models
 
 return new class () extends Migration
 {
-    use AbacHasConfigurations;
+    use AccessesAbacConfiguration;
 
     public function up(): void
     {
         Schema::create('abac_object_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('object_id');
-            $table->string('attribute_name');
-            $table->string('attribute_value');
+            $table->unsignedBigInteger('_id');
+            $table->string('key');
+            $table->string('value');
 
             $table->index(['object_id']);
         });
@@ -27,10 +29,10 @@ return new class () extends Migration
         Schema::create('abac_subject_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('subject');
-            $table->unsignedBigInteger('subject_id')->nullable();
-            $table->string('attribute_name');
-            $table->string('attribute_value');
+            $table->string('subject_class_string');
+            $table->unsignedBigInteger('_id')->nullable();
+            $table->string('key');
+            $table->string('value');
 
             $table->index(['subject', 'subject_id']);
         });
@@ -59,7 +61,7 @@ return new class () extends Migration
                 ->constrained('abac_chain')
                 ->cascadeOnDelete();
             $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
-            $table->string('context_accessor');
+            $table->string('key');
             $table->string('value');
         });
     }
