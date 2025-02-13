@@ -28,7 +28,7 @@ class AbacSubjectAdditionalAttributeController extends Controller
     public function store(AbacSubjectAdditionalAttributeRequest $request): JsonResponse
     {
         try {
-            return response()->json($this->service->store($request->validated()));
+            return response()->json($this->service->store($request->validated()), 201);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

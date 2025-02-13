@@ -10,12 +10,12 @@ class AbacSubjectAdditionalAttributeRequest extends Request
     protected function getRules(): array
     {
         return [
-            'subject' => [
+            'subject_class_string' => [
                 'required',
                 'string',
                 'regex:/^App\\\\Models(\\\\[A-Z][A-Za-z0-9_]*)+$/',
             ],
-            'subject_id' => ['required', 'integer', function ($attribute, $value, $fail) {
+            '_id' => ['required', 'integer', function ($attribute, $value, $fail) {
                 $subject_table = $this->string('subject');
 
                 if (!Schema::hasTable($subject_table)) {
@@ -32,8 +32,8 @@ class AbacSubjectAdditionalAttributeRequest extends Request
                     $fail('The subject_id is invalid (soft deleted).');
                 }
             }],
-            'attribute_name' => ['required', 'string'],
-            'attribute_value' => ['required', 'string'],
+            'key' => ['required', 'string'],
+            'value' => ['required', 'string'],
         ];
     }
 }

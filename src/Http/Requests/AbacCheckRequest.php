@@ -12,10 +12,28 @@ class AbacCheckRequest extends Request
     protected function getRules(): array
     {
         return [
-            'chain_id' => ['required', 'integer', 'exists:' . AbacChain::class . ',id'],
-            'operator' => ['required', 'string', Rule::in(AllOperators::values(LogicalOperators::cases()))],
-            'context_accessor' => ['required', 'string'],
-            'value' => ['required', 'string'],
+            'chains.*.checks' => [
+                'required',
+                'array',
+                'max:2',
+                function ($attribute, $value, $fail) {
+                    $chainIndex = explode('.', $attribute)[1];
+                    $chain = $this->input("chains.$chainIndex");
+
+                    $totalChildren = count($value);
+                    if (isset($chain['chains'])) {
+                        $totalChildren += count($chain['chains']);
+                    }
+
+                    if ($totalChildren > 2) {
+                        $fail('Total number of children (chains + checks) cannot exceed 2');
+                    }
+                },
+            ],
+            'chains.*.checks.*.chain_id' => ['required', 'integer', 'exists:' . AbacChain::class . ',id'],
+            'chains.*.checks.*.operator' => ['required', 'string', Rule::in(AllOperators::values(LogicalOperators::cases()))],
+            'chains.*.checks.*.key' => ['required', 'string'],
+            'chains.*.checks.*.value' => ['required', 'string'],
         ];
     }
 }

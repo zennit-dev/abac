@@ -9,7 +9,9 @@ readonly class AllOperators
     /**
      * Get all operator values except the excluded ones
      *
-     * @param  array<UnitEnum>  $excludes  Array of operator classes to exclude
+     * @template TEnumArray of array<UnitEnum>
+     *
+     * @param  TEnumArray $excludes  Array of operator classes to exclude
      *
      * @return array<string> Array of operator values
      */

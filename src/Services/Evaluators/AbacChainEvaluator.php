@@ -4,6 +4,7 @@ namespace zennit\ABAC\Services\Evaluators;
 
 use Illuminate\Database\Eloquent\Builder;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacCheck;
 
@@ -11,7 +12,8 @@ readonly class AbacChainEvaluator
 {
     public function __construct(
         private AbacCheckEvaluator $checkEvaluator,
-    ) {}
+    ) {
+    }
 
     public function evaluate(Builder $query, AbacChain $chain, AccessContext $context): Builder
     {
@@ -21,8 +23,7 @@ readonly class AbacChainEvaluator
 
         // Determine the method based on operator
         $method = match ($chain->operator) {
-            'and' => 'where',
-            'or' => 'orWhere',
+            LogicalOperators::OR->value => 'orWhere',
             default => 'where'
         };
 

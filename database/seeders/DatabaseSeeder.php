@@ -26,8 +26,8 @@ class DatabaseSeeder extends Seeder
                 Model::withoutEvents(function () {
                     $this->call([
                         // Access Control Base (arbitrary dependencies on other tables)
-                        UserAttributeSeeder::class,
-                        ResourceAttributeSeeder::class,
+                        ObjectAttributeSeeder::class,
+                        SubjectAttributeSeeder::class,
                         PolicySeeder::class,
                     ]);
 
@@ -58,7 +58,7 @@ class DatabaseSeeder extends Seeder
         $cacheManager = app(AbacCacheManager::class);
 
         // Cache policies and their relationships
-        $cacheManager->warmPolicies(AbacPolicy::all());
+        $cacheManager->warmPolicy(AbacPolicy::all());
 
         // Cache resource attributes
         $resources = AbacSubjectAdditionalAttribute::all()->groupBy('resource');

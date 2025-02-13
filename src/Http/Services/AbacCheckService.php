@@ -9,12 +9,12 @@ readonly class AbacCheckService
 {
     public function index(int $condition): array
     {
-        return AbacCheck::where('collection_condition_id', $condition)->get()->toArray();
+        return AbacCheck::where('chain_id', $condition)->get()->toArray();
     }
 
-    public function store(array $data, int $condition): array
+    public function store(array $data, int $chainId): array
     {
-        return AbacCheck::create([...$data, 'collection_condition_id' => $condition])->toArray();
+        return AbacCheck::create([...$data, 'chain_id' => $chainId])->toArray();
     }
 
     public function show(int $condition): AbacCheck

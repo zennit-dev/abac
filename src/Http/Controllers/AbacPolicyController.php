@@ -4,6 +4,7 @@ namespace zennit\ABAC\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 use zennit\ABAC\Http\Requests\AbacPolicyRequest;
 use zennit\ABAC\Http\Services\AbacPolicyService;
@@ -28,7 +29,11 @@ class AbacPolicyController extends Controller
     public function store(AbacPolicyRequest $request): JsonResponse
     {
         try {
-            return response()->json($this->service->store($request->validated(), $request->has('chains')));
+            $response = DB::transaction(function () use ($request) {
+                return $this->service->store($request->validated());
+            });
+
+            return response()->json($response, 201);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

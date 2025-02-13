@@ -11,9 +11,9 @@ class AbacObjectAdditionalAttributesRequest extends FormRequest
     protected function getRules(): array
     {
         return [
-            'attribute_name' => ['required', 'string'],
-            'attribute_value' => ['required', 'string'],
-            'object_id' => ['required', 'integer', function ($attribute, $value, $fail) {
+            'key' => ['required', 'string'],
+            'value' => ['required', 'string'],
+            '_id' => ['required', 'integer', function ($attribute, $value, $fail) {
                 $object_table = config('abac.database.object_additional_attributes');
 
                 if (!Schema::hasTable($object_table)) {

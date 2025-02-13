@@ -16,14 +16,21 @@ readonly class AbacPolicyService
         return AbacPolicy::with('chains.checks')->get()->toArray();
     }
 
-    public function store(array $data, bool $chain = false): array
+    public function store(array $policyData): array
     {
-        $policy = AbacPolicy::create($data);
+        $policy = AbacPolicy::create([
+            'method' => $policyData['method'],
+            'resource' => $policyData['resource'],
+        ]);
+
         $response = $policy->toArray();
 
-        if ($chain) {
-            $chains = array_map(fn ($policy) => $this->service->store($policy, $policy->id, true), $data['chains']);
-            $response['chains'] = $chains;
+        // If chains exist, create them recursively
+        if (!empty($policyData['chains'])) {
+            $response['chains'] = array_map(
+                fn ($chainData) => $this->service->store($chainData, $policy->id),
+                $policyData['chains']
+            );
         }
 
         return $response;

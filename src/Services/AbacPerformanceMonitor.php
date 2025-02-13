@@ -2,7 +2,7 @@
 
 namespace zennit\ABAC\Services;
 
-use Illuminate\Support\Facades\Log;
+use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacPerformanceMonitor
@@ -11,7 +11,7 @@ readonly class AbacPerformanceMonitor
 
     private array $timers;
 
-    public function __construct()
+    public function __construct(private AbacAuditLogger $logger)
     {
         $this->timers = [];
     }
@@ -19,27 +19,24 @@ readonly class AbacPerformanceMonitor
     /**
      * Measure the execution time of an operation.
      *
-     * @param  string  $operation  The name of the operation being measured
-     * @param  callable  $callback  The operation to measure
+     * @param string $operation The name of the operation being measured
+     * @param callable(): T $callback The operation to measure
      *
-     * @return mixed The result of the callback
+     * @template T
+     *
+     * @return array{T, float} The result of the callback and duration
      */
-    public function measure(string $operation, callable $callback): mixed
+    public function measure(string $operation, callable $callback): array
     {
         if (!$this->getPerformanceLoggingEnabled()) {
-            return $callback();
+            return [$callback(), 0.0];
         }
 
         $timers = [...$this->timers, $operation => microtime(true)];
         $result = $callback();
         $duration = $this->calculateDuration($operation, $timers);
 
-        if ($duration > $this->getSlowEvaluationThreshold()) {
-            Log::channel($this->getLogChannel())
-                ->warning("Performance warning: $operation took {$duration}ms");
-        }
-
-        return $result;
+        return [$result, $duration];
     }
 
     /**

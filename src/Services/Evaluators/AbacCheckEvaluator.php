@@ -4,28 +4,32 @@ namespace zennit\ABAC\Services\Evaluators;
 
 use Illuminate\Database\Eloquent\Builder;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\Enums\Operators\ArithmeticOperators;
+use zennit\ABAC\Enums\Operators\StringOperators;
 use zennit\ABAC\Models\AbacCheck;
 
 readonly class AbacCheckEvaluator
 {
     public function evaluate(Builder $query, AbacCheck $check, AccessContext $context): Builder
     {
-        // Convert ABAC operator to SQL operator TODO: support all operators through early returns
         $operator = match ($check->operator) {
-            'equals' => '=',
-            'not_equals' => '<>',
-            'greater_than' => '>',
-            'less_than' => '<',
-            'greater_than_equals' => '>=',
-            'less_than_equals' => '<=',
-            'contains' => 'LIKE',
-            'not_contains' => 'NOT LIKE',
+            ArithmeticOperators::NOT_EQUALS->value => '<>',
+            ArithmeticOperators::GREATER_THAN->value => '>',
+            ArithmeticOperators::LESS_THAN->value => '<',
+            ArithmeticOperators::GREATER_THAN_EQUALS->value => '>=',
+            ArithmeticOperators::LESS_THAN_EQUALS->value => '<=',
+            StringOperators::CONTAINS->value, StringOperators::ENDS_WITH->value, StringOperators::STARTS_WITH->value => 'LIKE',
+            StringOperators::NOT_CONTAINS->value, StringOperators::NOT_STARTS_WITH->value, StringOperators::NOT_ENDS_WITH->value => 'NOT LIKE',
             default => '='
         };
 
-        $value = $check->value;
 
-        return $query->where($check->key, $operator, $value);
+        return match ($check->operator) {
+            StringOperators::CONTAINS->value, StringOperators::NOT_CONTAINS->value => $query->where($check->key, $operator, "%$check->value%"),
+            StringOperators::ENDS_WITH->value, StringOperators::NOT_ENDS_WITH->value => $query->where($check->key, $operator, "%$check->value"),
+            StringOperators::STARTS_WITH->value, StringOperators::NOT_STARTS_WITH->value => $query->where($check->key, $operator, "$check->value%"),
+            default => $query->where($check->key, $operator, $check->value),
+        };
     }
 }
 

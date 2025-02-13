@@ -28,7 +28,7 @@ class AbacCheckController extends Controller
     public function store(AbacCheckRequest $request, $chain): JsonResponse
     {
         try {
-            return response()->json($this->service->store($request->validated(), $chain));
+            return response()->json($this->service->store($request->validated(), $chain), 201);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

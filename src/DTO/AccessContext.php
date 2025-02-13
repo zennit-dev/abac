@@ -23,12 +23,10 @@ class AccessContext implements JsonSerializable
     public function __construct(
         public PolicyMethod $method,
         public Builder $subject,
-        /**
-         * @var TObject $object
-         */
         public Model $object,
         public array $environment = [],
-    ) {}
+    ) {
+    }
 
     public function __toString(): string
     {

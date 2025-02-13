@@ -2,16 +2,15 @@
 
 namespace zennit\ABAC\Services;
 
+use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AccessResult;
-use zennit\ABAC\Exceptions\ValidationException;
-use zennit\ABAC\Logging\AuditLogger;
+use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
-use zennit\ABAC\Validators\AccessContextValidator;
 
 readonly class AbacService implements AbacManager
 {
@@ -19,14 +18,14 @@ readonly class AbacService implements AbacManager
 
     public function __construct(
         private AbacCacheManager $cache,
-        private AbacAttributeLoader $attributeLoader,
         private AbacChainEvaluator $evaluator,
-        private AuditLogger $logger,
-        private AbacPerformanceMonitor $monitor
-    ) {}
+        private AbacPerformanceMonitor $monitor,
+        private AbacAuditLogger $logger
+    ) {
+    }
 
     /**
-     * @throws ValidationException
+     * @throws InvalidArgumentException
      */
     public function can(AccessContext $context): bool
     {
@@ -34,39 +33,53 @@ readonly class AbacService implements AbacManager
     }
 
     /**
-     * @throws ValidationException
+     * Evaluate access for the given context
+     *
+     * @throws InvalidArgumentException
      */
     public function evaluate(AccessContext $context): AccessResult
     {
-        if ($this->getStrictValidation()) {
-            $this->validateContext($context);
+        $operation = $context->method->value . ':' . get_class($context->subject->getModel());
+
+        /** @var AccessResult $result */
+        [$result, $duration] = $this->monitor->measure($operation, function () use ($context): AccessResult {
+            $result = $this->internal($context);
+
+            if ($this->getLoggingEnabled()) {
+                $level = $result->can ? 'info' : 'warning';
+                $this->logger->log($result, $level);
+            }
+
+            return $result;
+        });
+
+        if ($duration > $this->getSlowEvaluationThreshold()) {
+            $this->logger->log($result, 'warning');
         }
 
-        $subject_class_string = get_class($context->subject->getModel());
-
-        $policy = AbacPolicy::where('method', $context->method)
-            ->where('resource', $subject_class_string)
-            ->first();
-
-        if (!$policy) {
-            return new AccessResult($context->subject, 'No policy provided, full access granted.', $context);
-        }
-
-        $chain = AbacChain::wherePolicyId($policy->id)->first();
-        $query = $this->evaluator->evaluate($context->subject, $chain, $context);
-
-        return new AccessResult($query, null, $context);
+        return $result;
     }
 
     /**
-     * Validate the access context.
-     *
-     * @param  AccessContext  $context  The context to validate
-     *
-     * @throws ValidationException If the context is invalid
+     * @throws InvalidArgumentException
      */
-    private function validateContext(AccessContext $context): void
+    private function internal(AccessContext $context): AccessResult
     {
-        app(AccessContextValidator::class)->validate($context);
+        return $this->cache->remember("abac_policies:{$context->method->value}", function () use ($context) {
+            $subject_class_string = get_class($context->subject->getModel());
+
+            $policy = AbacPolicy::where('method', $context->method->value)
+                ->where('resource', $subject_class_string)
+                ->first();
+
+            if (!$policy) {
+                return new AccessResult($context->subject, 'No policy provided, full access granted.', $context);
+            }
+
+            $chain = AbacChain::wherePolicyId($policy->id)->first();
+            $query = $this->evaluator->evaluate($context->subject, $chain, $context);
+
+            return new AccessResult($query, null, $context);
+        });
     }
 }

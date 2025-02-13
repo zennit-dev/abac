@@ -11,14 +11,14 @@ class AbacObjectAdditionalAttribute extends Model
     use AccessesAbacConfiguration;
 
     protected $fillable = [
-        'object_id',
+        '_id',
         'key',
         'value',
     ];
 
     protected $casts = [
         'id' => 'integer',
-        'object_id' => 'integer',
+        '_id' => 'integer',
         'key' => 'string',
         'value' => 'string',
     ];

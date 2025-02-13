@@ -18,25 +18,8 @@ return [
         'store' => env('ABAC_CACHE_STORE', 'database'),
         'ttl' => env('ABAC_CACHE_TTL', 3600),
         'prefix' => env('ABAC_CACHE_PREFIX', 'abac_'),
-        'warming' => [
-            'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
-            'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
-        ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | ABAC Evaluation Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This section defines the settings for ABAC evaluation, including whether
-    | strict validation is enabled.
-    |
-    */
-
-    'evaluation' => [
-        'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
-    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -58,24 +41,6 @@ return [
             'enabled' => env('ABAC_PERFORMANCE_LOGGING_ENABLED', true),
             'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', 100),
         ],
-        'events' => [
-            'enabled' => env('ABAC_EVENTS_ENABLED', true),
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | ABAC Operators Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This section defines the settings for ABAC operators, including any
-    | disabled or custom operators.
-    |
-    */
-
-    'operators' => [
-        'disabled' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
-        'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
 
     /*

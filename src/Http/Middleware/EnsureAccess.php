@@ -3,6 +3,7 @@
 namespace zennit\ABAC\Http\Middleware;
 
 use Closure;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -12,8 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Enums\PolicyMethod;
-use zennit\ABAC\Exceptions\UnsupportedOperatorException;
-use zennit\ABAC\Exceptions\ValidationException;
 use zennit\ABAC\Services\AbacAttributeLoader;
 use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Services\AbacService;
@@ -33,7 +32,8 @@ readonly class EnsureAccess
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
         protected AbacAttributeLoader $attributeLoader
-    ) {}
+    ) {
+    }
 
     /**
      * Handle an incoming request.
@@ -79,10 +79,11 @@ readonly class EnsureAccess
     /**
      * AbacCheck if the request has access
      *
+     * @param Request $request
+     *
      * @throws InvalidArgumentException
-     * @throws ValidationException
-     * @throws UnsupportedOperatorException
-     * @throws \Exception
+     * @throws Exception
+     * @return bool
      */
     private function checkAccess(Request $request): bool
     {

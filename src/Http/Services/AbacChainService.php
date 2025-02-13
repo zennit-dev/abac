@@ -7,7 +7,7 @@ use zennit\ABAC\Models\AbacChain;
 
 readonly class AbacChainService
 {
-    public function __construct(protected AbacCheckService $service)
+    public function __construct(protected AbacCheckService $checkService)
     {
     }
 
@@ -16,14 +16,29 @@ readonly class AbacChainService
         return AbacChain::where('policy_collection_id', $collection)->toArray();
     }
 
-    public function store(array $data, int $collection, bool $chain = false): array
+    public function store(array $chainData, ?int $policyId = null): array
     {
-        $condition = AbacChain::create([...$data, 'policy_collection_id' => $collection]);
-        $response = $condition->toArray();
+        $chain = AbacChain::create([
+            'operator' => $chainData['operator'],
+            'policy_id' => $policyId,
+        ]);
 
-        if ($chain) {
-            $attributes = array_map(fn ($attribute) => $this->service->store($attribute, $condition->id), $data['attributes']);
-            $response['attributes'] = $attributes;
+        $response = $chain->toArray();
+
+        // Handle nested chains recursively
+        if (isset($chainData['chains'])) {
+            $response['chains'] = array_map(
+                fn ($nestedChain) => $this->store($nestedChain, $policyId),
+                $chainData['chains']
+            );
+        }
+
+        // Handle checks
+        if (isset($chainData['checks'])) {
+            $response['checks'] = array_map(
+                fn ($check) => $this->checkService->store($check, $chain->id),
+                $chainData['checks']
+            );
         }
 
         return $response;

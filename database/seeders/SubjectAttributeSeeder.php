@@ -5,11 +5,11 @@ namespace zennit\ABAC\Database\Seeders;
 use Illuminate\Database\Seeder;
 use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
 
-class ResourceAttributeSeeder extends Seeder
+class SubjectAttributeSeeder extends Seeder
 {
     public function run(): void
     {
-        $resourcePath = resource_path(config('abac.seeders.resource_attribute_path'));
+        $resourcePath = resource_path(config('abac.seeders.subject_attribute_path'));
 
         if (!file_exists($resourcePath)) {
             $this->command->error("Resource attribute file not found at path: $resourcePath");
