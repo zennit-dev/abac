@@ -41,7 +41,10 @@ readonly class AbacService implements AbacManager
     {
         $operation = $context->method->value . ':' . get_class($context->subject->getModel());
 
-        /** @var AccessResult $result */
+        /**
+         * @var AccessResult $result
+         * @var float $duration
+         */
         [$result, $duration] = $this->monitor->measure($operation, function () use ($context): AccessResult {
             $result = $this->internal($context);
 
