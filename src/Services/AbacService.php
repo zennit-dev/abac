@@ -43,10 +43,10 @@ readonly class AbacService implements AbacManager
 
         /**
          * @var AccessResult $result
-         * @var float $duratio
+         * @var float $duration
          */
         [$result, $duration] = $this->monitor->measure($operation, function () use ($context): AccessResult {
-            $result = $this->internal($context);
+            $result = $this->memoizedEvaluate($context);
 
             if ($this->getLoggingEnabled()) {
                 $level = $result->can ? 'info' : 'warning';
@@ -66,15 +66,15 @@ readonly class AbacService implements AbacManager
     /**
      * @throws InvalidArgumentException
      */
-    private function internal(AccessContext $context): AccessResult
+    private function memoizedEvaluate(AccessContext $context): AccessResult
     {
         if (!$this->getCacheEnabled()) {
-            return $this->_eval($context);
+            return $this->_evaluate($context);
         }
         $cache_key = 'abac_policies:' . $context->method->value . ':' . get_class($context->subject->getModel());
 
         return $this->cache->remember($cache_key, function () use ($context) {
-            return $this->_eval($context);
+            return $this->_evaluate($context);
         });
     }
 
@@ -83,7 +83,7 @@ readonly class AbacService implements AbacManager
      *
      * @return AccessResult
      */
-    private function _eval(AccessContext $context): AccessResult
+    private function _evaluate(AccessContext $context): AccessResult
     {
         $subject_class = get_class($context->subject->getModel());
 
@@ -96,8 +96,8 @@ readonly class AbacService implements AbacManager
         }
 
         $chain = AbacChain::wherePolicyId($policy->id)->first();
-        $query = $this->evaluator->evaluate($context->subject, $chain, $context);
+        $subject_query = $this->evaluator->apply($context->subject, $chain, $context);
 
-        return new AccessResult($query, null, $context);
+        return new AccessResult($subject_query, null, $context);
     }
 }
