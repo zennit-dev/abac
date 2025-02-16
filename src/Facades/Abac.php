@@ -52,20 +52,18 @@ class Abac extends Facade
      *                      - middleware: string|array of middleware to apply
      *                      - prefix: string (optional) prefix for the routes, defaults to 'api'
      *
-     * @return Closure
+     * @return void
      */
-    public static function routes(array $options = []): Closure
+    public static function routes(array $options = []): void
     {
-        return function () use ($options) {
-            $middleware = $options['middleware'] ?? ['api'];
-            $prefix = $options['prefix'] ?? 'api';
+        $middleware = $options['middleware'] ?? ['api'];
+        $prefix = $options['prefix'] ?? 'api';
 
-            Route::middleware($middleware)
-                ->prefix($prefix)
-                ->group(function () {
-                    require __DIR__ . '/../../routes/api.php';
-                });
-        };
+        Route::middleware($middleware)
+            ->prefix($prefix)
+            ->group(function () {
+                require __DIR__ . '/../../routes/api.php';
+            });
     }
 
     /**
