@@ -68,21 +68,36 @@ readonly class AbacService implements AbacManager
      */
     private function internal(AccessContext $context): AccessResult
     {
-        return $this->cache->remember("abac_policies:{$context->method->value}", function () use ($context) {
-            $subject_class_string = get_class($context->subject->getModel());
+        if (!$this->getCacheEnabled()) {
+            return $this->_eval($context);
+        }
+        $cache_key = 'abac_policies:' . $context->method->value . ':' . get_class($context->subject->getModel());
 
-            $policy = AbacPolicy::where('method', $context->method->value)
-                ->where('resource', $subject_class_string)
-                ->first();
-
-            if (!$policy) {
-                return new AccessResult($context->subject, 'No policy provided, full access granted.', $context);
-            }
-
-            $chain = AbacChain::wherePolicyId($policy->id)->first();
-            $query = $this->evaluator->evaluate($context->subject, $chain, $context);
-
-            return new AccessResult($query, null, $context);
+        return $this->cache->remember($cache_key, function () use ($context) {
+            return $this->_eval($context);
         });
+    }
+
+    /**
+     * @param AccessContext $context
+     *
+     * @return AccessResult
+     */
+    private function _eval(AccessContext $context): AccessResult
+    {
+        $subject_class = get_class($context->subject->getModel());
+
+        $policy = AbacPolicy::where('method', $context->method->value)
+            ->where('resource', $subject_class)
+            ->first();
+
+        if (!$policy) {
+            return new AccessResult($context->subject, 'No policy provided, full access granted.', $context);
+        }
+
+        $chain = AbacChain::wherePolicyId($policy->id)->first();
+        $query = $this->evaluator->evaluate($context->subject, $chain, $context);
+
+        return new AccessResult($query, null, $context);
     }
 }

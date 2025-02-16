@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class AbacSubjectAdditionalAttribute extends Model
 {
     protected $fillable = [
-        'subject_class_string',
+        'subject_class',
         '_id',
         'key',
         'value',
@@ -16,7 +16,7 @@ class AbacSubjectAdditionalAttribute extends Model
 
     protected $casts = [
         'id' => 'integer',
-        'subject_class_string' => 'string',
+        'subject_class' => 'string',
         '_id' => 'integer',
         'key' => 'string',
         'value' => 'string',
@@ -26,7 +26,7 @@ class AbacSubjectAdditionalAttribute extends Model
     {
         return $this->morphTo(
             name: 'subject',
-            type: 'subject_class_string',
+            type: 'subject_class',
             id: '_id'
         );
     }

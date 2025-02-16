@@ -39,7 +39,7 @@ trait IntegratesAbacAdditionalAttributes
         return $this->morphMany(
             related: AbacSubjectAdditionalAttribute::class,
             name: 'subject',
-            type: 'subject_class_string',
+            type: 'subject_class',
             id: '_id',
         );
     }

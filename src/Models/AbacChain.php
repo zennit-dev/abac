@@ -36,6 +36,11 @@ class AbacChain extends Model
                 throw new Exception('You must set either chain_id or policy_id');
             }
         });
+
+        // todo: invalidate cache
+        static::updated(function (AbacChain $chain) {
+
+        });
     }
 
     public function chain(): BelongsTo

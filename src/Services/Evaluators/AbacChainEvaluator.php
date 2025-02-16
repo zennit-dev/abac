@@ -19,7 +19,7 @@ readonly class AbacChainEvaluator
     {
         // Get all related chains and checks
         $related_chains = AbacChain::where('chain_id', $chain->id)->get();
-        $related_checks = AbacCheck::where('chain_id', $chain->id)->get();
+        $related_checks = AbacCheck::where('chain_id', $chain->id)->where('key', 'like', 'subject.%')->get();
 
         // Determine the method based on operator
         $method = match ($chain->operator) {
@@ -36,7 +36,7 @@ readonly class AbacChainEvaluator
 
             // Apply checks
             foreach ($related_checks as $check) {
-                $this->checkEvaluator->evaluate($subQuery, $check, $context);
+                $this->checkEvaluator->evaluateSubjectQuery($subQuery, $check, $context);
             }
         });
     }

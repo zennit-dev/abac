@@ -10,7 +10,7 @@ class AbacSubjectAdditionalAttributeRequest extends Request
     protected function getRules(): array
     {
         return [
-            'subject_class_string' => [
+            'subject_class' => [
                 'required',
                 'string',
                 'regex:/^App\\\\Models(\\\\[A-Z][A-Za-z0-9_]*)+$/',

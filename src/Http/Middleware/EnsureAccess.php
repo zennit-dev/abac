@@ -109,7 +109,11 @@ readonly class EnsureAccess
             environment: $request->toArray()
         );
 
-        return $this->abac->can($context);
+        $context =  $this->abac->evaluate($context);
+
+        $request->merge(['abac' => $context]);
+
+        return $context->can;
     }
 
     /**

@@ -10,8 +10,10 @@ use zennit\ABAC\Models\AbacCheck;
 
 readonly class AbacCheckEvaluator
 {
-    public function evaluate(Builder $query, AbacCheck $check, AccessContext $context): Builder
+    public function evaluateSubjectQuery(Builder $query, AbacCheck $check, AccessContext $context): Builder
     {
+        $key = str_replace('subject.', '', $check->key);
+
         $operator = match ($check->operator) {
             ArithmeticOperators::NOT_EQUALS->value => '<>',
             ArithmeticOperators::GREATER_THAN->value => '>',
@@ -25,10 +27,10 @@ readonly class AbacCheckEvaluator
 
 
         return match ($check->operator) {
-            StringOperators::CONTAINS->value, StringOperators::NOT_CONTAINS->value => $query->where($check->key, $operator, "%$check->value%"),
-            StringOperators::ENDS_WITH->value, StringOperators::NOT_ENDS_WITH->value => $query->where($check->key, $operator, "%$check->value"),
-            StringOperators::STARTS_WITH->value, StringOperators::NOT_STARTS_WITH->value => $query->where($check->key, $operator, "$check->value%"),
-            default => $query->where($check->key, $operator, $check->value),
+            StringOperators::CONTAINS->value, StringOperators::NOT_CONTAINS->value => $query->where($key, $operator, "%$check->value%"),
+            StringOperators::ENDS_WITH->value, StringOperators::NOT_ENDS_WITH->value => $query->where($key, $operator, "%$check->value"),
+            StringOperators::STARTS_WITH->value, StringOperators::NOT_STARTS_WITH->value => $query->where($key, $operator, "$check->value%"),
+            default => $query->where($key, $operator, $check->value),
         };
     }
 }
