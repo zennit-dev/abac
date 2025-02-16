@@ -2,12 +2,13 @@
 
 namespace zennit\ABAC\DTO;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
 use zennit\ABAC\Enums\PolicyMethod;
 
-class AccessContext implements JsonSerializable
+class AccessContext implements JsonSerializable, Arrayable
 {
     /**
      * AccessContext - an object to hold all context of accessing a query
@@ -34,6 +35,17 @@ class AccessContext implements JsonSerializable
         return json_encode($this->jsonSerialize(), JSON_PRETTY_PRINT);
     }
 
+    public function toArray(): array
+    {
+        return [
+            'method' => $this->method,
+            'subject' => $this->subject,
+            'object' => $this->object,
+            'environment' => $this->environment,
+            'can' => $this->can ?? false,
+        ];
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -41,6 +53,7 @@ class AccessContext implements JsonSerializable
             'subject' => $this->subject->get()->toArray(),
             'object' => $this->object->toArray(),
             'environment' => $this->environment,
+            'can' => $this->can ?? false,
         ];
     }
 }

@@ -3,7 +3,7 @@
 namespace zennit\ABAC\Facades;
 
 use BadMethodCallException;
-use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Route;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -11,7 +11,6 @@ use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Exceptions\ValidationException;
-use zennit\ABAC\Http\Requests\Request;
 
 /**
  * Facade for the ABAC (Attribute-Based Access Control) service.
@@ -77,7 +76,7 @@ class Abac extends Facade
      */
     public static function macros(): void
     {
-        Request::macro('abac', function (): AccessResult {
+        Request::macro('abac', function (): ?AccessResult {
             return $this->get('abac');
         });
     }

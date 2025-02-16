@@ -24,8 +24,8 @@ abstract class Controller
      */
     protected function paginate(Request $request, array $data): array
     {
-        $perPage = $request->query('perPage');
-        $page = $request->query('page');
+        $perPage = $request->query('perPage', 15);
+        $page = $request->query('page', 1);
         $collection = collect($data);
 
         $paginator = new LengthAwarePaginator(
