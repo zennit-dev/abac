@@ -214,8 +214,7 @@ readonly class EnsureAccess
     private function findMatchingSubject(string $path, array $patterns): Builder
     {
         foreach ($patterns as $pattern => $model_class_string) {
-            $escapedPattern = preg_quote($pattern, '#');
-            if (preg_match("#$escapedPattern#", $path)) {
+            if (preg_match("#^{$pattern}$#", $path)) {
                 $parts = explode('/', $path);
                 $id = end($parts);
 
