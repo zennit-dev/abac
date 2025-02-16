@@ -65,22 +65,23 @@ readonly class AbacCheckEvaluator
     private function evaluateObjectAccess(Model $model, AbacCheck $check, AccessContext $context): bool
     {
 
-        $object = $model->toArray();
+        $key = str_replace('object.', '', $check->key);
+        $value = data_get($model, $key);
 
         return match ($check->operator) {
-            StringOperators::CONTAINS->value => str_contains($object[$check->key], $check->value),
-            StringOperators::NOT_CONTAINS->value => !str_contains($object[$check->key], $check->value),
-            StringOperators::ENDS_WITH->value => str_ends_with($object[$check->key], $check->value),
-            StringOperators::NOT_ENDS_WITH->value => !str_ends_with($object[$check->key], $check->value),
-            StringOperators::STARTS_WITH->value => str_starts_with($object[$check->key], $check->value),
-            StringOperators::NOT_STARTS_WITH->value => !str_starts_with($object[$check->key], $check->value),
-            ArithmeticOperators::EQUALS->value => $object[$check->key] == $check->value,
-            ArithmeticOperators::NOT_EQUALS->value => $object[$check->key] != $check->value,
-            ArithmeticOperators::GREATER_THAN->value => $object[$check->key] > $check->value,
-            ArithmeticOperators::LESS_THAN->value => $object[$check->key] < $check->value,
-            ArithmeticOperators::GREATER_THAN_EQUALS->value => $object[$check->key] >= $check->value,
-            ArithmeticOperators::LESS_THAN_EQUALS->value => $object[$check->key] <= $check->value,
-            default => $object[$check->key] == $check->value,
+            StringOperators::CONTAINS->value => str_contains($value, $check->value),
+            StringOperators::NOT_CONTAINS->value => !str_contains($value, $check->value),
+            StringOperators::ENDS_WITH->value => str_ends_with($value, $check->value),
+            StringOperators::NOT_ENDS_WITH->value => !str_ends_with($value, $check->value),
+            StringOperators::STARTS_WITH->value => str_starts_with($value, $check->value),
+            StringOperators::NOT_STARTS_WITH->value => !str_starts_with($value, $check->value),
+            ArithmeticOperators::EQUALS->value => $value == $check->value,
+            ArithmeticOperators::NOT_EQUALS->value => $value != $check->value,
+            ArithmeticOperators::GREATER_THAN->value => $value > $check->value,
+            ArithmeticOperators::LESS_THAN->value => $value < $check->value,
+            ArithmeticOperators::GREATER_THAN_EQUALS->value => $value >= $check->value,
+            ArithmeticOperators::LESS_THAN_EQUALS->value => $value <= $check->value,
+            default => $value == $check->value,
         };
     }
 }
