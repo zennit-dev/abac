@@ -9,6 +9,7 @@ use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Models\tmp\Post;
 use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
@@ -41,9 +42,13 @@ readonly class AbacService implements AbacManager
     {
         $operation = $context->method->value . ':' . get_class($context->subject->getModel());
 
+
+        $post = Post::find(1);
+        $post->additional_attributes->toArray();
+
         /**
          * @var AccessResult $result
-         * @var float $duration
+         * @var float $duratio
          */
         [$result, $duration] = $this->monitor->measure($operation, function () use ($context): AccessResult {
             $result = $this->internal($context);

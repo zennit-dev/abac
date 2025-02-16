@@ -3,6 +3,7 @@
 namespace zennit\ABAC\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AbacSubjectAdditionalAttribute extends Model
 {
@@ -20,4 +21,13 @@ class AbacSubjectAdditionalAttribute extends Model
         'key' => 'string',
         'value' => 'string',
     ];
+
+    public function subject(): MorphTo
+    {
+        return $this->morphTo(
+            name: 'subject',
+            type: 'subject_class_string',
+            id: '_id'
+        );
+    }
 }
