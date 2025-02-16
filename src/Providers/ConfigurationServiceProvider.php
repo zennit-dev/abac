@@ -20,7 +20,7 @@ class ConfigurationServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 self::CONFIG_PATH => config_path('abac.php'),
-            ], 'zennit-abac-config');
+            ], 'abac-config');
         }
     }
 }
