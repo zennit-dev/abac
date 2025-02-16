@@ -9,7 +9,6 @@ class ObjectAttributeSeeder extends Seeder
 {
     public function run(): void
     {
-        $subject = config('abac.database.object_additional_attributes');
         $resourcePath = resource_path(config('abac.seeders.object_attribute_path'));
 
         if (!file_exists($resourcePath)) {
@@ -27,7 +26,7 @@ class ObjectAttributeSeeder extends Seeder
         }
 
         foreach ($userAttributes as $attr) {
-            AbacObjectAdditionalAttribute::create([...$attr, 'subject_type' => $subject]);
+            AbacObjectAdditionalAttribute::create($attr);
         }
     }
 }

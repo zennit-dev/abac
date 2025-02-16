@@ -23,18 +23,18 @@ return new class () extends Migration
             $table->string('key');
             $table->string('value');
 
-            $table->index(['object_id']);
+            $table->index(['_id']);
         });
 
         Schema::create('abac_subject_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('subject_class_string');
+            $table->string('subject_class');
             $table->unsignedBigInteger('_id')->nullable();
             $table->string('key');
             $table->string('value');
 
-            $table->index(['subject', 'subject_id']);
+            $table->index(['subject_class', '_id']);
         });
 
         Schema::create('abac_policies', function (Blueprint $table) {
@@ -48,17 +48,18 @@ return new class () extends Migration
 
         Schema::create('abac_chains', function (Blueprint $table) {
             $table->id();
+			$table->timestamps();
             $table->enum('operator', LogicalOperators::values());
-            $table->foreignId('chain_id')->nullable()->constrained('chain')->cascadeOnDelete();
-            $table->foreignId('policy_id')->unique()->nullable()->constrained('policies')->cascadeOnDelete();
+            $table->foreignId('chain_id')->nullable()->constrained('abac_chains')->cascadeOnDelete();
+            $table->foreignId('policy_id')->unique()->nullable()->constrained('abac_policies')->cascadeOnDelete();
         });
-        DB::statement('ALTER TABLE abac_chain ADD CONSTRAINT check_null CHECK ((chain_id IS NULL AND policy_id IS NOT NULL) OR (chain_id IS NOT NULL AND policy_id IS NULL))');
+        DB::statement('ALTER TABLE abac_chains ADD CONSTRAINT check_null CHECK ((chain_id IS NULL AND policy_id IS NOT NULL) OR (chain_id IS NOT NULL AND policy_id IS NULL))');
 
         Schema::create('abac_checks', function (Blueprint $table) { // check
             $table->id();
             $table->timestamps();
             $table->foreignId('chain_id')
-                ->constrained('abac_chain')
+                ->constrained('abac_chains')
                 ->cascadeOnDelete();
             $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
             $table->string('key');
