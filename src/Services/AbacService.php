@@ -9,7 +9,6 @@ use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacPolicy;
-use zennit\ABAC\Models\tmp\Post;
 use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
@@ -41,10 +40,6 @@ readonly class AbacService implements AbacManager
     public function evaluate(AccessContext $context): AccessResult
     {
         $operation = $context->method->value . ':' . get_class($context->subject->getModel());
-
-
-        $post = Post::find(1);
-        $post->additional_attributes->toArray();
 
         /**
          * @var AccessResult $result
