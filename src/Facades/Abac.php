@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Route;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
+use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Exceptions\ValidationException;
+use zennit\ABAC\Http\Requests\Request;
 
 /**
  * Facade for the ABAC (Attribute-Based Access Control) service.
@@ -64,5 +66,21 @@ class Abac extends Facade
                     require __DIR__ . '/../../routes/api.php';
                 });
         };
+    }
+
+    /**
+     * Register the ABAC macros.
+     *
+     * - Request::abac(): AccessResult - Get the access result from the request.
+     *
+     * @return void
+     *
+     * @see \zennit\ABAC\Providers\RequestMacroProvider
+     */
+    public static function macros(): void
+    {
+        Request::macro('abac', function (): AccessResult {
+            return $this->get('abac');
+        });
     }
 }

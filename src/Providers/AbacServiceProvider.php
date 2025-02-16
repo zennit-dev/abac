@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
+use zennit\ABAC\Facades\Abac;
 
 class AbacServiceProvider extends ServiceProvider
 {
