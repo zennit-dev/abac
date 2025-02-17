@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Services;
 
+use Closure;
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\FileStore;
 use Illuminate\Cache\NullStore;
@@ -36,24 +37,30 @@ readonly class AbacCacheManager
      * Remember an item in cache.
      *
      * @param  string  $key  The cache key
-     * @param  callable  $callback  Function that returns the value to cache
+     * @param  Closure  $callback  Function that returns the value to cache
      *
      * @throws InvalidArgumentException
      * @return mixed The cached value
      */
-    public function remember(string $key, callable $callback): mixed
+    public function remember(string $key, Closure $callback): mixed
     {
-        if (!$this->getCacheEnabled()) {
-            return $callback();
-        }
-
         $this->registerCacheKey($key);
 
-        return $this->cache->remember(
-            $key,
-            $this->getCacheTTL(),
-            $callback
-        );
+        $value = $this->cache->get($key);
+        if ($value !== null) {
+            return $value;
+        }
+
+        $result = $callback();
+        $cacheValue = [
+            'sql' => $result->query->toSql(),
+            'bindings' => $result->query->getBindings(),
+            'reason' => $result->reason,
+            'can' => $result->can
+        ];
+        
+        $this->cache->put($key, $cacheValue, $this->getCacheTTL());
+        return $result;
     }
 
     /**
@@ -119,5 +126,18 @@ readonly class AbacCacheManager
     public function forget(string $key): bool
     {
         return $this->cache->forget($this->getCachePrefix() . $key);
+    }
+
+    /**
+     * Get an item from cache.
+     *
+     * @param  string  $key  The cache key
+     *
+     * @throws InvalidArgumentException
+     * @return mixed The cached value or null if not found
+     */
+    public function get(string $key): mixed
+    {
+        return $this->cache->get($key);
     }
 }

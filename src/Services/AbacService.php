@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Services;
 
+use Exception;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
@@ -65,13 +66,28 @@ readonly class AbacService implements AbacManager
 
     /**
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     private function memoizedEvaluate(AccessContext $context): AccessResult
     {
         if (!$this->getCacheEnabled()) {
             return $this->_evaluate($context);
         }
-        $cache_key = 'abac_policies:' . $context->method->value . ':' . get_class($context->subject->getModel());
+        $cache_key = $context->method->value . ':' . get_class($context->subject->getModel());
+
+        $cached = $this->cache->get($cache_key);
+        if ($cached) {
+            $query = $context->subject->newQuery();
+            foreach ($cached['bindings'] as $key => $binding) {
+                $query->whereRaw('id = ?', [$binding]);
+            }
+
+            return new AccessResult(
+                $query,
+                $cached['reason'],
+                $context
+            );
+        }
 
         return $this->cache->remember($cache_key, function () use ($context) {
             return $this->_evaluate($context);
@@ -81,6 +97,7 @@ readonly class AbacService implements AbacManager
     /**
      * @param AccessContext $context
      *
+     * @throws Exception
      * @return AccessResult
      */
     private function _evaluate(AccessContext $context): AccessResult

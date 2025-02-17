@@ -13,8 +13,12 @@ readonly class AbacChainEvaluator
 {
     public function __construct(
         private AbacCheckEvaluator $checkEvaluator,
-    ) {}
+    ) {
+    }
 
+    /**
+     * @throws Exception
+     */
     public function apply(Builder $query, AbacChain $chain, AccessContext $context): Builder
     {
         // Get all related chains and checks
@@ -28,18 +32,18 @@ readonly class AbacChainEvaluator
         };
 
         // Apply the constraints using a closure to maintain proper grouping
-        return $query->{$method}(/**
-         * @throws Exception
-         */ function ($sub_query) use ($related_chains, $related_checks, $context) {
-            // Apply nested chains
-            foreach ($related_chains as $nested_chain) {
-                $this->apply($sub_query, $nested_chain, $context);
-            }
+        return $query->{$method}(
+            function ($sub_query) use ($related_chains, $related_checks, $context) {
+                // Apply nested chains
+                foreach ($related_chains as $nested_chain) {
+                    $this->apply($sub_query, $nested_chain, $context);
+                }
 
-            // Apply checks
-            foreach ($related_checks as $check) {
-                $this->checkEvaluator->apply($sub_query, $check, $context);
+                // Apply checks
+                foreach ($related_checks as $check) {
+                    $this->checkEvaluator->apply($sub_query, $check, $context);
+                }
             }
-        });
+        );
     }
 }

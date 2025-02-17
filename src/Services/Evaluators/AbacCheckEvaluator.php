@@ -2,6 +2,7 @@
 
 namespace zennit\ABAC\Services\Evaluators;
 
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use zennit\ABAC\DTO\AccessContext;
@@ -11,6 +12,9 @@ use zennit\ABAC\Models\AbacCheck;
 
 readonly class AbacCheckEvaluator
 {
+    /**
+     * @throws Exception
+     */
     public function apply(Builder $query, AbacCheck $check, AccessContext $context): Builder
     {
         /** @var "subject" | "object" | "environment" $type */
@@ -27,15 +31,15 @@ readonly class AbacCheckEvaluator
                 return 'environment';
             }
 
-            throw new \Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'subject.', 'object.', 'environment.' or 'environment.' ");
+            throw new Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'subject.', 'object.', 'environment.' or 'environment.' ");
         })();
 
         return match ($type) {
             'subject' => $this->applyConditionsToSubject($query, $check, $context),
             // basically emptying the query
-            'object' => $this->evaluateObjectAccess($context->object, $check, $context) ? $query : $query->whereRaw('1 = 0'),
-            'environment' => throw new \Exception('Environment not implemented yet'),
-            default =>  throw new \Exception('Not implemented yet')
+            'object' => $this->evaluateObjectAccess($context->object, $check) ? $query : $query->whereRaw('1 = 0'),
+            'environment' => throw new Exception('Environment not implemented yet'),
+            default =>  throw new Exception('Not implemented yet')
         };
     }
 
@@ -62,7 +66,7 @@ readonly class AbacCheckEvaluator
         };
     }
 
-    private function evaluateObjectAccess(Model $model, AbacCheck $check, AccessContext $context): bool
+    private function evaluateObjectAccess(Model $model, AbacCheck $check): bool
     {
 
         $key = str_replace('object.', '', $check->key);
@@ -75,7 +79,6 @@ readonly class AbacCheckEvaluator
             StringOperators::NOT_ENDS_WITH->value => !str_ends_with($value, $check->value),
             StringOperators::STARTS_WITH->value => str_starts_with($value, $check->value),
             StringOperators::NOT_STARTS_WITH->value => !str_starts_with($value, $check->value),
-            ArithmeticOperators::EQUALS->value => $value == $check->value,
             ArithmeticOperators::NOT_EQUALS->value => $value != $check->value,
             ArithmeticOperators::GREATER_THAN->value => $value > $check->value,
             ArithmeticOperators::LESS_THAN->value => $value < $check->value,
@@ -85,28 +88,3 @@ readonly class AbacCheckEvaluator
         };
     }
 }
-
-// // Use a CASE statement to check both tables with proper precedence
-// return $query->where(function ($subQuery) use ($check, $operator, $value, $table, $additionalTable) {
-//    $subQuery->where(function ($q) use ($check, $operator, $value, $table, $additionalTable) {
-//        $q->whereExists(function ($exists) use ($check, $operator, $value, $table, $additionalTable) {
-//            // Check additional attributes table first
-//            $exists->select(DB::raw(1))
-//                ->from($additionalTable)
-//                ->whereColumn("$additionalTable._id", "$table.id")
-//                ->where("$additionalTable.subject", get_class($q->getModel()))
-//                ->where("$additionalTable.key", $check->key)
-//                ->where("$additionalTable.value", $operator, $value);
-//        });
-//    })->orWhere(function ($q) use ($check, $operator, $value, $table, $additionalTable) {
-//        // If no override exists, check the original column
-//        $q->where("$table.{$check->key}", $operator, $value)
-//            ->whereNotExists(function ($exists) use ($check, $table, $additionalTable) {
-//                $exists->select(DB::raw(1))
-//                    ->from($additionalTable)
-//                    ->whereColumn("$additionalTable._id", "$table.id")
-//                    ->where("$additionalTable.subject", get_class($q->getModel()))
-//                    ->where("$additionalTable.key", $check->key);
-//            });
-//    });
-// });

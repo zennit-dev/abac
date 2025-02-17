@@ -42,20 +42,20 @@ readonly class AbacAttributeLoader
     {
         $attributes = AbacObjectAdditionalAttribute::where('_id', $id)->get();
 
-        return $attributes->map(fn (AbacObjectAdditionalAttribute $attribute) => [$attribute->attribute_name, $attribute->attribute_value])->toArray();
+        return $attributes->map(fn (AbacObjectAdditionalAttribute $attribute) => [$attribute->key, $attribute->value])->toArray();
     }
 
     /**
      * Load attributes associated with a resource.
      *
-     * @param string $model_class_string
+     * @param string $model
      * @param string|int $id
      *
      * @return Collection additional defined attributes
      */
-    public function loadAdditionalSubjectAttributes(string $model_class_string, string|int $id): Collection
+    public function loadAdditionalSubjectAttributes(string $model, string|int $id): Collection
     {
-        return AbacSubjectAdditionalAttribute::where('subject', $model_class_string)
+        return AbacSubjectAdditionalAttribute::where('model', $model)
             ->where('_id', $id)->get();
     }
 }
