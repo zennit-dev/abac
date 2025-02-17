@@ -8,8 +8,6 @@ use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
-// todo: match column names to models
-
 return new class () extends Migration
 {
     use AccessesAbacConfiguration;
