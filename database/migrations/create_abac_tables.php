@@ -29,12 +29,12 @@ return new class () extends Migration
         Schema::create('abac_subject_additional_attributes', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('subject_class');
+            $table->string('model');
             $table->unsignedBigInteger('_id')->nullable();
             $table->string('key');
             $table->string('value');
 
-            $table->index(['subject_class', '_id']);
+            $table->index(['model', '_id']);
         });
 
         Schema::create('abac_policies', function (Blueprint $table) {
@@ -48,7 +48,7 @@ return new class () extends Migration
 
         Schema::create('abac_chains', function (Blueprint $table) {
             $table->id();
-			$table->timestamps();
+            $table->timestamps();
             $table->enum('operator', LogicalOperators::values());
             $table->foreignId('chain_id')->nullable()->constrained('abac_chains')->cascadeOnDelete();
             $table->foreignId('policy_id')->unique()->nullable()->constrained('abac_policies')->cascadeOnDelete();

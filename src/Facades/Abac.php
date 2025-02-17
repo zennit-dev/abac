@@ -25,6 +25,8 @@ use zennit\ABAC\Exceptions\ValidationException;
  * @throws BadMethodCallException If the method does not exist
  *
  * @see \zennit\ABAC\Services\AbacService
+ *
+ * @mixin \Illuminate\Http\Request
  */
 class Abac extends Facade
 {
@@ -68,14 +70,17 @@ class Abac extends Facade
     /**
      * Register the ABAC macros.
      *
-     * - Request::abac(): AccessResult - Get the access result from the request.
-     *
      * @return void
      *
-     * @see \zennit\ABAC\Providers\RequestMacroProvider
+     * @see Request::abac()
      */
     public static function macros(): void
     {
+        /**
+         * Get the access result from the request.
+         *
+         * @return AccessResult|null
+         */
         Request::macro('abac', function (): ?AccessResult {
             return $this->get('abac');
         });

@@ -15,7 +15,7 @@ class PublishAbacConfigCommand extends Command
     {
         if ($this->shouldPublishConfig()) {
             $this->call('vendor:publish', [
-	            '--tag' => 'abac-config',
+                '--tag' => 'abac-config',
                 '--force' => true,
             ]);
             $this->info('Config published successfully.');

@@ -85,10 +85,10 @@ readonly class AbacService implements AbacManager
      */
     private function _evaluate(AccessContext $context): AccessResult
     {
-        $subject_class = get_class($context->subject->getModel());
+        $model = get_class($context->subject->getModel());
 
         $policy = AbacPolicy::where('method', $context->method->value)
-            ->where('resource', $subject_class)
+            ->where('resource', $model)
             ->first();
 
         if (!$policy) {
