@@ -17,9 +17,7 @@ class AbacSubjectAdditionalAttributeController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $matched = [];
-
-            return response()->json($this->paginate($request, $matched));
+            return response()->json($this->paginate($request, $request->abac()->query->get()->toArray()));
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }
@@ -57,7 +55,7 @@ class AbacSubjectAdditionalAttributeController extends Controller
         try {
             $this->service->destroy($subject_attribute);
 
-            return response()->json([], 204);
+            return response()->json(['message' => 'Subject Attribute deleted successfully.'], 204);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

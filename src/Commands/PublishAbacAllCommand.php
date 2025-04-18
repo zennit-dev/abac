@@ -8,7 +8,7 @@ class PublishAbacAllCommand extends Command
 {
     protected $signature = 'abac:publish {--force : Force the operation to run without confirmation}';
 
-    protected $description = 'Publish all ABAC files (config, migration, and environment variables)';
+    protected $description = 'Publish all ABAC files (config and environment variables)';
 
     public function handle(): void
     {
@@ -17,7 +17,6 @@ class PublishAbacAllCommand extends Command
         $this->info('Publishing ABAC files...');
 
         $this->call('abac:publish-config', $force);
-        $this->call('abac:publish-migration', $force);
         $this->call('abac:publish-env', $force);
 
         $this->info('All ABAC files published successfully!');

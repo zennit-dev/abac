@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Commands\PublishAbacAllCommand;
 use zennit\ABAC\Commands\PublishAbacConfigCommand;
 use zennit\ABAC\Commands\PublishAbacEnvCommand;
-use zennit\ABAC\Commands\PublishAbacMigrationCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {
@@ -15,7 +14,6 @@ class CommandServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 PublishAbacConfigCommand::class,
-                PublishAbacMigrationCommand::class,
                 PublishAbacEnvCommand::class,
                 PublishAbacAllCommand::class,
             ]);
