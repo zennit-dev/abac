@@ -15,12 +15,10 @@ class AbacChainController extends Controller
     {
     }
 
-    public function index(Request $request, int $policy): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $matched = [];
-
-            return response()->json($this->paginate($request, $matched));
+            return response()->json($this->paginate($request, $request->abac()->query->get()->toArray()));
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }
@@ -62,7 +60,7 @@ class AbacChainController extends Controller
         try {
             $this->service->destroy($chain);
 
-            return response()->json([], 204);
+            return response()->json(['message' => 'Chain deleted successfully.'], 204);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

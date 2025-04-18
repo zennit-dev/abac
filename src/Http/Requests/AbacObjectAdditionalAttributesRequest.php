@@ -2,11 +2,10 @@
 
 namespace zennit\ABAC\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class AbacObjectAdditionalAttributesRequest extends FormRequest
+class AbacObjectAdditionalAttributesRequest extends Request
 {
     protected function getRules(): array
     {

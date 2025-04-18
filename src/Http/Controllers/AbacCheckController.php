@@ -14,12 +14,10 @@ class AbacCheckController extends Controller
     {
     }
 
-    public function index(Request $request, int $chain): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $matched = [];
-
-            return response()->json($this->paginate($request, $matched));
+            return response()->json($this->paginate($request, $request->abac()->query->get()->toArray()));
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }
@@ -57,7 +55,7 @@ class AbacCheckController extends Controller
         try {
             $this->service->destroy($check);
 
-            return response()->json([], 204);
+            return response()->json(['message' => 'Check deleted successfully.'], 204);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }

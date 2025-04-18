@@ -13,12 +13,10 @@ A flexible and powerful ABAC implementation for Laravel applications.
 5. [API Routes](#api-routes)
 6. [Commands](#commands)
 7. [Configuration](#configuration)
-8. [Operators](#operators)
-9. [Context Value Resolution](#context-value-resolution)
-10. [Database Schema](#database-schema)
-11. [Models](#models)
-12. [License](#license)
-13. [Contributing](#contributing)
+8. [Database Schema](#database-schema)
+9. [License](#license)
+10. [Contributing](#contributing)
+11. [Reporting Issues & Questions](#reporting-issues--questions)
 
 ---
 
@@ -51,107 +49,139 @@ return [
 
 ## Quick Start
 
-1. Publish configuration and migrations:
-   ```bash
-   php artisan abac:publish
-   ```
+### Migrate
 
-2. Run migrations:
    ```bash
    php artisan migrate
    ```
 
-3. Create permissions using JSON:
-   ```json
-    "object_attributes": [{
-        "object_id": 1,
-        "attribute_name": "owner_id",
-        "attribute_value": "5"
-    }],
-    "subject_attributes": [{
-        "subject": "App\\Models\\User",
-        "subject_id": 1,
-        "attribute_name": "role",
-        "attribute_value": "admin"
-    }],
-    "policies": [{
-        "resource": "posts",
-        "method": "view",
-        "chains": [{
-            "operator": "and",
-            "chains": [
+### Setup initial data using the provided JSON files. You can use the following example JSON structure to seed your database
+
+```json
+{
+  "object_attributes": [
+    {
+      "object_id": 1,
+      "attribute_name": "owner_id",
+      "attribute_value": "5"
+    }
+  ],
+  "subject_attributes": [
+    {
+      "subject": "App\\Models\\User",
+      "subject_id": 1,
+      "attribute_name": "role",
+      "attribute_value": "admin"
+    }
+  ],
+  "policies": [
+    {
+      "resource": "posts",
+      "method": "view",
+      "chains": [
+        {
+          "operator": "and",
+          "chains": [
+            {
+              "operator": "or",
+              "chains": [
                 {
-                    "operator": "or",
-                    "chains": [
+                  "operator": "and",
+                  "chains": [
+                    {
+                      "operator": "or",
+                      "checks": [
                         {
-                            "operator": "and",
-                            "chains": [{
-                                "operator": "or",
-                                "checks": [
-                                    {
-                                        "operator": "greater_than",
-                                        "context_accessor": "object.view_count",
-                                        "value": "1000"
-                                    },
-                                    {
-                                        "operator": "contains",
-                                        "context_accessor": "object.title",
-                                        "value": "featured"
-                                    }
-                                ]
-                            }]
+                          "operator": "greater_than",
+                          "context_accessor": "object.view_count",
+                          "value": "1000"
                         },
                         {
-                            "operator": "and",
-                            "checks": [
-                                {
-                                    "operator": "less_than_equals",
-                                    "context_accessor": "object.age_restriction",
-                                    "value": "18"
-                                },
-                                {
-                                    "operator": "starts_with",
-                                    "context_accessor": "subject.permission_level",
-                                    "value": "senior"
-                                }
-                            ]
+                          "operator": "contains",
+                          "context_accessor": "object.title",
+                          "value": "featured"
                         }
-                    ]
+                      ]
+                    }
+                  ]
                 },
                 {
-                    "operator": "or",
-                    "checks": [
-                        {
-                            "operator": "not_ends_with",
-                            "context_accessor": "object.category",
-                            "value": "restricted"
-                        },
-                        {
-                            "operator": "not",
-                            "context_accessor": "subject.access_level",
-                            "value": "0"
-                        }
-                    ]
+                  "operator": "and",
+                  "checks": [
+                    {
+                      "operator": "less_than_equals",
+                      "context_accessor": "object.age_restriction",
+                      "value": "18"
+                    },
+                    {
+                      "operator": "starts_with",
+                      "context_accessor": "subject.permission_level",
+                      "value": "senior"
+                    }
+                  ]
                 }
-            ]
-        }]
-    }]
-
+              ]
+            },
+            {
+              "operator": "or",
+              "checks": [
+                {
+                  "operator": "not_ends_with",
+                  "context_accessor": "object.category",
+                  "value": "restricted"
+                },
+                {
+                  "operator": "not",
+                  "context_accessor": "subject.access_level",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 ```
 
-   This JSON structure follows the database schema:
-   - `object_attributes`: Maps to `abac_object_additional_attributes` table
-   - `subject_attributes`: Maps to `abac_subject_additional_attributes` table
-   - `policies`: Maps to `abac_policies` table
-   - `chains`: Maps to `abac_chains` table (supports nested chains via `chain_id`)
-   - `checks`: Maps to `abac_checks` table
+This JSON structure follows the database schema:
 
-   Note: The `chains` array supports nested structures where a chain can reference another chain using the `chain_id` field. Either `chain_id` or `checks` must be provided in a chain, but not both.
+- `object_attributes`: Maps to `abac_object_additional_attributes` table
+- `subject_attributes`: Maps to `abac_subject_additional_attributes` table
+- `policies`: Maps to `abac_policies` table
+- `chains`: Maps to `abac_chains` table (supports nested chains via `chain_id`)
+- `checks`: Maps to `abac_checks` table
 
-4. Run the seeder:
-   ```bash
-   php artisan db:seed
-   ```
+Note: The `chains` array supports nested structures where a chain can reference another chain using the `chain_id`
+field. Either `chain_id` or `checks` must be provided in a chain, but not both.
+
+### Before running the seeder
+
+- Ensure you have updated the [abac.php](config/abac.php) configuration file with the correct paths to your JSON files.
+
+- Also include the [DatabaseSeeder](database/seeders/DatabaseSeeder.php) into your `DatabaseSeeder` class
+
+```php
+use zennit\ABAC\Database\Seeders\DatabaseSeeder as ABACDatabaseSeeder;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run()
+    {
+        // Other seeders...
+        $this->call(ABACDatabaseSeeder::class, []);
+    }
+}
+```
+
+### Run the seeder command
+
+```bash
+php artisan db:seed --class=AbacSeeder
+```
+
+### After seeding the database
 
 ---
 
@@ -186,79 +216,206 @@ abacCache()->clear();        # Clear all cache
 
 The `can()` method evaluates the access request and returns a boolean indicating whether access is granted.
 
+The `evaluate()` method can be used to get detailed information about the evaluation process, look
+at [AccessResult](/src/DTO/AccessResult.php) for more details.
+
 The evaluation result is automatically cached using the subject ID, resource, and operation as the cache key.
 
 ---
 
 ## API Routes
 
-The following API routes are available for managing ABAC-related data. These routes are protected by the `abac`
-middleware and can be prefixed using the `ABAC_ROUTE_PREFIX` environment variable:
+The following API routes are available for managing ABAC-related data. These routes must be protected by the `abac`
+middleware (look at [Configuration](#configuration) for more details) and can be prefixed using the `ABAC_ROUTE_PREFIX`
+environment variable:
+
+## For Update and Create Operations
+
+When creating or updating ABAC resources, you have flexibility in how you structure your requests, as long as they
+comply with the validation rules defined in the [FormRequests](src/Http/Requests) classes. These rules ensure data
+integrity and proper relationships between policies, chains, and checks.
+
+You can create complex policy structures in a single request or build them incrementally through separate API calls. The
+validation system will ensure that your data maintains proper hierarchical relationships and contains all required
+fields.
+
+For detailed validation rules and request structure examples, refer to the FormRequest classes:
+
+- [AbacPolicyRequest](src/Http/Requests/AbacPolicyRequest.php)
+- [AbacChainRequest](src/Http/Requests/AbacChainRequest.php)
+- [AbacCheckRequest](src/Http/Requests/AbacCheckRequest.php)
+- [AbacObjectAttributeRequest](src/Http/Requests/AbacObjectAdditionalAttributesRequest.php)
+- [AbacSubjectAttributeRequest](src/Http/Requests/AbacSubjectAdditionalAttributeRequest.php)
+
+## Pagination
+
+All index responses are paginated and support the following query parameters:
+
+- `page`: The page number to retrieve (default: 1)
+- `per_page`: The number of items per page (default: 10)
+
+The pagination response format includes both the data items and pagination metadata:
+
+```json
+{
+  "items": [],
+  "pagination": {
+    "firstPage": 1,
+    "currentPage": 1,
+    "lastPage": 10,
+    "firstPageUrl": "localhost:8000/{prefix}/object-attributes?page=1",
+    "lastPageUrl": "localhost:8000/{prefix}/object-attributes?page=10",
+    "perPage": 10,
+    "nextPageUrl": "localhost:8000/{prefix}/object-attributes?page=2",
+    "prevPageUrl": null,
+    "total": 100,
+    "hasMorePages": true
+  }
+}
+```
 
 ### Object Attributes
 
-- **Endpoint**: `/{prefix}/object-attributes`
-- **Request Body**:
-  ```json
-  {
-    "object_id": "integer",
-    "attribute_name": "string",
-    "attribute_value": "string"
-  }
-  ```
+- **Get Object Attributes**
+    - **Endpoint**: `/{prefix}/object-attributes`
+    - **Method**: `GET`
+    - **Description**: Retrieve a list of object attributes.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+          {
+            "object_id": 1,
+            "attribute_name": "name_1",
+            "attribute_value": "val_1"
+          }
+      ```
+
+- **Delete Object Attribute**
+    - **Endpoint**: `/{prefix}/object-attributes/{id}`
+    - **Method**: `DELETE`
+    - **Description**: Delete a specific object attribute by ID.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "message": "Object Attribute deleted successfully."
+      }
+      ```
 
 ### Subject Attributes
 
-- **Endpoint**: `/{prefix}/subject-attributes`
-- **Request Body**:
+- **Get Subject Attributes**
+    - **Endpoint**: `/{prefix}/subject-attributes`
+    - **Method**: `GET`
+    - **Description**: Retrieve a list of subject attributes.
+    - **Request Body**: None
+- **Response**:
   ```json
-  {
-    "subject": "string",
-    "subject_id": "integer",
-    "attribute_name": "string",
-    "attribute_value": "string"
-  }
+      {
+        "subject": "App\\Models\\User",
+        "subject_id": 1,
+        "attribute_name": "role",
+        "attribute_value": "admin"
+      }
   ```
+
+- **Delete Subject Attribute**
+    - **Endpoint**: `/{prefix}/subject-attributes/{id}`
+    - **Method**: `DELETE`
+    - **Description**: Delete a specific subject attribute by ID.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "message": "Subject attribute deleted successfully."
+      }
+      ```
 
 ### Policies
 
-- **Endpoint**: `/{prefix}/policies`
-- **Request Body**:
-  ```json
-  {
-    "resource": "string",
-    "method": "string",
-    "chains": "array, optional"
-  }
-  ```
+- **Get Policies**
+    - **Endpoint**: `/{prefix}/policies`
+    - **Method**: `GET`
+    - **Description**: Retrieve a list of policies.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "id": 1,
+        "resource": "posts",
+        "method": "view",
+        "chains": []
+      }
+      ```
+
+- **Delete Policy**
+    - **Endpoint**: `/{prefix}/policies/{id}`
+    - **Method**: `DELETE`
+    - **Description**: Delete a specific policy by ID.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "message": "Policy deleted successfully."
+      }
+      ```
 
 ### Chains
 
-- **Endpoint**: `/{prefix}/policies/{policy}/chains`
-- **Request Body**:
-  ```json
-  {
-    "operator": "string",
-    "chain_id": "integer|null",
-    "policy_id": "integer|null",
-    "checks": "array, optional"
-  }
-  ```
+- **Get Chains**
+    - **Endpoint**: `/{prefix}/policies/{policy}/chains`
+    - **Method**: `GET`
+    - **Description**: Retrieve a list of chains for a given policy.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "id": 1,
+        "operator": "and",
+        "checks": []
+      }
+      ```
 
-    - **Either chain_id or policy_id must be provided. Providing both will result in an exception.**
+- **Delete Chain**
+    - **Endpoint**: `/{prefix}/policies/{policy}/chains/{id}`
+    - **Method**: `DELETE`
+    - **Description**: Delete a specific chain from a policy.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "message": "Chain deleted successfully."
+      }
+      ```
 
 ### Checks
 
-- **Endpoint**: `/{prefix}/policies/{policy}/chains/{chain}/checks`
-- **Request Body**:
-  ```json
-  {
-    "chain_id": "integer",
-    "operator": "string",
-    "context_accessor": "string",
-    "value": "string"
-  }
-  ```
+- **Get Checks**
+    - **Endpoint**: `/{prefix}/policies/{policy}/chains/{chain}/checks`
+    - **Method**: `GET`
+    - **Description**: Retrieve a list of checks for a given chain.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "id": 1,
+        "operator": "greater_than",
+        "context_accessor": "object.view_count",
+        "value": "1000"
+      }
+      ```
+
+- **Delete Check**
+    - **Endpoint**: `/{prefix}/policies/{policy}/chains/{chain}/checks/{id}`
+    - **Method**: `DELETE`
+    - **Description**: Delete a specific check from a chain.
+    - **Request Body**: None
+    - **Response**:
+      ```json
+      {
+        "message": "Check deleted successfully."
+      }
+      ```
 
 To register the ABAC routes in your application, create a new service provider:
 
@@ -285,6 +442,9 @@ class AbacRoutesServiceProvider extends ServiceProvider
             'middleware' => ['api', 'auth'],  // Add your middleware here
             'prefix' => 'abac'                // Optional: customize the route prefix
         ]);
+        
+        // Load ABAC macros so you have access to $request->abac()
+        Abac::macros();
     }
 }
 ```
@@ -305,13 +465,22 @@ Register your new service provider in `config/app.php`:
 ### Publishing Commands
 
 ```bash
-# Publish all ABAC files (config, migrations, and env variables)
+# Publish all ABAC files (config and env variables)
 php artisan abac:publish
 
 # Individual publishing commands
 php artisan abac:publish-config    # Publish configuration file only
-php artisan abac:publish-migration # Publish migration files only
 php artisan abac:publish-env       # Publish environment variables only
+```
+
+### Force Options
+
+All commands support the `--force` option to skip confirmations:
+
+```bash
+php artisan abac:publish --force
+php artisan abac:publish-config --force
+php artisan abac:publish-env --force
 ```
 
 ### Cache Management
@@ -328,42 +497,6 @@ php artisan abac:cache-invalidate
 
 # Clear cache
 php artisan abac:cache-clear
-```
-
-### Environment Setup
-
-```bash
-# Add required environment variables to .env file
-php artisan abac:publish-env
-
-# Available environment variables:
-ABAC_CACHE_ENABLED=true
-ABAC_CACHE_STORE='database'
-ABAC_CACHE_TTL=3600
-ABAC_CACHE_PREFIX='abac_'
-ABAC_CACHE_WARMING_ENABLED=true
-ABAC_CACHE_WARMING_SCHEDULE=100
-ABAC_STRICT_VALIDATION=true
-ABAC_LOGGING_ENABLED=true
-ABAC_LOG_CHANNEL='abac'
-ABAC_DETAILED_LOGGING=false
-ABAC_PERFORMANCE_LOGGING=true
-ABAC_SLOW_EVALUATION_THRESHOLD=100
-ABAC_EVENTS_ENABLED=true
-ABAC_USER_ATTRIBUTE_SUBJECT_TYPE='users'
-ABAC_SUBJECT_METHOD='user'
-ABAC_ROUTE_PREFIX='abac' # New environment variable for route prefix
-```
-
-### Force Options
-
-All commands support the `--force` option to skip confirmations:
-
-```bash
-php artisan abac:publish --force
-php artisan abac:publish-config --force
-php artisan abac:publish-migration --force
-php artisan abac:publish-env --force
 ```
 
 ---
@@ -396,19 +529,11 @@ ABAC_MIDDLEWARE_OBJECT_METHOD=user         # Method to retrieve object in middle
 <?php
 
 return [
-   
     'cache' => [
         'enabled' => env('ABAC_CACHE_ENABLED', true),
         'store' => env('ABAC_CACHE_STORE', 'database'),
         'ttl' => env('ABAC_CACHE_TTL', 3600),
         'prefix' => env('ABAC_CACHE_PREFIX', 'abac_'),
-        'warming' => [
-            'enabled' => env('ABAC_CACHE_WARMING_ENABLED', true),
-            'schedule' => env('ABAC_CACHE_WARMING_SCHEDULE', 'hourly'),
-        ],
-    ],
-    'evaluation' => [
-        'strict_validation' => env('ABAC_STRICT_VALIDATION', true),
     ],
     'monitoring' => [
         'logging' => [
@@ -420,25 +545,18 @@ return [
             'enabled' => env('ABAC_PERFORMANCE_LOGGING_ENABLED', true),
             'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', 100),
         ],
-        'events' => [
-            'enabled' => env('ABAC_EVENTS_ENABLED', true),
-        ],
-    ],
-    'operators' => [
-        'disabled' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
-        'custom' => [], // key => class name in the format of 'zennit\ABAC\Operators\OperatorName'
     ],
     'database' => [
-        'user_attribute_subject_type' => env('ABAC_USER_ATTRIBUTE_SUBJECT_TYPE', App\Models\User::class),
-        'user_soft_deletes_column' => 'deleted_at',
+        'object_additional_attributes' => env('ABAC_OBJECT_ADDITIONAL_ATTRIBUTES', 'App\Models\User'),
+        'soft_deletes_column' => 'deleted_at',
     ],
     'seeders' => [
-        'user_attribute_path' => env('ABAC_USER_ATTRIBUTE_PATH', 'stubs/abac/user_attributes.json'),
-        'resource_attribute_path' => env('ABAC_RESOURCE_ATTRIBUTE_PATH', 'stubs/abac/resource_attributes.json'),
-        'permission_path' => env('ABAC_PERMISSION_PATH', 'stubs/abac/permissions.json'),
+        'object_attribute_path' => 'stubs/abac/object_attribute_path.json',
+        'subject_attribute_path' => 'stubs/abac/subject_attribute_path.json',
+        'policy_file_path' => 'stubs/abac/abac_policy_file_path.json',
     ],
     'middleware' => [
-        'subject_method' => env('ABAC_MIDDLEWARE_SUBJECT_METHOD', 'user'),
+        'object_method' => env('ABAC_MIDDLEWARE_OBJECT_METHOD', 'user'),
         'excluded_routes' => [
             // Simple wildcard pattern - excludes all methods
             'current-user*',    // Matches current-user, current-user/profile, etc.
@@ -462,78 +580,40 @@ return [
                 'method' => 'GET'
             ]
         ],
+        'path_patterns' => [] // key value pairs for matching the URI to its associated method, required for the middleware to work
     ],
 ];
 ```
 
-### Permission JSON Structure
+## Database Schema
 
-The package supports defining permissions through JSON files. The structure should follow:
+![Database Schema](/resources/abac_db_model.png)
 
-```json
-{
-  "permissions": [
-    {
-      "resource": "string",
-      "operation": "string"
-    }
-  ],
-  "policies": [
-    {
-      "name": "string",
-      "permission_id": "integer"
-    }
-  ],
-  "collections": [
-    {
-      "operator": "string",
-      "policy_id": "integer"
-    }
-  ],
-  "conditions": [
-    {
-      "operator": "string",
-      "policy_collection_id": "integer"
-    }
-  ],
-  "attributes": [
-    {
-      "collection_condition_id": "integer",
-      "operator": "string",
-      "attribute_name": "string",
-      "attribute_value": "string"
-    }
-  ]
-}
-```
+## License
 
-The JSON file path can be configured in your `.env`:
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-```bash
-ABAC_PERMISSION_PATH=permissions.json
-```
+## Contributing
 
-### Resource Attributes JSON Structure
+Contributions are welcome! Please read the [CONTRIBUTING](CONTRIBUTING.md) file for details on how to contribute to this
+project.
 
-The package supports defining resource attributes through JSON files. Create a JSON file with the following structure:
+---
 
-```json
-[
-  {
-    "resource": "posts",
-    "attribute_name": "post_owner_id",
-    "attribute_value": "5"
-  },
-  {
-    "resource": "posts",
-    "attribute_name": "status",
-    "attribute_value": "published"
-  }
-]
-```
+## Reporting Issues & Questions
 
-The resource attributes JSON file path can be configured in your `.env`:
+If you encounter any issues, have questions, or need assistance with the ABAC package, please feel free to open an issue
+on our GitHub repository:
 
-```bash
-ABAC_RESOURCE_ATTRIBUTE_PATH=resource-attributes.json
-```
+[https://github.com/zennit-dev/abac/issues](https://github.com/zennit-dev/abac/issues)
+
+Our team monitors the issues board regularly and will respond as soon as possible. When reporting issues, please
+include:
+
+- Laravel and PHP versions
+- Package version
+- Steps to reproduce the issue
+- Expected and actual behavior
+- Any relevant error messages or logs
+
+This helps us address your concerns more efficiently.

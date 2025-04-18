@@ -18,9 +18,7 @@ class AbacPolicyController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $matched = [];
-
-            return response()->json($this->paginate($request, $matched));
+            return response()->json($this->paginate($request, $request->abac()->query->get()->toArray()));
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }
@@ -62,7 +60,7 @@ class AbacPolicyController extends Controller
         try {
             $this->service->destroy($policy);
 
-            return response()->json([], 204);
+            return response()->json(['message' => 'Policy deleted successfully.'], 204);
         } catch (Throwable $e) {
             return $this->sendErrorResponse($e);
         }
