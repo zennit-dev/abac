@@ -158,7 +158,15 @@ field. Either `chain_id` or `checks` must be provided in a chain, but not both.
 
 ### Before running the seeder
 
-- Ensure you have updated the [abac.php](config/abac.php) configuration file with the correct paths to your JSON files.
+- Make sure you have published the [configuration file](config/abac.php)  and set the correct paths for the JSON files
+  in your environment.
+
+```bash
+php artisan abac:publish
+```
+
+This will add the required environment variables to your `.env` file and create the configuration file at
+`config/abac.php`.
 
 - Also include the [DatabaseSeeder](database/seeders/DatabaseSeeder.php) into your `DatabaseSeeder` class
 
@@ -183,6 +191,12 @@ php artisan db:seed --class=AbacSeeder
 
 ### After seeding the database
 
+The final step to complete the setup is to add the [trait](src/Traits/IntegratesAbacAdditionalAttributes.php) to all the
+classes you have defined in path_patterns in the configuration file.
+
+- Check the [Configuration](#configuration) section for more details.
+
+```php
 ---
 
 ## Basic Usage
@@ -580,7 +594,11 @@ return [
                 'method' => 'GET'
             ]
         ],
-        'path_patterns' => [] // key value pairs for matching the URI to its associated method, required for the middleware to work
+        // key value pairs for matching the URI to its associated method, required for the middleware to work
+        'path_patterns' => [
+          'users/(/[^/]+)?' => 'App\Models\User',
+          'users/(/[^/]+)/posts/(/[^/]+)?' => 'App\Models\Post',
+        ] 
     ],
 ];
 ```
