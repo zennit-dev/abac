@@ -7,16 +7,18 @@ A flexible and powerful ABAC implementation for Laravel applications.
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Installation](#installation)
-3. [Quick Start](#quick-start)
-4. [Basic Usage](#basic-usage)
-5. [API Routes](#api-routes)
-6. [Commands](#commands)
-7. [Configuration](#configuration)
-8. [Database Schema](#database-schema)
-9. [License](#license)
-10. [Contributing](#contributing)
-11. [Reporting Issues & Questions](#reporting-issues--questions)
+2. [Prerequisites](#prerequisites)
+3. [Installation](#installation)
+4. [Quick Start](#quick-start)
+5. [Basic Usage](#basic-usage)
+6. [API Routes](#api-routes)
+7. [Commands](#commands)
+8. [Configuration](#configuration)
+9. [Database Schema](#database-schema)
+10. [Performance Monitoring](#performance-monitoring)
+11. [License](#license)
+12. [Contributing](#contributing)
+13. [Reporting Issues & Questions](#reporting-issues--questions)
 
 ---
 
@@ -25,6 +27,14 @@ A flexible and powerful ABAC implementation for Laravel applications.
 ABAC provides fine-grained access control by evaluating attributes of users, resources, and the context of a request.
 
 This package integrates seamlessly with Laravel to offer powerful access control mechanisms.
+
+---
+
+## Prerequisites
+
+- Laravel 11.0 or higher
+- LaravelSanctum 4.0 or higher
+- PHP 8.2 or higher
 
 ---
 
@@ -62,8 +72,13 @@ return [
   "object_attributes": [
     {
       "object_id": 1,
-      "attribute_name": "owner_id",
-      "attribute_value": "5"
+      "attribute_name": "posts_id",
+      "attribute_value": "1"
+    },
+    {
+      "object_id": 2,
+      "attribute_name": "user_id",
+      "attribute_value": "1"
     }
   ],
   "subject_attributes": [
@@ -71,71 +86,46 @@ return [
       "subject": "App\\Models\\User",
       "subject_id": 1,
       "attribute_name": "role",
-      "attribute_value": "admin"
+      "attribute_value": "editor"
     }
   ],
   "policies": [
     {
-      "resource": "posts",
+      "resource": "App\\Models\\Post",
       "method": "view",
       "chains": [
         {
-          "operator": "and",
+          "operator": "or",
           "chains": [
-            {
-              "operator": "or",
-              "chains": [
-                {
-                  "operator": "and",
-                  "chains": [
-                    {
-                      "operator": "or",
-                      "checks": [
-                        {
-                          "operator": "greater_than",
-                          "context_accessor": "object.view_count",
-                          "value": "1000"
-                        },
-                        {
-                          "operator": "contains",
-                          "context_accessor": "object.title",
-                          "value": "featured"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "operator": "and",
-                  "checks": [
-                    {
-                      "operator": "less_than_equals",
-                      "context_accessor": "object.age_restriction",
-                      "value": "18"
-                    },
-                    {
-                      "operator": "starts_with",
-                      "context_accessor": "subject.permission_level",
-                      "value": "senior"
-                    }
-                  ]
-                }
-              ]
-            },
             {
               "operator": "or",
               "checks": [
                 {
-                  "operator": "not_ends_with",
-                  "context_accessor": "object.category",
-                  "value": "restricted"
+                  "operator": "equals",
+                  "context_accessor": "object.posts.id",
+                  "value": "1"
                 },
                 {
-                  "operator": "not",
-                  "context_accessor": "subject.access_level",
-                  "value": "0"
+                  "operator": "equals",
+                  "context_accessor": "object.user.id",
+                  "value": "1"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "operator": "or",
+          "checks": [
+            {
+              "operator": "equals",
+              "context_accessor": "object.posts.id",
+              "value": "1"
+            },
+            {
+              "operator": "equals",
+              "context_accessor": "object.user.id",
+              "value": "1"
             }
           ]
         }
@@ -144,6 +134,11 @@ return [
   ]
 }
 ```
+
+This example creates a policy that determines who can view posts. It allows viewing when either:
+
+- The post ID equals 1, OR
+- The user ID equals 1
 
 This JSON structure follows the database schema:
 
@@ -234,6 +229,72 @@ at [AccessResult](/src/DTO/AccessResult.php) for more details.
 
 The evaluation result is automatically cached using the subject ID, resource, and operation as the cache key.
 
+### Available Operators
+
+All operators are defined in the `src/Enums/Operators` directory
+
+#### [Logical Operators](src/Enums/Operators/LogicalOperators.php)
+
+- `and`
+- `or`
+
+#### [Arithmetic Operators](src/Enums/Operators/ArithmeticOperators.php)
+
+- `equals`
+- `not_equals`
+- `greater_than`
+- `less_than`
+- `greater_than_equals`
+- `less_than_equals`
+
+#### [String Operators](src/Enums/Operators/StringOperators.php)
+
+- `contains`
+- `not_contains`
+- `starts_with`
+- `ends_with`
+- `not_starts_with`
+- `not_ends_with`
+
+**Note: Make sure when creating new objects in the database, you make use of these operators, not doing so is going to
+make the conditions invalid. If you want us to support other operators make a PR or raise an issue**
+
+---
+
+## Middleware
+
+The ABAC package uses the [EnsureAccess Middleware](src/Http/Middleware/EnsureAccess.php) to check whether the
+requesting user has the necessary permissions to access a specific resource and method.
+
+### How It Works
+
+The middleware is automatically registered when you add the service provider to your `bootstrap/providers.php` file. It
+evaluates access requests based on the following parameters:
+
+- **Resource**: The resource being accessed (e.g., `App\Models\Post`, `App\Models\User`, etc.).
+- **Method**: The HTTP method of the request (e.g., `GET`, `POST`, etc.).
+- **Subject**: The user making the request (e.g., `$request->user()`).
+
+For more details, refer to the [AccessContext](src/DTO/AccessContext.php) class.
+
+### Accessing the Evaluation Result
+
+After processing the request, the middleware adds the evaluation result to the request object. You can access it using
+`$request->abac()`.
+
+### Usage Example
+
+To use the middleware, simply apply it to your routes. For example:
+
+```php
+Route::apiResource('users', UserController::class)->middleware('abac');
+```
+
+### Important Notes
+
+- Ensure that the `abac` middleware is applied to the routes you want to protect.
+- The middleware evaluates access dynamically based on the defined policies and attributes.
+
 ---
 
 ## API Routes
@@ -242,7 +303,7 @@ The following API routes are available for managing ABAC-related data. These rou
 middleware (look at [Configuration](#configuration) for more details) and can be prefixed using the `ABAC_ROUTE_PREFIX`
 environment variable:
 
-## For Update and Create Operations
+### For Update and Create Operations
 
 When creating or updating ABAC resources, you have flexibility in how you structure your requests, as long as they
 comply with the validation rules defined in the [FormRequests](src/Http/Requests) classes. These rules ensure data
@@ -260,7 +321,7 @@ For detailed validation rules and request structure examples, refer to the FormR
 - [AbacObjectAttributeRequest](src/Http/Requests/AbacObjectAdditionalAttributesRequest.php)
 - [AbacSubjectAttributeRequest](src/Http/Requests/AbacSubjectAdditionalAttributeRequest.php)
 
-## Pagination
+### Pagination
 
 All index responses are paginated and support the following query parameters:
 
@@ -605,6 +666,38 @@ return [
 ## Database Schema
 
 ![Database Schema](/resources/abac_db_model.png)
+
+## Performance Monitoring
+
+The ABAC package includes built-in performance monitoring capabilities:
+
+### Caching System
+
+- **Automatic Result Caching**: Access control evaluations are automatically cached to improve performance
+- **Configurable Cache Store**: Supports multiple cache backends (database, Redis, file, etc.) via the
+  `ABAC_CACHE_STORE` setting
+- **Custom Cache Prefix**: All cache keys use the configured prefix (`ABAC_CACHE_PREFIX`) for easy identification
+- **Cache Registry**: The system maintains a registry of all cache keys for efficient invalidation
+- **Serialization Strategy**: Evaluation results are serialized efficiently, storing SQL queries and bindings rather
+  than full objects
+
+### Cache Management
+
+- All evaluation results are cached by default to improve performance
+- Cache storage uses the store defined in your configuration (`ABAC_CACHE_STORE`)
+- Cache warm-up can be scheduled with `ABAC_CACHE_WARMING_SCHEDULE` option
+- If caching is disabled (`ABAC_CACHE_ENABLED=false`), evaluations will be performed for each request
+
+### Performance Metrics
+
+- The package monitors the performance of all access control evaluations
+- Any evaluation that takes longer than the configured threshold (`ABAC_SLOW_EVALUATION_THRESHOLD`, default 100ms) will
+  log a warning
+- Performance metrics can be viewed in your configured log channel (`ABAC_LOG_CHANNEL`)
+
+These monitoring tools help identify and resolve performance bottlenecks in your access control policies.
+
+---
 
 ## License
 
