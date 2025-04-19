@@ -196,7 +196,6 @@ classes you have defined in path_patterns in the configuration file.
 
 - Check the [Configuration](#configuration) section for more details.
 
-```php
 ---
 
 ## Basic Usage
