@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
-use zennit\ABAC\Facades\Abac;
 
 class AbacServiceProvider extends ServiceProvider
 {
@@ -20,7 +19,8 @@ class AbacServiceProvider extends ServiceProvider
         $this->app->register(ConfigurationServiceProvider::class);
         $this->app->register(ServicesServiceProvider::class);
         $this->app->register(MiddlewareServiceProvider::class);
-        $this->app->register(CommandServiceProvider::class);
+	    $this->app->register(MigrationServiceProvider::class);
+	    $this->app->register(CommandServiceProvider::class);
 
         // Register the facade
         $this->app->bind(AbacManager::class, function ($app) {
