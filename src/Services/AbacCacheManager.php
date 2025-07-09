@@ -56,10 +56,11 @@ readonly class AbacCacheManager
             'sql' => $result->query->toSql(),
             'bindings' => $result->query->getBindings(),
             'reason' => $result->reason,
-            'can' => $result->can
+            'can' => $result->can,
         ];
-        
+
         $this->cache->put($key, $cacheValue, $this->getCacheTTL());
+
         return $result;
     }
 

@@ -53,12 +53,10 @@ return new class () extends Migration
         });
         DB::statement('ALTER TABLE abac_chains ADD CONSTRAINT check_null CHECK ((chain_id IS NULL AND policy_id IS NOT NULL) OR (chain_id IS NOT NULL AND policy_id IS NULL))');
 
-        Schema::create('abac_checks', function (Blueprint $table) { // check
+        Schema::create('abac_checks', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->foreignId('chain_id')
-                ->constrained('abac_chains')
-                ->cascadeOnDelete();
+            $table->foreignId('chain_id')->constrained('abac_chains')->cascadeOnDelete();
             $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
             $table->string('key');
             $table->string('value');

@@ -32,9 +32,9 @@ This package integrates seamlessly with Laravel to offer powerful access control
 
 ## Prerequisites
 
-- Laravel 11.0 or higher
+- Laravel 12.0 or higher
 - LaravelSanctum 4.0 or higher
-- PHP 8.2 or higher
+- PHP 8.3 or higher
 
 ---
 
