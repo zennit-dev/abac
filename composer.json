@@ -1,87 +1,87 @@
 {
-  "name": "zennit/abac",
-  "description": "Attribute-Based Access Control (ABAC) for Laravel",
-  "version": "6.6.1",
-  "type": "library",
-  "license": "MIT",
-  "keywords": [
-    "laravel",
-    "abac",
-    "access-control",
-    "authorization",
-    "permissions"
-  ],
-  "homepage": "https://github.com/zennit-dev/abac",
-  "support": {
-    "issues": "https://github.com/zennit-dev/abac/issues",
-    "source": "https://github.com/zennit-dev/abac"
-  },
-  "readme": "README.md",
-  "authors": [
-    {
-      "name": "zennit",
-      "email": "contact@zennit.dev",
-      "homepage": "https://zennit.dev"
-    }
-  ],
-  "require": {
-    "php": "^8.3",
-    "laravel/framework": "^12.20",
-    "laravel/sanctum": "^4.1"
-  },
-  "require-dev": {
-    "laravel/pint": "^1.23",
-    "mockery/mockery": "^1.6",
-    "orchestra/testbench": "^10.4",
-    "phpbench/phpbench": "^1.4",
-    "phpunit/phpunit": "^12.2"
-  },
-  "autoload": {
-    "psr-4": {
-      "zennit\\ABAC\\": "src/",
-      "zennit\\ABAC\\Database\\Factories\\": "database/factories/",
-      "zennit\\ABAC\\Database\\Seeders\\": "database/seeders/"
+    "name": "zennit/abac",
+    "description": "Attribute-Based Access Control (ABAC) for Laravel",
+    "version": "6.7.0",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "abac",
+        "access-control",
+        "authorization",
+        "permissions"
+    ],
+    "homepage": "https://github.com/zennit-dev/abac",
+    "support": {
+        "issues": "https://github.com/zennit-dev/abac/issues",
+        "source": "https://github.com/zennit-dev/abac"
     },
-    "files": [
-      "src/helpers.php"
+    "readme": "README.md",
+    "authors": [
+        {
+            "name": "zennit",
+            "email": "contact@zennit.dev",
+            "homepage": "https://zennit.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^12.20",
+        "laravel/sanctum": "^4.1"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.23",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^10.4",
+        "phpbench/phpbench": "^1.4",
+        "phpunit/phpunit": "^12.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "zennit\\ABAC\\": "src/",
+            "zennit\\ABAC\\Database\\Factories\\": "database/factories/",
+            "zennit\\ABAC\\Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "zennit\\ABAC\\Providers\\AbacServiceProvider"
+            ],
+            "config": {
+                "abac": "config/abac.php"
+            },
+            "aliases": {
+                "Abac": "zennit\\ABAC\\Facades\\Abac"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "version-patch": [
+            "php -f scripts/version.php patch"
+        ],
+        "version-minor": [
+            "php -f scripts/version.php minor"
+        ],
+        "version-major": [
+            "php -f scripts/version.php major"
+        ],
+        "pint": [
+            "vendor/bin/pint"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/zennit-dev/abac"
+        }
     ]
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "zennit\\ABAC\\Providers\\AbacServiceProvider"
-      ],
-      "config": {
-        "abac": "config/abac.php"
-      },
-      "aliases": {
-        "Abac": "zennit\\ABAC\\Facades\\Abac"
-      }
-    }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "scripts": {
-    "version-patch": [
-      "php -f scripts/version.php patch"
-    ],
-    "version-minor": [
-      "php -f scripts/version.php minor"
-    ],
-    "version-major": [
-      "php -f scripts/version.php major"
-    ],
-    "pint": [
-      "vendor/bin/pint"
-    ]
-  },
-  "config": {
-    "sort-packages": true
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/zennit-dev/abac"
-    }
-  ]
 }
