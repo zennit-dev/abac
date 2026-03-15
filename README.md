@@ -55,6 +55,24 @@ Local docs index: `docs/index.md`
 
 ---
 
+## Artisan Commands
+
+The package ships with helper commands for publishing ABAC assets and scaffolding policy payloads.
+
+```bash
+php artisan abac:publish
+php artisan abac:publish-config
+php artisan abac:publish-env
+php artisan abac:scaffold --from-routes
+```
+
+- `abac:publish` publishes ABAC config and environment variables in one step.
+- `abac:publish-config` publishes the `config/abac.php` file (supports `--force`).
+- `abac:publish-env` writes missing ABAC environment variables to a target env-style file.
+- `abac:scaffold --from-routes` generates policy stubs from `abac.middleware.resource_patterns`.
+
+---
+
 ## License
 
 MIT License — see [LICENSE.md](LICENSE.md)
