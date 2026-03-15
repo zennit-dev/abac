@@ -1,5 +1,6 @@
 site_name: Laravel ABAC
 site_description: Attribute-Based Access Control for Laravel
+site_url: https://zennit-dev.github.io/abac/
 
 docs_dir: docs
 
