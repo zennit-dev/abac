@@ -2,9 +2,9 @@
 
 A flexible ABAC implementation for Laravel 12+ with a developer-friendly permission management API.
 
-[![PHP Version](https://img.shields.io/packagist/php-v/zennit/abac)](https://packagist.org/packages/zennit/abac)
-[![License](https://img.shields.io/packagist/l/zennit/abac)](LICENSE.md)
-[![Packagist Version](https://img.shields.io/packagist/v/zennit/abac)](https://packagist.org/packages/zennit/abac)
+[![PHP Version](https://img.shields.io/packagist/php-v/zennit/abac?cacheSeconds=300)](https://packagist.org/packages/zennit/abac)
+[![License](https://img.shields.io/packagist/l/zennit/abac?cacheSeconds=300)](LICENSE.md)
+[![Packagist Version](https://img.shields.io/packagist/v/zennit/abac?cacheSeconds=300)](https://packagist.org/packages/zennit/abac)
 
 ---
 
