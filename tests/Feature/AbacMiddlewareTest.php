@@ -3,6 +3,7 @@
 use zennit\ABAC\Enums\Operators\ArithmeticOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
 use zennit\ABAC\Enums\PolicyMethod;
+use zennit\ABAC\Facades\Abac;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacCheck;
 use zennit\ABAC\Models\AbacPolicy;
@@ -52,6 +53,70 @@ it('allows access when actor attributes satisfy policy checks', function () {
     ]);
 
     $this->actingAs($user)->getJson('/posts/post-one')->assertOk();
+});
+
+it('allows access when any OR-linked grant matches', function () {
+    config()->set('abac.middleware.resource_patterns', [
+        'posts/([^/]+)' => Post::class,
+    ]);
+
+    Abac::addPermission('read', Post::class, ['resource.title' => 'Allowed Title']);
+    Abac::addPermission('read', Post::class, ['resource.title' => 'Other Title']);
+
+    $user = User::query()->create([
+        '_id' => 'u_or_grants',
+        'slug' => 'or-grants-user',
+        'name' => 'OR Grants User',
+        'role' => 'member',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_or_grants',
+        'slug' => 'or-grants-post',
+        'title' => 'Allowed Title',
+        'owner_id' => 'u_or_grants',
+    ]);
+
+    $this->actingAs($user)->getJson('/posts/or-grants-post')->assertOk();
+});
+
+it('denies show access when requested resource does not match any OR-linked grant', function () {
+    config()->set('abac.middleware.resource_patterns', [
+        'posts/([^/]+)' => Post::class,
+    ]);
+
+    Abac::addPermission('read', Post::class, ['resource._id' => 'p_allowed_show']);
+    Abac::addPermission('read', Post::class, ['resource._id' => 'p_other_allowed_show']);
+
+    $user = User::query()->create([
+        '_id' => 'u_show_scope',
+        'slug' => 'show-scope-user',
+        'name' => 'Show Scope User',
+        'role' => 'member',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_allowed_show',
+        'slug' => 'allowed-show-post',
+        'title' => 'Allowed Show Post',
+        'owner_id' => 'u_show_scope',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_other_allowed_show',
+        'slug' => 'other-allowed-show-post',
+        'title' => 'Other Allowed Show Post',
+        'owner_id' => 'u_show_scope',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_denied_show',
+        'slug' => 'denied-show-post',
+        'title' => 'Denied Show Post',
+        'owner_id' => 'u_show_scope',
+    ]);
+
+    $this->actingAs($user)->getJson('/posts/denied-show-post')->assertUnauthorized();
 });
 
 it('denies access when actor attributes do not satisfy policy checks', function () {

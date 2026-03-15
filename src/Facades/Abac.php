@@ -71,7 +71,7 @@ class Abac extends Facade
          * @return AccessResult|null
          */
         Request::macro('abac', function (): ?AccessResult {
-            return $this->input('abac');
+            return $this->attributes->get('abac') ?? $this->input('abac');
         });
     }
 }
