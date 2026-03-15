@@ -11,7 +11,6 @@ A flexible Attribute-Based Access Control (ABAC) implementation for Laravel 12+.
 - [Operations Guide](OPERATIONS.md)
 - [Benchmarking](BENCHMARKING.md)
 - [Security Model](SECURITY_MODEL.md)
-- [Upgrade Guide](UPGRADE.md)
 
 ## Key Features
 

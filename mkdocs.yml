@@ -14,10 +14,16 @@ theme:
       scheme: default
       primary: blue
       accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: blue
       accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 markdown_extensions:
   - attr_list
@@ -25,7 +31,15 @@ markdown_extensions:
   - tables
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid.js
 
 nav:
   - Home: index.md
@@ -36,5 +50,4 @@ nav:
   - Operations: OPERATIONS.md
   - Benchmarking: BENCHMARKING.md
   - Security Model: SECURITY_MODEL.md
-  - Upgrade Guide: UPGRADE.md
   - Governance: GOVERNANCE.md

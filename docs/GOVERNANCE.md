@@ -12,7 +12,7 @@ This package follows SemVer:
 
 - Public package APIs and documented config keys are treated as compatibility surfaces.
 - New behavior defaults should remain backward-compatible in minor/patch releases.
-- Security hardening defaults that can change behavior should be called out in `docs/UPGRADE.md`.
+- Security hardening defaults that can change behavior should be called out in release notes.
 
 ## Deprecation policy
 
@@ -26,5 +26,5 @@ When a key or behavior is superseded:
 ## Release controls
 
 - Run `composer pint -- --test`, `composer analyse`, and `composer test` before release.
-- Update `docs/UPGRADE.md` for behavior/config changes.
+- Update release notes for behavior/config changes.
 - Tag releases with semantic versions.
