@@ -7,8 +7,9 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\FileStore;
 use Illuminate\Cache\NullStore;
 use Illuminate\Contracts\Cache\Repository;
-use Log;
+use Illuminate\Support\Facades\Log;
 use Psr\SimpleCache\InvalidArgumentException;
+use zennit\ABAC\Contracts\MetricsCollector;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacCacheManager
@@ -17,19 +18,19 @@ readonly class AbacCacheManager
 
     private Repository $cache;
 
-    public function __construct()
+    public function __construct(private MetricsCollector $metrics)
     {
         $store = cache()->store($this->getCacheStore());
         $this->cache = $store;
         $concreteStore = $store->getStore();
 
         // Skip prefix setting for stores that don't support it
-        if (!$concreteStore instanceof FileStore &&
-            !$concreteStore instanceof ArrayStore &&
-            !$concreteStore instanceof NullStore &&
-            method_exists($concreteStore, 'setPrefix')
+        if (! $concreteStore instanceof FileStore &&
+            ! $concreteStore instanceof ArrayStore &&
+            ! $concreteStore instanceof NullStore &&
+            is_callable([$concreteStore, 'setPrefix'])
         ) {
-            $concreteStore->setPrefix($this->getCachePrefix());
+            call_user_func([$concreteStore, 'setPrefix'], $this->getCachePrefix());
         }
     }
 
@@ -38,9 +39,9 @@ readonly class AbacCacheManager
      *
      * @param  string  $key  The cache key
      * @param  Closure  $callback  Function that returns the value to cache
+     * @return mixed The cached value
      *
      * @throws InvalidArgumentException
-     * @return mixed The cached value
      */
     public function remember(string $key, Closure $callback): mixed
     {
@@ -48,13 +49,22 @@ readonly class AbacCacheManager
 
         $value = $this->cache->get($key);
         if ($value !== null) {
+            $this->metrics->recordCacheLookup(true);
+
             return $value;
         }
 
+        $this->metrics->recordCacheLookup(false);
+
         $result = $callback();
+        $query = clone $result->query;
+        $model = $query->getModel();
+
         $cacheValue = [
             'sql' => $result->query->toSql(),
             'bindings' => $result->query->getBindings(),
+            'model_keys' => $query->get()->modelKeys(),
+            'primary_key' => $model->getKeyName(),
             'reason' => $result->reason,
             'can' => $result->can,
         ];
@@ -76,7 +86,7 @@ readonly class AbacCacheManager
         $registryKey = 'key_registry';
         $keys = $this->cache->get($registryKey, []);
 
-        if (!in_array($key, $keys)) {
+        if (! in_array($key, $keys)) {
             $keys[] = $key;
             $this->cache->forever($registryKey, $keys);
         }
@@ -85,17 +95,22 @@ readonly class AbacCacheManager
     /**
      * Flush all cached items and optionally schedule cache warm-up.
      *
-     * @throws InvalidArgumentException
      * @return bool True if the cache was flushed successfully
+     *
+     * @throws InvalidArgumentException
      */
     public function flush(): bool
     {
         $this->logCacheOperation('flush', []);
 
-        $keys = $this->cache->get($this->getCachePrefix() . 'key_registry', []);
+        $keys = $this->cache->get('key_registry', []);
+        $this->metrics->recordCacheFlush(count($keys));
+
         foreach ($keys as $key) {
-            $this->cache->forget($this->getCachePrefix() . $key);
+            $this->cache->forget($key);
         }
+
+        $this->cache->forget('key_registry');
 
         return true;
     }
@@ -121,21 +136,20 @@ readonly class AbacCacheManager
      * Remove an item from cache and optionally schedule cache warm-up.
      *
      * @param  string  $key  The cache key to forget
-     *
      * @return bool True if the item was removed, false otherwise
      */
     public function forget(string $key): bool
     {
-        return $this->cache->forget($this->getCachePrefix() . $key);
+        return $this->cache->forget($key);
     }
 
     /**
      * Get an item from cache.
      *
      * @param  string  $key  The cache key
+     * @return mixed The cached value or null if not found
      *
      * @throws InvalidArgumentException
-     * @return mixed The cached value or null if not found
      */
     public function get(string $key): mixed
     {

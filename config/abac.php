@@ -1,5 +1,7 @@
 <?php
 
+use zennit\ABAC\Support\AbacDefaults;
+
 return [
 
     /*
@@ -14,12 +16,12 @@ return [
     */
 
     'cache' => [
-        'enabled' => env('ABAC_CACHE_ENABLED', true),
-        'store' => env('ABAC_CACHE_STORE', 'database'),
-        'ttl' => env('ABAC_CACHE_TTL', 3600),
-        'prefix' => env('ABAC_CACHE_PREFIX', 'abac_'),
+        'enabled' => env('ABAC_CACHE_ENABLED', AbacDefaults::CACHE_ENABLED),
+        'store' => env('ABAC_CACHE_STORE', AbacDefaults::CACHE_STORE),
+        'ttl' => env('ABAC_CACHE_TTL', AbacDefaults::CACHE_TTL),
+        'prefix' => env('ABAC_CACHE_PREFIX', AbacDefaults::CACHE_PREFIX),
+        'include_context' => env('ABAC_CACHE_INCLUDE_CONTEXT', AbacDefaults::CACHE_INCLUDE_CONTEXT),
     ],
-
 
     /*
     |--------------------------------------------------------------------------
@@ -33,13 +35,13 @@ return [
 
     'monitoring' => [
         'logging' => [
-            'enabled' => env('ABAC_LOGGING_ENABLED', true),
-            'channel' => env('ABAC_LOG_CHANNEL', 'abac'),
-            'detailed' => env('ABAC_DETAILED_LOGGING', false),
+            'enabled' => env('ABAC_LOGGING_ENABLED', AbacDefaults::LOGGING_ENABLED),
+            'channel' => env('ABAC_LOG_CHANNEL', AbacDefaults::LOG_CHANNEL),
+            'detailed' => env('ABAC_DETAILED_LOGGING', AbacDefaults::DETAILED_LOGGING),
         ],
         'performance' => [
-            'enabled' => env('ABAC_PERFORMANCE_LOGGING_ENABLED', true),
-            'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', 100),
+            'enabled' => env('ABAC_PERFORMANCE_LOGGING_ENABLED', AbacDefaults::PERFORMANCE_LOGGING_ENABLED),
+            'slow_threshold' => env('ABAC_SLOW_EVALUATION_THRESHOLD', AbacDefaults::SLOW_EVALUATION_THRESHOLD),
         ],
     ],
 
@@ -49,13 +51,19 @@ return [
     |--------------------------------------------------------------------------
     |
     | This section defines the settings for the ABAC database, including the
-    | user attribute subject type.
+    | actor and resource additional attribute storage.
     |
     */
 
     'database' => [
-        'object_additional_attributes' => env('ABAC_OBJECT_ADDITIONAL_ATTRIBUTES', 'App\Models\User'),
+        'actor_additional_attributes' => env('ABAC_ACTOR_ADDITIONAL_ATTRIBUTES', AbacDefaults::ACTOR_ADDITIONAL_ATTRIBUTES),
+        'primary_key' => env('ABAC_PRIMARY_KEY', AbacDefaults::PRIMARY_KEY),
+        'fallback_primary_key' => env('ABAC_FALLBACK_PRIMARY_KEY', AbacDefaults::FALLBACK_PRIMARY_KEY),
         'soft_deletes_column' => 'deleted_at',
+    ],
+
+    'policy' => [
+        'default_policy_behavior' => env('ABAC_DEFAULT_POLICY_BEHAVIOR', AbacDefaults::DEFAULT_POLICY_BEHAVIOR),
     ],
 
     /*
@@ -63,13 +71,17 @@ return [
     | ABAC Seeders Configuration
     |--------------------------------------------------------------------------
     |
-    | This section defines the paths to the json files used by the ABAC seeders.
+    | This section defines the paths to the JSON files used by the ABAC seeders.
     | These paths are relative to the resources' directory.
     */
     'seeders' => [
-        'object_attribute_path' => 'stubs/abac/object_attribute_path.json',
-        'subject_attribute_path' => 'stubs/abac/subject_attribute_path.json',
+        'actor_attribute_path' => 'stubs/abac/actor_attribute_path.json',
+        'resource_attribute_path' => 'stubs/abac/resource_attribute_path.json',
         'policy_file_path' => 'stubs/abac/abac_policy_file_path.json',
+    ],
+
+    'permissions' => [
+        'resources' => [], // alias => model class
     ],
 
     /*
@@ -78,13 +90,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | This section defines the settings for ABAC middleware, including the
-    | method to retrieve the subject and any excluded routes.
+    | method to retrieve the actor and any excluded routes.
     |
     */
 
     'middleware' => [
-        'object_method' => env('ABAC_MIDDLEWARE_OBJECT_METHOD', 'user'),
+        'actor_method' => env('ABAC_MIDDLEWARE_ACTOR_METHOD', AbacDefaults::ACTOR_METHOD),
         'excluded_routes' => [],
-        'path_patterns' => [], // key => resource path eg.
+        'allow_if_unmatched_route' => env('ABAC_ALLOW_IF_UNMATCHED_ROUTE', AbacDefaults::ALLOW_IF_UNMATCHED_ROUTE),
+        'resource_patterns' => [], // key => resource path eg.
     ],
 ];

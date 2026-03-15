@@ -1,0 +1,349 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/seeders/ActorAttributeSeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:resolveChainId\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:resolveParentChainId\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:resolvePolicyId\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:seedChain\(\) has parameter \$chainData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:seedCheck\(\) has parameter \$checkData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Database\\Seeders\\PolicySeeder\:\:seedPolicy\(\) has parameter \$policyData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/seeders/PolicySeeder.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/seeders/ResourceAttributeSeeder.php
+
+		-
+			message: '#^Property zennit\\ABAC\\Commands\\PublishAbacEnvCommand\:\:\$envVariables type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Commands/PublishAbacEnvCommand.php
+
+		-
+			message: '#^Parameter \#1 \$path of function resource_path expects string, array\|bool\|float\|int\|string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Commands/ScaffoldAbacPoliciesCommand.php
+
+		-
+			message: '#^Class zennit\\ABAC\\DTO\\AccessContext implements generic interface Illuminate\\Contracts\\Support\\Arrayable but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/DTO/AccessContext.php
+
+		-
+			message: '#^Method zennit\\ABAC\\DTO\\AccessContext\:\:__construct\(\) has parameter \$environment with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DTO/AccessContext.php
+
+		-
+			message: '#^Method zennit\\ABAC\\DTO\\AccessContext\:\:__toString\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/DTO/AccessContext.php
+
+		-
+			message: '#^Method zennit\\ABAC\\DTO\\AccessContext\:\:jsonSerialize\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DTO/AccessContext.php
+
+		-
+			message: '#^Method zennit\\ABAC\\DTO\\AccessResult\:\:__construct\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/DTO/AccessResult.php
+
+		-
+			message: '#^Call to function in_array\(\) with ''zennit\\\\ABAC\\\\Enums\\\\Operators\\\\ArithmeticOperators''\|''zennit\\\\ABAC\\\\Enums\\\\Operators\\\\LogicalOperators''\|''zennit\\\\ABAC\\\\Enums\\\\Operators\\\\StringOperators'' and TEnumArray of array\<UnitEnum\> will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Enums/Operators/AllOperators.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Enums\\Operators\\ArithmeticOperators\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Enums/Operators/ArithmeticOperators.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Enums\\Operators\\LogicalOperators\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Enums/Operators/LogicalOperators.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Enums\\Operators\\StringOperators\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Enums/Operators/StringOperators.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Enums\\PolicyMethod\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Enums/PolicyMethod.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Exceptions\\ValidationException\:\:__construct\(\) has parameter \$code with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Exceptions/ValidationException.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Exceptions\\ValidationException\:\:__construct\(\) has parameter \$message with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Exceptions/ValidationException.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Facades\\Abac\:\:__callStatic\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Facades/Abac.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Models\\AbacActorAdditionalAttribute\:\:actor\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacActorAdditionalAttribute.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacChain\:\:\$chain_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/AbacChain.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacChain\:\:\$policy_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/AbacChain.php
+
+		-
+			message: '#^Class zennit\\ABAC\\Models\\AbacChain uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacChain.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Models\\AbacChain\:\:chain\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacChain.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Models\\AbacChain\:\:checks\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacChain.php
+
+		-
+			message: '#^Class zennit\\ABAC\\Models\\AbacCheck uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacCheck.php
+
+		-
+			message: '#^Class zennit\\ABAC\\Models\\AbacPolicy uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacPolicy.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Models\\AbacPolicy\:\:chains\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacPolicy.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Models\\AbacResourceAdditionalAttribute\:\:resource\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Models/AbacResourceAdditionalAttribute.php
+
+		-
+			message: '#^Trait zennit\\ABAC\\Traits\\IntegratesAbacAdditionalAttributes is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Traits/IntegratesAbacAdditionalAttributes.php
+
+		-
+			message: '#^Cannot access offset ''router'' on Illuminate\\Contracts\\Foundation\\Application\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Providers/MiddlewareServiceProvider.php
+
+		-
+			message: '#^Property zennit\\ABAC\\Providers\\MiddlewareServiceProvider\:\:\$middlewareAliases type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/MiddlewareServiceProvider.php
+
+		-
+			message: '#^Property zennit\\ABAC\\Providers\\ServicesServiceProvider\:\:\$singletons type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/ServicesServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacActorAdditionalAttribute\:\:\$key\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/AbacAttributeLoader.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacActorAdditionalAttribute\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/AbacAttributeLoader.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,zennit\\ABAC\\Models\\AbacActorAdditionalAttribute\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: src/Services/AbacAttributeLoader.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,zennit\\ABAC\\Models\\AbacActorAdditionalAttribute\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: src/Services/AbacAttributeLoader.php
+
+		-
+			message: '#^Call to an undefined method object\:\:get\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Services/AbacCacheManager.php
+
+		-
+			message: '#^Call to an undefined method object\:\:getModel\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Services/AbacCacheManager.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\AbacCacheManager\:\:logCacheOperation\(\) has parameter \$counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Services/AbacCacheManager.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\AbacPerformanceMonitor\:\:calculateDuration\(\) has parameter \$timers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Services/AbacPerformanceMonitor.php
+
+		-
+			message: '#^Property zennit\\ABAC\\Services\\AbacPerformanceMonitor\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Services/AbacPerformanceMonitor.php
+
+		-
+			message: '#^Property zennit\\ABAC\\Services\\AbacPerformanceMonitor\:\:\$timers type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Services/AbacPerformanceMonitor.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacChain\:\:\$operator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Services/Evaluators/AbacChainEvaluator.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\Evaluators\\AbacChainEvaluator\:\:apply\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Services/Evaluators/AbacChainEvaluator.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\Evaluators\\AbacChainEvaluator\:\:apply\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Services/Evaluators/AbacChainEvaluator.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacCheck\:\:\$key\.$#'
+			identifier: property.notFound
+			count: 6
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacCheck\:\:\$operator\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Access to an undefined property zennit\\ABAC\\Models\\AbacCheck\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 16
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Match arm comparison between ''environment'' and ''environment'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\Evaluators\\AbacCheckEvaluator\:\:apply\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Method zennit\\ABAC\\Services\\Evaluators\\AbacCheckEvaluator\:\:apply\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Services/Evaluators/AbacCheckEvaluator.php
+
+		-
+			message: '#^Function abacPolicy\(\) should return zennit\\ABAC\\Services\\AbacService but returns zennit\\ABAC\\Contracts\\AbacManager\.$#'
+			identifier: return.type
+			count: 1
+			path: src/helpers.php

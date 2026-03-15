@@ -26,14 +26,23 @@
     ],
     "require": {
         "php": "^8.3",
-        "laravel/framework": "^12.20",
-        "laravel/sanctum": "^4.1"
+        "illuminate/cache": "^12.0",
+        "illuminate/console": "^12.0",
+        "illuminate/contracts": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/http": "^12.0",
+        "illuminate/routing": "^12.0",
+        "illuminate/support": "^12.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.4",
         "laravel/pint": "^1.23",
         "mockery/mockery": "^1.6",
         "orchestra/testbench": "^10.4",
+        "pestphp/pest": "^4.4",
+        "pestphp/pest-plugin-laravel": "^4.0",
         "phpbench/phpbench": "^1.4",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.2"
     },
     "autoload": {
@@ -45,6 +54,12 @@
         "files": [
             "src/helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "zennit\\ABAC\\Tests\\": "tests/",
+            "zennit\\ABAC\\Benchmarks\\": "benchmarks/"
+        }
     },
     "extra": {
         "laravel": {
@@ -59,7 +74,7 @@
             }
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "version-patch": [
@@ -73,10 +88,31 @@
         ],
         "pint": [
             "vendor/bin/pint"
+        ],
+        "test": [
+            "vendor/bin/pest"
+        ],
+        "test:unit": [
+            "vendor/bin/pest tests/Unit"
+        ],
+        "test:feature": [
+            "vendor/bin/pest tests/Feature"
+        ],
+        "analyse": [
+            "vendor/bin/phpstan analyse --memory-limit=1G"
+        ],
+        "bench": [
+            "vendor/bin/phpbench run --config=phpbench.json"
+        ],
+        "bench:quick": [
+            "vendor/bin/phpbench run --config=phpbench.json --revs=10 --iterations=2"
         ]
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "repositories": [
         {

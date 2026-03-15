@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use zennit\ABAC\Commands\PublishAbacAllCommand;
 use zennit\ABAC\Commands\PublishAbacConfigCommand;
 use zennit\ABAC\Commands\PublishAbacEnvCommand;
+use zennit\ABAC\Commands\ScaffoldAbacPoliciesCommand;
 
 class CommandServiceProvider extends ServiceProvider
 {
@@ -16,6 +17,7 @@ class CommandServiceProvider extends ServiceProvider
                 PublishAbacConfigCommand::class,
                 PublishAbacEnvCommand::class,
                 PublishAbacAllCommand::class,
+                ScaffoldAbacPoliciesCommand::class,
             ]);
         }
     }

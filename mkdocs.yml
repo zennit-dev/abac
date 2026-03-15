@@ -1,0 +1,37 @@
+site_name: Laravel ABAC
+site_description: Attribute-Based Access Control for Laravel
+site_url: https://zennit-dev.github.io/laravel-abac
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - Home: index.md
+  - Consumer Setup: CONSUMER_SETUP.md
+  - Managing Permissions: MANAGING_ABAC.md
+  - Seeding Schema: SEEDING_SCHEMA.md
+  - Architecture Diagrams: ARCHITECTURE_DIAGRAMS.md
+  - Operations: OPERATIONS.md
+  - Benchmarking: BENCHMARKING.md
+  - Security Model: SECURITY_MODEL.md
+  - Upgrade Guide: UPGRADE.md
+  - Governance: GOVERNANCE.md

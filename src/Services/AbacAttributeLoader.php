@@ -4,9 +4,7 @@ namespace zennit\ABAC\Services;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
-use zennit\ABAC\Models\AbacObjectAdditionalAttribute;
-use zennit\ABAC\Models\AbacSubjectAdditionalAttribute;
+use zennit\ABAC\Models\AbacActorAdditionalAttribute;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacAttributeLoader
@@ -14,48 +12,39 @@ readonly class AbacAttributeLoader
     use AccessesAbacConfiguration;
 
     /**
-     * Load attributes associated with a user/subject.
+     * Load attributes associated with an actor.
      *
-     * @template TObject of Model
+     * @template TActor of Model
      *
-     * @param  TObject  $object  The context containing the subject
+     * @param  TActor  $actor  The context containing the actor
      *
-     * @returns Model - the $object as it was + the additional attributes assigned through magic methods
+     * @returns Model - the $actor as it was + the additional attributes assigned through magic methods
      *
      * @throws Exception
      */
-    public function loadAllObjectAttributes(Model $object): Model
+    public function loadAllActorAttributes(Model $actor): Model
     {
-        if (!isset($object->id)) {
-            throw new Exception('Object Model does not have an ID field');
+        $actorId = $actor->getKey();
+
+        if (is_null($actorId)) {
+            throw new Exception('Actor model does not have a resolved primary key value');
         }
 
-        $additions = $this->loadAdditionalObjectAttributes($object->id);
+        $additions = $this->loadAdditionalActorAttributes($actorId);
         foreach ($additions as $key => $value) {
-            $object->$key = $value;
+            $actor->$key = $value;
         }
 
-        return $object;
-    }
-
-    private function loadAdditionalObjectAttributes(int $id): array
-    {
-        $attributes = AbacObjectAdditionalAttribute::where('_id', $id)->get();
-
-        return $attributes->map(fn (AbacObjectAdditionalAttribute $attribute) => [$attribute->key, $attribute->value])->toArray();
+        return $actor;
     }
 
     /**
-     * Load attributes associated with a resource.
-     *
-     * @param string $model
-     * @param string|int $id
-     *
-     * @return Collection additional defined attributes
+     * @return array<int, array{0: string, 1: string}>
      */
-    public function loadAdditionalSubjectAttributes(string $model, string|int $id): Collection
+    private function loadAdditionalActorAttributes(string|int $id): array
     {
-        return AbacSubjectAdditionalAttribute::where('model', $model)
-            ->where('_id', $id)->get();
+        $attributes = AbacActorAdditionalAttribute::where('_id', $id)->get();
+
+        return $attributes->map(fn (AbacActorAdditionalAttribute $attribute) => [$attribute->key, $attribute->value])->toArray();
     }
 }

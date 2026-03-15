@@ -17,35 +17,41 @@ readonly class AbacCheckEvaluator
      */
     public function apply(Builder $query, AbacCheck $check, AccessContext $context): Builder
     {
-        /** @var "subject" | "object" | "environment" $type */
+        $actor = $context->actor;
+
         $type = (function () use ($check) {
-            if (str_contains($check->key, 'subject')) {
-                return 'subject';
+            if (str_starts_with($check->key, 'resource.')) {
+                return 'resource';
             }
 
-            if (str_contains($check->key, 'object.')) {
-                return 'object';
+            if (str_starts_with($check->key, 'actor.')) {
+                return 'actor';
             }
 
-            if (str_contains($check->key, 'environment.')) {
+            if (str_starts_with($check->key, 'environment.')) {
                 return 'environment';
             }
 
-            throw new Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'subject.', 'object.', 'environment.' or 'environment.' ");
+            throw new Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'resource.', 'actor.', or 'environment.'");
         })();
 
         return match ($type) {
-            'subject' => $this->applyConditionsToSubject($query, $check, $context),
-            // basically emptying the query
-            'object' => $this->evaluateObjectAccess($context->object, $check) ? $query : $query->whereRaw('1 = 0'),
+            'resource' => $this->applyConditionsToResource($query, $check),
+            'actor' => $this->evaluateActorAccess($actor, $check) ? $query : $query->whereRaw('1 = 0'),
             'environment' => throw new Exception('Environment not implemented yet'),
-            default =>  throw new Exception('Not implemented yet')
+            default => throw new Exception('Not implemented yet')
         };
     }
 
-    private function applyConditionsToSubject(Builder $query, AbacCheck $check, AccessContext $context): Builder
+    /**
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     */
+    private function applyConditionsToResource(Builder $query, AbacCheck $check): Builder
     {
-        $key = str_replace('subject.', '', $check->key);
+        $key = str_replace('resource.', '', $check->key);
 
         $operator = match ($check->operator) {
             ArithmeticOperators::NOT_EQUALS->value => '<>',
@@ -66,19 +72,19 @@ readonly class AbacCheckEvaluator
         };
     }
 
-    private function evaluateObjectAccess(Model $model, AbacCheck $check): bool
+    private function evaluateActorAccess(Model $model, AbacCheck $check): bool
     {
 
-        $key = str_replace('object.', '', $check->key);
+        $key = str_replace('actor.', '', $check->key);
         $value = data_get($model, $key);
 
         return match ($check->operator) {
             StringOperators::CONTAINS->value => str_contains($value, $check->value),
-            StringOperators::NOT_CONTAINS->value => !str_contains($value, $check->value),
+            StringOperators::NOT_CONTAINS->value => ! str_contains($value, $check->value),
             StringOperators::ENDS_WITH->value => str_ends_with($value, $check->value),
-            StringOperators::NOT_ENDS_WITH->value => !str_ends_with($value, $check->value),
+            StringOperators::NOT_ENDS_WITH->value => ! str_ends_with($value, $check->value),
             StringOperators::STARTS_WITH->value => str_starts_with($value, $check->value),
-            StringOperators::NOT_STARTS_WITH->value => !str_starts_with($value, $check->value),
+            StringOperators::NOT_STARTS_WITH->value => ! str_starts_with($value, $check->value),
             ArithmeticOperators::NOT_EQUALS->value => $value != $check->value,
             ArithmeticOperators::GREATER_THAN->value => $value > $check->value,
             ArithmeticOperators::LESS_THAN->value => $value < $check->value,

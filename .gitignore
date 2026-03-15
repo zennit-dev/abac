@@ -21,3 +21,4 @@ opencode-*
 .cursor/
 .cursorrules
 .github/copilot-instructions.md
+.phpstan

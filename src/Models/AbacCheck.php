@@ -4,9 +4,11 @@ namespace zennit\ABAC\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 class AbacCheck extends Model
 {
+    use FlushesAbacCache;
     use HasFactory;
 
     protected $fillable = [
@@ -23,4 +25,9 @@ class AbacCheck extends Model
         'key' => 'string',
         'value' => 'string',
     ];
+
+    protected static function booted(): void
+    {
+        self::registerAbacCacheFlushHooks();
+    }
 }

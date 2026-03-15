@@ -8,26 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
 use zennit\ABAC\Enums\PolicyMethod;
 
-class AccessContext implements JsonSerializable, Arrayable
+class AccessContext implements Arrayable, JsonSerializable
 {
     /**
-     * AccessContext - an object to hold all context of accessing a query
+     * AccessContext - holds all context for access evaluation
      *
-     * @template TResource
-     * @template TObject of Model
+     * @template TResource of Model
+     * @template TActor of Model
      *
      * @param  PolicyMethod  $method  The method being invoked
-     * @param  Builder<TResource>  $subject  The query of the given resource
-     * @param  TObject  $object  The accessor context (user, profile)
+     * @param  Builder<TResource>  $resource  The query of the given resource
+     * @param  TActor  $actor  The accessor context (user, profile)
      * @param  array  $environment  Additional environment properties
      */
     public function __construct(
         public PolicyMethod $method,
-        public Builder $subject,
-        public Model $object,
+        public Builder $resource,
+        public Model $actor,
         public array $environment = [],
-    ) {
-    }
+    ) {}
 
     public function __toString(): string
     {
@@ -39,8 +38,8 @@ class AccessContext implements JsonSerializable, Arrayable
     {
         return [
             'method' => $this->method,
-            'subject' => $this->subject,
-            'object' => $this->object,
+            'resource' => $this->resource,
+            'actor' => $this->actor,
             'environment' => $this->environment,
             'can' => $this->can ?? false,
         ];
@@ -48,10 +47,12 @@ class AccessContext implements JsonSerializable, Arrayable
 
     public function jsonSerialize(): array
     {
+        $actor = $this->actor;
+
         return [
             'method' => $this->method,
-            'subject' => $this->subject->get()->toArray(),
-            'object' => $this->object->toArray(),
+            'resource' => $this->resource->get()->toArray(),
+            'actor' => $actor->toArray(),
             'environment' => $this->environment,
             'can' => $this->can ?? false,
         ];

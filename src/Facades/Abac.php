@@ -4,29 +4,36 @@ namespace zennit\ABAC\Facades;
 
 use BadMethodCallException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Facades\Route;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\AbacManager;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AccessResult;
+use zennit\ABAC\DTO\PermissionGrant;
 use zennit\ABAC\Exceptions\ValidationException;
+use zennit\ABAC\Services\AbacService;
 
 /**
  * Facade for the ABAC (Attribute-Based Access Control) service.
  *
- * Provides methods for evaluating access permissions based on
- * subject attributes, resource attributes, and operations.
+ * Provides methods for evaluating access permissions and managing grants.
  *
  * @method static bool can(AccessContext $context)
+ * @method static PermissionGrant addPermission(string $method, string $resource, array<string, mixed>|array<int, array<string, mixed> >|string $constraints)
+ * @method static Collection<int, PermissionGrant> getPermissions(?string $method = null, ?string $resource = null, array<string, mixed> $filters = [])
+ * @method static PermissionGrant|null getPermission(int $grantId)
+ * @method static PermissionGrant updatePermission(int $grantId, array<string, mixed>|array<int, array<string, mixed> >|string $constraints)
+ * @method static bool removePermission(int $grantId)
+ * @method static int removePermissions(string $method, string $resource, array<string, mixed>|array<int, array<string, mixed> >|string|null $constraints = null)
  *
  * @throws ValidationException If the access context is invalid
  * @throws InvalidArgumentException If cache operations fail
  * @throws BadMethodCallException If the method does not exist
  *
- * @see \zennit\ABAC\Services\AbacService
+ * @see AbacService
  *
- * @mixin \Illuminate\Http\Request
+ * @mixin Request
  */
 class Abac extends Facade
 {
@@ -34,7 +41,7 @@ class Abac extends Facade
     {
         $instance = static::resolveFacadeInstance(static::getFacadeAccessor());
 
-        if (!method_exists($instance, $method)) {
+        if (! method_exists($instance, $method)) {
             throw new BadMethodCallException("Method $method does not exist.");
         }
 
@@ -47,30 +54,8 @@ class Abac extends Facade
     }
 
     /**
-     * Register the ABAC routes.
-     *
-     * @param array $options Array of options, supports:
-     *                      - middleware: string|array of middleware to apply
-     *                      - prefix: string (optional) prefix for the routes, defaults to 'api'
-     *
-     * @return void
-     */
-    public static function routes(array $options = []): void
-    {
-        $middleware = $options['middleware'] ?? ['api'];
-        $prefix = $options['prefix'] ?? 'api';
-
-        Route::middleware($middleware)
-            ->prefix($prefix)
-            ->group(function () {
-                require __DIR__ . '/../../routes/api.php';
-            });
-    }
-
-    /**
      * Register the ABAC macros.
      *
-     * @return void
      *
      * @see Request::abac()
      */
@@ -82,7 +67,7 @@ class Abac extends Facade
          * @return AccessResult|null
          */
         Request::macro('abac', function (): ?AccessResult {
-            return $this->get('abac');
+            return $this->input('abac');
         });
     }
 }

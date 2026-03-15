@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 class AbacChain extends Model
 {
+    use FlushesAbacCache;
     use HasFactory;
 
     protected $fillable = [
@@ -32,15 +34,12 @@ class AbacChain extends Model
                 throw new Exception('You can not set both chain_id and policy_id at the same time');
             }
 
-            if (!$chain->chain_id && !$chain->policy_id) {
+            if (! $chain->chain_id && ! $chain->policy_id) {
                 throw new Exception('You must set either chain_id or policy_id');
             }
         });
 
-        // todo: invalidate cache
-        static::updated(function (AbacChain $chain) {
-
-        });
+        self::registerAbacCacheFlushHooks();
     }
 
     public function chain(): BelongsTo

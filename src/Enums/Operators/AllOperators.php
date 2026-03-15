@@ -11,8 +11,7 @@ readonly class AllOperators
      *
      * @template TEnumArray of array<UnitEnum>
      *
-     * @param  TEnumArray $excludes  Array of operator classes to exclude
-     *
+     * @param  TEnumArray  $excludes  Array of operator classes to exclude
      * @return array<string> Array of operator values
      */
     public static function values(array $excludes = []): array
@@ -21,7 +20,7 @@ readonly class AllOperators
             LogicalOperators::class,
             ArithmeticOperators::class,
             StringOperators::class,
-        ], fn ($class) => !in_array($class, $excludes));
+        ], fn ($class) => ! in_array($class, $excludes));
 
         $operators = array_merge(
             ...array_map(

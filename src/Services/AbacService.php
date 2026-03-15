@@ -3,14 +3,20 @@
 namespace zennit\ABAC\Services;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Psr\SimpleCache\InvalidArgumentException;
+use Throwable;
 use zennit\ABAC\Contracts\AbacManager;
+use zennit\ABAC\Contracts\CacheKeyStrategy;
+use zennit\ABAC\Contracts\MetricsCollector;
+use zennit\ABAC\Contracts\PolicyRepository;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AccessResult;
+use zennit\ABAC\DTO\PermissionGrant;
 use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Models\AbacChain;
-use zennit\ABAC\Models\AbacPolicy;
 use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
+use zennit\ABAC\Services\Permissions\PermissionManager;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacService implements AbacManager
@@ -21,8 +27,58 @@ readonly class AbacService implements AbacManager
         private AbacCacheManager $cache,
         private AbacChainEvaluator $evaluator,
         private AbacPerformanceMonitor $monitor,
-        private AbacAuditLogger $logger
-    ) {
+        private AbacAuditLogger $logger,
+        private PolicyRepository $policies,
+        private CacheKeyStrategy $cacheKeyStrategy,
+        private MetricsCollector $metrics,
+        private PermissionManager $permissions,
+    ) {}
+
+    /**
+     * @param  array<string, mixed>|array<int, array<string, mixed>>|string  $constraints
+     *
+     * @throws Throwable
+     */
+    public function addPermission(string $method, string $resource, array|string $constraints): PermissionGrant
+    {
+        return $this->permissions->addPermission($method, $resource, $constraints);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return Collection<int, PermissionGrant>
+     */
+    public function getPermissions(?string $method = null, ?string $resource = null, array $filters = []): Collection
+    {
+        return $this->permissions->getPermissions($method, $resource, $filters);
+    }
+
+    public function getPermission(int $grantId): ?PermissionGrant
+    {
+        return $this->permissions->getPermission($grantId);
+    }
+
+    /**
+     * @param  array<string, mixed>|array<int, array<string, mixed>>|string  $constraints
+     *
+     * @throws Throwable
+     */
+    public function updatePermission(int $grantId, array|string $constraints): PermissionGrant
+    {
+        return $this->permissions->updatePermission($grantId, $constraints);
+    }
+
+    public function removePermission(int $grantId): bool
+    {
+        return $this->permissions->removePermission($grantId);
+    }
+
+    /**
+     * @param  array<string, mixed>|array<int, array<string, mixed>>|string|null  $constraints
+     */
+    public function removePermissions(string $method, string $resource, array|string|null $constraints = null): int
+    {
+        return $this->permissions->removePermissions($method, $resource, $constraints);
     }
 
     /**
@@ -40,22 +96,26 @@ readonly class AbacService implements AbacManager
      */
     public function evaluate(AccessContext $context): AccessResult
     {
-        $operation = $context->method->value . ':' . get_class($context->subject->getModel());
+        $resourceModel = $context->resource->getModel();
+        $operation = $context->method->value.':'.get_class($resourceModel);
 
         /**
          * @var AccessResult $result
+         * @var bool $cacheHit
          * @var float $duration
          */
-        [$result, $duration] = $this->monitor->measure($operation, function () use ($context): AccessResult {
-            $result = $this->memoizedEvaluate($context);
+        [[$result, $cacheHit], $duration] = $this->monitor->measure($operation, function () use ($context): array {
+            [$result, $cacheHit] = $this->memoizedEvaluate($context);
 
             if ($this->getLoggingEnabled()) {
                 $level = $result->can ? 'info' : 'warning';
                 $this->logger->log($result, $level);
             }
 
-            return $result;
+            return [$result, $cacheHit];
         });
+
+        $this->metrics->recordEvaluation($operation, $result->can, $duration, $cacheHit);
 
         if ($duration > $this->getSlowEvaluationThreshold()) {
             $this->logger->log($result, 'warning');
@@ -68,53 +128,123 @@ readonly class AbacService implements AbacManager
      * @throws InvalidArgumentException
      * @throws Exception
      */
-    private function memoizedEvaluate(AccessContext $context): AccessResult
+    /**
+     * @return array{0: AccessResult, 1: bool}
+     *
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
+    private function memoizedEvaluate(AccessContext $context): array
     {
-        if (!$this->getCacheEnabled()) {
-            return $this->_evaluate($context);
+        if (! $this->getCacheEnabled()) {
+            return [$this->_evaluate($context), false];
         }
-        $cache_key = $context->method->value . ':' . get_class($context->subject->getModel());
+        $cache_key = $this->makeCacheKey($context);
 
         $cached = $this->cache->get($cache_key);
         if ($cached) {
-            $query = $context->subject->newQuery();
-            foreach ($cached['bindings'] as $key => $binding) {
-                $query->whereRaw('id = ?', [$binding]);
+            $query = $context->resource->newQuery();
+
+            if (! ($cached['can'] ?? false)) {
+                return [new AccessResult(
+                    $query->whereRaw('1 = 0'),
+                    $cached['reason'] ?? null,
+                    $context,
+                    false,
+                ), true];
             }
 
-            return new AccessResult(
+            $primaryKey = $query->getModel()->getQualifiedKeyName();
+            $modelKeys = $cached['model_keys'] ?? [];
+
+            $query = empty($modelKeys)
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn($primaryKey, $modelKeys);
+
+            return [new AccessResult(
                 $query,
-                $cached['reason'],
-                $context
-            );
+                $cached['reason'] ?? null,
+                $context,
+                (bool) ($cached['can'] ?? false),
+            ), true];
         }
 
-        return $this->cache->remember($cache_key, function () use ($context) {
-            return $this->_evaluate($context);
-        });
+        return [
+            $this->cache->remember($cache_key, function () use ($context) {
+                return $this->_evaluate($context);
+            }),
+            false,
+        ];
     }
 
     /**
-     * @param AccessContext $context
-     *
      * @throws Exception
-     * @return AccessResult
      */
     private function _evaluate(AccessContext $context): AccessResult
     {
-        $model = get_class($context->subject->getModel());
+        $resourceModel = $context->resource->getModel();
+        $model = get_class($resourceModel);
 
-        $policy = AbacPolicy::where('method', $context->method->value)
-            ->where('resource', $model)
-            ->first();
+        $policy = $this->policies->findByMethodAndResource($context->method->value, $model);
 
-        if (!$policy) {
-            return new AccessResult($context->subject, 'No policy provided, full access granted.', $context);
+        if (! $policy) {
+            $this->logger->logPolicyMiss($context);
+
+            if ($this->shouldAllowWhenNoPolicyMatched()) {
+                $result = new AccessResult(
+                    $context->resource,
+                    'No policy provided, access granted by default policy behavior.',
+                    $context,
+                    true,
+                );
+
+                $this->logger->logChainOutcome($context, true, null, null, $result->reason);
+
+                return $result;
+            }
+
+            $result = new AccessResult(
+                $context->resource->whereRaw('1 = 0'),
+                'No policy provided, access denied by default policy behavior.',
+                $context,
+                false,
+            );
+
+            $this->logger->logChainOutcome($context, false, null, null, $result->reason);
+
+            return $result;
         }
 
-        $chain = AbacChain::wherePolicyId($policy->id)->first();
-        $subject_query = $this->evaluator->apply($context->subject, $chain, $context);
+        $chain = AbacChain::where('policy_id', $policy->id)->first();
 
-        return new AccessResult($subject_query, null, $context);
+        if (is_null($chain)) {
+            $result = new AccessResult(
+                $context->resource->whereRaw('1 = 0'),
+                'Policy exists but has no chain definition; access denied.',
+                $context,
+                false,
+            );
+
+            $this->logger->logChainOutcome($context, false, (int) $policy->id, null, $result->reason);
+
+            return $result;
+        }
+
+        $resourceQuery = $this->evaluator->apply($context->resource, $chain, $context);
+        $allowed = $resourceQuery->exists();
+
+        $this->logger->logChainOutcome($context, $allowed, (int) $policy->id, (int) $chain->id);
+
+        return new AccessResult(
+            $resourceQuery,
+            null,
+            $context,
+            $allowed,
+        );
+    }
+
+    private function makeCacheKey(AccessContext $context): string
+    {
+        return $this->cacheKeyStrategy->make($context, $this->getCacheIncludeContext());
     }
 }

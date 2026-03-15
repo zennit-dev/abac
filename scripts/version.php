@@ -10,7 +10,7 @@ class VersionUpdater
 
     public function __construct()
     {
-        $this->composerFile = dirname(__DIR__) . '/composer.json';
+        $this->composerFile = dirname(__DIR__).'/composer.json';
         $this->composerJson = json_decode(file_get_contents($this->composerFile), true);
         $this->currentVersion = $this->composerJson['version'] ?? '1.0.0';
     }
@@ -23,7 +23,7 @@ class VersionUpdater
         $this->composerJson['version'] = $newVersion;
         file_put_contents(
             $this->composerFile,
-            json_encode($this->composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
+            json_encode($this->composerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n"
         );
 
         // Create git tag
@@ -61,13 +61,13 @@ class VersionUpdater
     private function createGitTag(string $version): void
     {
         // AbacCheck if we're in a git repository
-        if (!is_dir(dirname(__DIR__) . '/.git')) {
+        if (! is_dir(dirname(__DIR__).'/.git')) {
             echo "Warning: Not a git repository\n";
 
             return;
         }
 
-        $version = 'v' . $version;
+        $version = 'v'.$version;
 
         // Create tag locally only
         exec('git add composer.json');
@@ -80,9 +80,9 @@ class VersionUpdater
 $type = $argv[count($argv) - 1] ?? null;
 
 // Validate version type
-if (!in_array($type, ['major', 'minor', 'patch'])) {
+if (! in_array($type, ['major', 'minor', 'patch'])) {
     exit("Usage: composer version-[major|minor|patch]\n");
 }
 
-$updater = new VersionUpdater();
+$updater = new VersionUpdater;
 $updater->update($type);

@@ -19,8 +19,8 @@ readonly class AbacPerformanceMonitor
     /**
      * Measure the execution time of an operation.
      *
-     * @param string $operation The name of the operation being measured
-     * @param callable(): T $callback The operation to measure
+     * @param  string  $operation  The name of the operation being measured
+     * @param  callable(): T  $callback  The operation to measure
      *
      * @template T
      *
@@ -28,7 +28,7 @@ readonly class AbacPerformanceMonitor
      */
     public function measure(string $operation, callable $callback): array
     {
-        if (!$this->getPerformanceLoggingEnabled()) {
+        if (! $this->getPerformanceLoggingEnabled()) {
             return [$callback(), 0.0];
         }
 
@@ -44,7 +44,6 @@ readonly class AbacPerformanceMonitor
      *
      * @param  string  $operation  The operation name
      * @param  array  $timers  Array of operation start times
-     *
      * @return float Duration in milliseconds
      */
     private function calculateDuration(string $operation, array $timers): float

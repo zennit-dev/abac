@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Psr\SimpleCache\InvalidArgumentException;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+use zennit\ABAC\Contracts\ActorResolver;
+use zennit\ABAC\Contracts\ContextEnricher;
+use zennit\ABAC\Contracts\ResourceResolver;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Services\AbacAttributeLoader;
@@ -19,10 +21,10 @@ use zennit\ABAC\Services\AbacService;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 /**
- * Class EnsurePermissions
+ * Class EnsureAccess
  *
  * Middleware implementation for ABAC permission checking.
- * Validates user access to resources based on configured policies and subjects.
+ * Validates actor access to resources based on configured policies.
  */
 readonly class EnsureAccess
 {
@@ -31,26 +33,27 @@ readonly class EnsureAccess
     public function __construct(
         protected AbacService $abac,
         protected AbacCacheManager $cacheManager,
-        protected AbacAttributeLoader $attributeLoader
-    ) {
-    }
+        protected AbacAttributeLoader $attributeLoader,
+        protected ContextEnricher $contextEnricher,
+        protected ResourceResolver $resourceResolver,
+        protected ActorResolver $actorResolver,
+    ) {}
 
     /**
      * Handle an incoming request.
      *
      * @param  Request  $request  The incoming HTTP request
      * @param  Closure  $next  The next middleware in the pipeline
-     *
      * @return Response The HTTP response
      */
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (!$request->user()) {
+            if (! $request->user()) {
                 return $this->unauthorizedResponse();
             }
 
-            if (!$this->checkAccess($request)) {
+            if (! $this->checkAccess($request)) {
                 return $this->unauthorizedResponse();
             }
 
@@ -58,7 +61,10 @@ readonly class EnsureAccess
         } catch (Throwable $e) {
             report($e);
 
-            return $this->unauthorizedResponse();
+            return response()->json(
+                ['error' => 'ABAC evaluation failed.'],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -79,11 +85,9 @@ readonly class EnsureAccess
     /**
      * AbacCheck if the request has access
      *
-     * @param Request $request
      *
      * @throws InvalidArgumentException
      * @throws Exception
-     * @return bool
      */
     private function checkAccess(Request $request): bool
     {
@@ -95,21 +99,28 @@ readonly class EnsureAccess
         // If not excluded, check ABAC permissions
         $method = $this->matchRequestOperation($request);
 
-        if (!$method) {
+        if (! $method) {
             return true;
         }
 
-        $subject = $this->defineSubject($request);
-        $object = $this->defineObject($request);
+        $resource = $this->defineResource($request);
+
+        if (is_null($resource)) {
+            return $this->shouldAllowIfUnmatchedRoute();
+        }
+
+        $actor = $this->defineActor($request);
 
         $context = new AccessContext(
             method: $method,
-            subject: $subject,
-            object: $this->attributeLoader->loadAllObjectAttributes($object),
+            resource: $resource,
+            actor: $this->attributeLoader->loadAllActorAttributes($actor),
             environment: $request->toArray()
         );
 
-        $context =  $this->abac->evaluate($context);
+        $context = $this->contextEnricher->enrich($context, $request);
+
+        $context = $this->abac->evaluate($context);
 
         $request->attributes->set('abac', $context);
 
@@ -132,16 +143,16 @@ readonly class EnsureAccess
             }
 
             // If route is array with method and path
-            if (!is_array($route) && !isset($route['path'])) {
-                return false;
+            if (! is_array($route) || ! isset($route['path'])) {
+                continue;
             }
 
-            if (!$this->matchPath($currentPath, $route['path'])) {
+            if (! $this->matchPath($currentPath, $route['path'])) {
                 continue;
             }
 
             // If method is not specified or is '*', exclude all methods
-            if (!isset($route['method']) || $route['method'] === '*') {
+            if (! isset($route['method']) || $route['method'] === '*') {
                 return true;
             }
 
@@ -193,72 +204,25 @@ readonly class EnsureAccess
     }
 
     /**
-     * Define the subject for permission checking.
-     * Retrieves the subject from the request using the method configured in abac.middleware.path_resources
+     * Define the resource for permission checking.
+     * Retrieves the resource from the request using the configured middleware resource patterns.
      *
      * @param  Request  $request  The incoming HTTP request
-     *
-     * @return Builder The subject for permission checking
+     * @return Builder<Model>|null The resource for permission checking
      */
-    private function defineSubject(Request $request): Builder
+    private function defineResource(Request $request): ?Builder
     {
-        $path = trim($request->path(), '/');
-        $patterns = $this->getPathPatterns();
-
-        return $this->findMatchingSubject($path, $patterns);
+        return $this->resourceResolver->resolve($request, $this->getResourcePatterns());
     }
 
     /**
-     * Find the matching model class for a given path and handle different ID types
-     */
-    private function findMatchingSubject(string $path, array $patterns): Builder
-    {
-        foreach ($patterns as $pattern => $model_class_string) {
-            if (preg_match("#^$pattern$#", $path)) {
-                $parts = explode('/', $path);
-                $id = end($parts);
-
-                if ($this->isValidId($id)) {
-                    return $model_class_string::where('id', $id);
-                }
-
-                return $model_class_string::query();
-            }
-        }
-
-        throw new RuntimeException("Unable to find matching subject for path: $path");
-    }
-
-    /**
-     * Check if a string is a valid UUID
-     */
-    private function isValidId(string $id): bool
-    {
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $id) === 1 || is_numeric($id);
-    }
-
-    /**
-     * Define the object for permission checking.
-     * Retrieves the object from the request using the method configured in abac.middleware.object_method.
+     * Define the actor for permission checking.
+     * Retrieves the actor from the request using the configured middleware actor method.
      *
      * @param  Request  $request  The incoming HTTP request
-     *
-     * @throws RuntimeException When the configured object method doesn't exist
      */
-    private function defineObject(Request $request): Model
+    private function defineActor(Request $request): Model
     {
-        $method = $this->getObjectMethod();
-
-        if (!is_callable([$request, $method])) {
-            throw new RuntimeException("Object method '$method' is not callable on request");
-        }
-
-        $object = $request->$method();
-
-        if (is_null($object)) {
-            throw new RuntimeException("Object method '$method' returned null");
-        }
-
-        return $object;
+        return $this->actorResolver->resolve($request, $this->getActorMethod());
     }
 }
