@@ -10,3 +10,14 @@ composer.lock
 coverage/
 coverage.txt
 coverage.xml
+
+# AI assistant/tooling artifacts
+AGENTS.md
+CLAUDE.md
+.claude/
+.opencode/
+opencode/
+opencode-*
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
