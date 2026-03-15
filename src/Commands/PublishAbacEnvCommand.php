@@ -14,6 +14,9 @@ class PublishAbacEnvCommand extends Command
 
     protected $description = 'Publish ABAC environment variables';
 
+    /**
+     * @var array<string, scalar>
+     */
     private array $envVariables;
 
     public function __construct()

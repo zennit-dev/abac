@@ -5,10 +5,19 @@ namespace zennit\ABAC\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
+use zennit\ABAC\Traits\IntegratesAbacAdditionalAttributes;
 
+/**
+ * @property int $id
+ * @property string $model
+ * @property string|null $_id
+ * @property string $key
+ * @property string $value
+ */
 class AbacResourceAdditionalAttribute extends Model
 {
     use FlushesAbacCache;
+    use IntegratesAbacAdditionalAttributes;
 
     protected $fillable = [
         'model',
@@ -29,6 +38,9 @@ class AbacResourceAdditionalAttribute extends Model
         self::registerAbacCacheFlushHooks();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function resource(): MorphTo
     {
         return $this->morphTo(

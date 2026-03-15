@@ -50,7 +50,14 @@ class ScaffoldAbacPoliciesCommand extends Command
             ],
         ];
 
-        $targetPath = resource_path($this->option('path'));
+        $pathOption = $this->option('path');
+        if (! is_string($pathOption) || $pathOption === '') {
+            $this->error('Invalid --path option provided.');
+
+            return;
+        }
+
+        $targetPath = resource_path($pathOption);
         if (File::exists($targetPath) && ! $this->option('force')) {
             $this->error("File already exists: $targetPath (use --force to overwrite)");
 

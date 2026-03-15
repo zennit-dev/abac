@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
+/**
+ * @property int $id
+ * @property string $_id
+ * @property string $key
+ * @property string $value
+ */
 class AbacActorAdditionalAttribute extends Model
 {
     use FlushesAbacCache;
@@ -27,6 +33,9 @@ class AbacActorAdditionalAttribute extends Model
         self::registerAbacCacheFlushHooks();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function actor(): MorphTo
     {
         return $this->morphTo();

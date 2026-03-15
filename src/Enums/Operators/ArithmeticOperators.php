@@ -11,6 +11,9 @@ enum ArithmeticOperators: string
     case GREATER_THAN_EQUALS = 'greater_than_equals';
     case LESS_THAN_EQUALS = 'less_than_equals';
 
+    /**
+     * @return list<string>
+     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

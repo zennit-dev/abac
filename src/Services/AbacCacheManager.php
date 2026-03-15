@@ -10,6 +10,7 @@ use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Log;
 use Psr\SimpleCache\InvalidArgumentException;
 use zennit\ABAC\Contracts\MetricsCollector;
+use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
 readonly class AbacCacheManager
@@ -38,22 +39,14 @@ readonly class AbacCacheManager
      * Remember an item in cache.
      *
      * @param  string  $key  The cache key
-     * @param  Closure  $callback  Function that returns the value to cache
-     * @return mixed The cached value
+     * @param  Closure(): AccessResult  $callback  Function that returns the value to cache
+     * @return AccessResult The cached value
      *
      * @throws InvalidArgumentException
      */
-    public function remember(string $key, Closure $callback): mixed
+    public function remember(string $key, Closure $callback): AccessResult
     {
         $this->registerCacheKey($key);
-
-        $value = $this->cache->get($key);
-        if ($value !== null) {
-            $this->metrics->recordCacheLookup(true);
-
-            return $value;
-        }
-
         $this->metrics->recordCacheLookup(false);
 
         $result = $callback();
@@ -63,7 +56,7 @@ readonly class AbacCacheManager
         $cacheValue = [
             'sql' => $result->query->toSql(),
             'bindings' => $result->query->getBindings(),
-            'model_keys' => $query->get()->modelKeys(),
+            'model_keys' => $query->pluck($model->getQualifiedKeyName())->all(),
             'primary_key' => $model->getKeyName(),
             'reason' => $result->reason,
             'can' => $result->can,
@@ -84,6 +77,7 @@ readonly class AbacCacheManager
     private function registerCacheKey(string $key): void
     {
         $registryKey = 'key_registry';
+        /** @var list<string> $keys */
         $keys = $this->cache->get($registryKey, []);
 
         if (! in_array($key, $keys)) {
@@ -103,6 +97,7 @@ readonly class AbacCacheManager
     {
         $this->logCacheOperation('flush', []);
 
+        /** @var list<string> $keys */
         $keys = $this->cache->get('key_registry', []);
         $this->metrics->recordCacheFlush(count($keys));
 
@@ -119,14 +114,19 @@ readonly class AbacCacheManager
      * Log cache operation details.
      *
      * @param  string  $operation  The operation being performed (e.g., 'warm', 'flush')
-     * @param  array  $counts  Array of count metrics to log
+     * @param  array<string, int>  $counts  Array of count metrics to log
      */
     private function logCacheOperation(string $operation, array $counts): void
     {
+        $parts = [];
+        foreach ($counts as $type => $count) {
+            $parts[] = "$type=$count";
+        }
+
         $message = sprintf(
             'Cache %s: %s',
             $operation,
-            collect($counts)->map(fn ($count, $type) => "$type=$count")->join(', ')
+            implode(', ', $parts)
         );
 
         Log::info($message);

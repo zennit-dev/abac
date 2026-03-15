@@ -104,7 +104,7 @@ readonly class AbacService implements AbacManager
          * @var bool $cacheHit
          * @var float $duration
          */
-        [[$result, $cacheHit], $duration] = $this->monitor->measure($operation, function () use ($context): array {
+        [[$result, $cacheHit], $duration] = $this->monitor->measure(function () use ($context): array {
             [$result, $cacheHit] = $this->memoizedEvaluate($context);
 
             if ($this->getLoggingEnabled()) {
@@ -225,7 +225,7 @@ readonly class AbacService implements AbacManager
                 false,
             );
 
-            $this->logger->logChainOutcome($context, false, (int) $policy->id, null, $result->reason);
+            $this->logger->logChainOutcome($context, false, $policy->id, null, $result->reason);
 
             return $result;
         }
@@ -233,7 +233,7 @@ readonly class AbacService implements AbacManager
         $resourceQuery = $this->evaluator->apply($context->resource, $chain, $context);
         $allowed = $resourceQuery->exists();
 
-        $this->logger->logChainOutcome($context, $allowed, (int) $policy->id, (int) $chain->id);
+        $this->logger->logChainOutcome($context, $allowed, $policy->id, $chain->id);
 
         return new AccessResult(
             $resourceQuery,

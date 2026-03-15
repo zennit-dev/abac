@@ -37,6 +37,10 @@ use zennit\ABAC\Services\AbacService;
  */
 class Abac extends Facade
 {
+    /**
+     * @param  string  $method
+     * @param  array<int, mixed>  $args
+     */
     public static function __callStatic($method, $args)
     {
         $instance = static::resolveFacadeInstance(static::getFacadeAccessor());

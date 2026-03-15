@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
 use zennit\ABAC\Enums\PolicyMethod;
 
+/**
+ * @implements Arrayable<string, mixed>
+ */
 class AccessContext implements Arrayable, JsonSerializable
 {
     /**
      * AccessContext - holds all context for access evaluation
      *
-     * @template TResource of Model
-     * @template TActor of Model
-     *
      * @param  PolicyMethod  $method  The method being invoked
-     * @param  Builder<TResource>  $resource  The query of the given resource
-     * @param  TActor  $actor  The accessor context (user, profile)
-     * @param  array  $environment  Additional environment properties
+     * @param  Builder<Model>  $resource  The query of the given resource
+     * @param  Model  $actor  The accessor context (user, profile)
+     * @param  array<string, mixed>  $environment  Additional environment properties
      */
     public function __construct(
         public PolicyMethod $method,
@@ -30,10 +30,14 @@ class AccessContext implements Arrayable, JsonSerializable
 
     public function __toString(): string
     {
+        $json = json_encode($this->jsonSerialize(), JSON_PRETTY_PRINT);
 
-        return json_encode($this->jsonSerialize(), JSON_PRETTY_PRINT);
+        return $json === false ? '{}' : $json;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -41,10 +45,12 @@ class AccessContext implements Arrayable, JsonSerializable
             'resource' => $this->resource,
             'actor' => $this->actor,
             'environment' => $this->environment,
-            'can' => $this->can ?? false,
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $actor = $this->actor;
@@ -54,7 +60,6 @@ class AccessContext implements Arrayable, JsonSerializable
             'resource' => $this->resource->get()->toArray(),
             'actor' => $actor->toArray(),
             'environment' => $this->environment,
-            'can' => $this->can ?? false,
         ];
     }
 }

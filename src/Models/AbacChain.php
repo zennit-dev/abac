@@ -7,11 +7,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use zennit\ABAC\Database\Factories\AbacChainFactory;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
+/**
+ * @property int $id
+ * @property string $operator
+ * @property int|null $chain_id
+ * @property int|null $policy_id
+ *
+ * @use HasFactory<AbacChainFactory>
+ */
 class AbacChain extends Model
 {
     use FlushesAbacCache;
+
+    /** @use HasFactory<AbacChainFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -42,11 +53,17 @@ class AbacChain extends Model
         self::registerAbacCacheFlushHooks();
     }
 
+    /**
+     * @return BelongsTo<AbacChain, $this>
+     */
     public function chain(): BelongsTo
     {
         return $this->belongsTo(AbacChain::class, 'chain_id');
     }
 
+    /**
+     * @return HasMany<AbacCheck, $this>
+     */
     public function checks(): HasMany
     {
         return $this->hasMany(AbacCheck::class, 'chain_id');

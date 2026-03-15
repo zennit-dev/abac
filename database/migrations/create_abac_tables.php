@@ -53,7 +53,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->foreignId('chain_id')->constrained('abac_chains')->cascadeOnDelete();
-            $table->enum('operator', AllOperators::values(LogicalOperators::cases()));
+            $table->enum('operator', AllOperators::values([LogicalOperators::class]));
             $table->string('key');
             $table->string('value');
         });

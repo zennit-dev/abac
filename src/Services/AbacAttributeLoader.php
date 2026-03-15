@@ -39,12 +39,17 @@ readonly class AbacAttributeLoader
     }
 
     /**
-     * @return array<int, array{0: string, 1: string}>
+     * @return array<string, string>
      */
     private function loadAdditionalActorAttributes(string|int $id): array
     {
         $attributes = AbacActorAdditionalAttribute::where('_id', $id)->get();
 
-        return $attributes->map(fn (AbacActorAdditionalAttribute $attribute) => [$attribute->key, $attribute->value])->toArray();
+        $resolved = [];
+        foreach ($attributes as $attribute) {
+            $resolved[$attribute->key] = $attribute->value;
+        }
+
+        return $resolved;
     }
 }

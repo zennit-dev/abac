@@ -11,6 +11,9 @@ enum StringOperators: string
     case NOT_STARTS_WITH = 'not_starts_with';
     case NOT_ENDS_WITH = 'not_ends_with';
 
+    /**
+     * @return list<string>
+     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

@@ -25,6 +25,9 @@ use zennit\ABAC\Services\Resolution\DefaultResourceResolver;
 
 class ServicesServiceProvider extends ServiceProvider
 {
+    /**
+     * @var array<int|string, class-string>
+     */
     public array $singletons = [
         CacheKeyStrategy::class => DefaultCacheKeyStrategy::class,
         PolicyRepository::class => EloquentPolicyRepository::class,

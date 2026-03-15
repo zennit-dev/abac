@@ -2,33 +2,30 @@
 
 namespace zennit\ABAC\Enums\Operators;
 
-use UnitEnum;
-
 readonly class AllOperators
 {
     /**
      * Get all operator values except the excluded ones
      *
-     * @template TEnumArray of array<UnitEnum>
-     *
-     * @param  TEnumArray  $excludes  Array of operator classes to exclude
-     * @return array<string> Array of operator values
+     * @param  list<class-string>  $excludes
+     * @return list<string>
      */
     public static function values(array $excludes = []): array
     {
-        $operatorClasses = array_filter([
+        /** @var list<class-string> $operatorClasses */
+        $operatorClasses = array_values(array_filter([
             LogicalOperators::class,
             ArithmeticOperators::class,
             StringOperators::class,
-        ], fn ($class) => ! in_array($class, $excludes));
+        ], fn (string $class): bool => ! in_array($class, $excludes, true)));
 
         $operators = array_merge(
             ...array_map(
-                fn ($class) => $class::cases(),
+                fn (string $class): array => $class::cases(),
                 $operatorClasses
             )
         );
 
-        return array_map(fn ($operator) => $operator->value, $operators);
+        return array_values(array_map(fn ($operator): string => $operator->value, $operators));
     }
 }

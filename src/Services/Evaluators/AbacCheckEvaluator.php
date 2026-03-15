@@ -13,6 +13,11 @@ use zennit\ABAC\Models\AbacCheck;
 readonly class AbacCheckEvaluator
 {
     /**
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
+     *
      * @throws Exception
      */
     public function apply(Builder $query, AbacCheck $check, AccessContext $context): Builder
@@ -35,12 +40,15 @@ readonly class AbacCheckEvaluator
             throw new Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'resource.', 'actor.', or 'environment.'");
         })();
 
-        return match ($type) {
-            'resource' => $this->applyConditionsToResource($query, $check),
-            'actor' => $this->evaluateActorAccess($actor, $check) ? $query : $query->whereRaw('1 = 0'),
-            'environment' => throw new Exception('Environment not implemented yet'),
-            default => throw new Exception('Not implemented yet')
-        };
+        if ($type === 'resource') {
+            return $this->applyConditionsToResource($query, $check);
+        }
+
+        if ($type === 'actor') {
+            return $this->evaluateActorAccess($actor, $check) ? $query : $query->whereRaw('1 = 0');
+        }
+
+        throw new Exception('Environment not implemented yet');
     }
 
     /**
@@ -74,23 +82,23 @@ readonly class AbacCheckEvaluator
 
     private function evaluateActorAccess(Model $model, AbacCheck $check): bool
     {
-
         $key = str_replace('actor.', '', $check->key);
-        $value = data_get($model, $key);
+        $value = (string) data_get($model, $key, '');
+        $checkValue = $check->value;
 
         return match ($check->operator) {
-            StringOperators::CONTAINS->value => str_contains($value, $check->value),
-            StringOperators::NOT_CONTAINS->value => ! str_contains($value, $check->value),
-            StringOperators::ENDS_WITH->value => str_ends_with($value, $check->value),
-            StringOperators::NOT_ENDS_WITH->value => ! str_ends_with($value, $check->value),
-            StringOperators::STARTS_WITH->value => str_starts_with($value, $check->value),
-            StringOperators::NOT_STARTS_WITH->value => ! str_starts_with($value, $check->value),
-            ArithmeticOperators::NOT_EQUALS->value => $value != $check->value,
-            ArithmeticOperators::GREATER_THAN->value => $value > $check->value,
-            ArithmeticOperators::LESS_THAN->value => $value < $check->value,
-            ArithmeticOperators::GREATER_THAN_EQUALS->value => $value >= $check->value,
-            ArithmeticOperators::LESS_THAN_EQUALS->value => $value <= $check->value,
-            default => $value == $check->value,
+            StringOperators::CONTAINS->value => str_contains($value, $checkValue),
+            StringOperators::NOT_CONTAINS->value => ! str_contains($value, $checkValue),
+            StringOperators::ENDS_WITH->value => str_ends_with($value, $checkValue),
+            StringOperators::NOT_ENDS_WITH->value => ! str_ends_with($value, $checkValue),
+            StringOperators::STARTS_WITH->value => str_starts_with($value, $checkValue),
+            StringOperators::NOT_STARTS_WITH->value => ! str_starts_with($value, $checkValue),
+            ArithmeticOperators::NOT_EQUALS->value => $value != $checkValue,
+            ArithmeticOperators::GREATER_THAN->value => $value > $checkValue,
+            ArithmeticOperators::LESS_THAN->value => $value < $checkValue,
+            ArithmeticOperators::GREATER_THAN_EQUALS->value => $value >= $checkValue,
+            ArithmeticOperators::LESS_THAN_EQUALS->value => $value <= $checkValue,
+            default => $value == $checkValue,
         };
     }
 }

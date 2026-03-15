@@ -38,11 +38,18 @@ abstract class TestCase extends Orchestra
     protected function defineRoutes($router): void
     {
         Route::middleware(['api', 'abac'])->get('/posts/{post:slug}', function (Post $post) {
-            return response()->json(['ok' => true]);
+            return response()->json([
+                'ok' => true,
+                'post_id' => $post->getKey(),
+            ]);
         });
 
         Route::middleware(['api', 'abac'])->withoutScopedBindings()->get('/users/{user:slug}/posts/{post:slug}', function (User $user, Post $post) {
-            return response()->json(['ok' => true]);
+            return response()->json([
+                'ok' => true,
+                'user_id' => $user->getKey(),
+                'post_id' => $post->getKey(),
+            ]);
         });
 
         Route::middleware(['api', 'abac'])->get('/manual-posts/{id}', function () {

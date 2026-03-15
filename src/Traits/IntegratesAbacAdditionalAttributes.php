@@ -7,6 +7,9 @@ use zennit\ABAC\Models\AbacResourceAdditionalAttribute;
 
 trait IntegratesAbacAdditionalAttributes
 {
+    /**
+     * @return MorphMany<AbacResourceAdditionalAttribute, $this>
+     */
     public function additionalAttributes(): MorphMany
     {
         return $this->morphMany(
