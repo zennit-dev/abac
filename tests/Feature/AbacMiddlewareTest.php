@@ -6,6 +6,7 @@ use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Models\AbacCheck;
 use zennit\ABAC\Models\AbacPolicy;
+use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Tests\Fixtures\Models\Post;
 use zennit\ABAC\Tests\Fixtures\Models\User;
 
@@ -156,6 +157,52 @@ it('applies explicit policy fallback behavior when no policy exists', function (
     $this->actingAs($user)->getJson('/posts/fallback-post')->assertUnauthorized();
 });
 
+it('denies access by default when no policy exists', function () {
+    config()->set('abac.middleware.resource_patterns', [
+        'posts/([^/]+)' => Post::class,
+    ]);
+    config()->set('abac.cache.enabled', false);
+
+    $user = User::query()->create([
+        '_id' => 'u_default_deny',
+        'slug' => 'default-deny-user',
+        'name' => 'Default Deny User',
+        'role' => 'member',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_default_deny',
+        'slug' => 'default-deny-post',
+        'title' => 'Default Deny Post',
+        'owner_id' => 'u_default_deny',
+    ]);
+
+    $this->actingAs($user)->getJson('/posts/default-deny-post')->assertUnauthorized();
+});
+
+it('allows empty collection reads when policy is valid but no rows match', function () {
+    config()->set('abac.middleware.resource_patterns', [
+        'posts' => Post::class,
+    ]);
+
+    createTitlePolicy('No Matching Posts');
+
+    $user = User::query()->create([
+        '_id' => 'u_collection',
+        'slug' => 'collection-user',
+        'name' => 'Collection User',
+        'role' => 'member',
+    ]);
+
+    $this->actingAs($user)
+        ->getJson('/posts')
+        ->assertOk()
+        ->assertJson([
+            'ok' => true,
+            'count' => 0,
+        ]);
+});
+
 it('does not return unauthorized when middleware throws internal errors', function () {
     config()->set('abac.middleware.resource_patterns', [
         'posts/([^/]+)' => Post::class,
@@ -205,4 +252,37 @@ it('invalidates memoized decisions when checks are updated', function () {
     AbacCheck::query()->firstOrFail()->update(['value' => 'Not Cache Post']);
 
     $this->actingAs($user)->getJson('/posts/cache-post')->assertUnauthorized();
+});
+
+it('can skip cache flush hooks during writes when configured', function () {
+    config()->set('abac.cache.flush_on_write', false);
+    config()->set('abac.middleware.resource_patterns', [
+        'posts/([^/]+)' => Post::class,
+    ]);
+
+    createTitlePolicy('Bulk Post');
+
+    $user = User::query()->create([
+        '_id' => 'u_bulk',
+        'slug' => 'bulk-user',
+        'name' => 'Bulk User',
+        'role' => 'admin',
+    ]);
+
+    Post::query()->create([
+        '_id' => 'p_bulk',
+        'slug' => 'bulk-post',
+        'title' => 'Bulk Post',
+        'owner_id' => 'u_bulk',
+    ]);
+
+    $this->actingAs($user)->getJson('/posts/bulk-post')->assertOk();
+
+    AbacCheck::query()->firstOrFail()->update(['value' => 'Not Bulk Post']);
+
+    $this->actingAs($user)->getJson('/posts/bulk-post')->assertOk();
+
+    app(AbacCacheManager::class)->flush();
+
+    $this->actingAs($user)->getJson('/posts/bulk-post')->assertUnauthorized();
 });

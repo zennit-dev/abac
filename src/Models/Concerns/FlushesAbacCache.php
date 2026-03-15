@@ -11,6 +11,10 @@ trait FlushesAbacCache
     {
         $flushCache = static function (): void {
             try {
+                if (! config('abac.cache.flush_on_write', true)) {
+                    return;
+                }
+
                 if (app()->bound(AbacCacheManager::class)) {
                     app(AbacCacheManager::class)->flush();
                 }

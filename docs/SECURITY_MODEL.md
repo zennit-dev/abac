@@ -21,8 +21,12 @@ This package evaluates authorization decisions (ABAC). It does not replace authe
 
 Use the hardened defaults from [Operations Guide](OPERATIONS.md).
 
+- Set `ABAC_DEFAULT_POLICY_BEHAVIOR=deny` to avoid permissive fallback when no policy matches.
+- Treat `allow` fallback as an explicit migration/rollout choice, not a long-term default.
+
 ## Operational controls
 
 - Monitor logs for `abac.policy_miss` and denied chain outcomes.
+- Monitor logs for `abac.actor_attributes_empty` to catch missing actor attribute seed/data issues.
 - Review route-to-model mappings whenever new endpoints are added.
 - Keep middleware attached only to routes with explicit auth requirements.

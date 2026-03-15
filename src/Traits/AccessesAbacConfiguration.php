@@ -33,6 +33,11 @@ trait AccessesAbacConfiguration
         return config('abac.cache.include_context', AbacDefaults::CACHE_INCLUDE_CONTEXT);
     }
 
+    public function getCacheFlushOnWrite(): bool
+    {
+        return config('abac.cache.flush_on_write', AbacDefaults::CACHE_FLUSH_ON_WRITE);
+    }
+
     // Monitoring Configuration
     public function getLoggingEnabled(): bool
     {
@@ -104,7 +109,7 @@ trait AccessesAbacConfiguration
 
     public function shouldAllowWhenNoPolicyMatched(): bool
     {
-        return $this->getDefaultPolicyBehavior() === AbacDefaults::DEFAULT_POLICY_BEHAVIOR;
+        return strtolower($this->getDefaultPolicyBehavior()) === 'allow';
     }
 
     // Middleware Configuration

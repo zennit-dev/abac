@@ -6,6 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
+use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\Providers\AbacServiceProvider;
 use zennit\ABAC\Tests\Fixtures\Models\Post;
 use zennit\ABAC\Tests\Fixtures\Models\User;
@@ -30,6 +31,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('abac.cache.enabled', true);
         $app['config']->set('abac.cache.store', 'array');
         $app['config']->set('abac.cache.include_context', true);
+        $app['config']->set('abac.database.actor_additional_attributes', User::class);
         $app['config']->set('abac.monitoring.logging.enabled', false);
         $app['config']->set('abac.monitoring.logging.channel', 'stack');
         $app['config']->set('abac.middleware.actor_method', 'user');
@@ -41,6 +43,20 @@ abstract class TestCase extends Orchestra
             return response()->json([
                 'ok' => true,
                 'post_id' => $post->getKey(),
+            ]);
+        });
+
+        Route::middleware(['api', 'abac'])->get('/posts', function () {
+            $result = request()->attributes->get('abac');
+            $count = 0;
+
+            if ($result instanceof AccessResult) {
+                $count = $result->query->count();
+            }
+
+            return response()->json([
+                'ok' => true,
+                'count' => $count,
             ]);
         });
 

@@ -43,9 +43,17 @@ If your models use UUID/custom PKs:
 ```dotenv
 ABAC_PRIMARY_KEY=id
 ABAC_FALLBACK_PRIMARY_KEY=_id
+ABAC_DEFAULT_POLICY_BEHAVIOR=deny
+ABAC_CACHE_FLUSH_ON_WRITE=true
 ```
 
 Set the model PK normally (`$primaryKey`, `$incrementing`, `$keyType`).
+
+`ABAC_CACHE_FLUSH_ON_WRITE` controls automatic ABAC cache invalidation on policy/check/chain writes.
+Keep it `true` for standard behavior, or set it to `false` during large bulk imports and flush cache manually after the batch.
+
+`ABAC_DEFAULT_POLICY_BEHAVIOR` controls fallback when a route is mapped to a resource but no policy matches.
+Use `deny` for fail-safe behavior (recommended), and only use `allow` when you explicitly accept permissive fallback.
 
 ## 4) Add middleware to protected routes
 

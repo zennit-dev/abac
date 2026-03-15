@@ -14,6 +14,8 @@ final class AbacDefaults
 
     public const true CACHE_INCLUDE_CONTEXT = true;
 
+    public const true CACHE_FLUSH_ON_WRITE = true;
+
     public const true LOGGING_ENABLED = true;
 
     public const string LOG_CHANNEL = 'stack';
@@ -30,7 +32,7 @@ final class AbacDefaults
 
     public const string FALLBACK_PRIMARY_KEY = '_id';
 
-    public const string DEFAULT_POLICY_BEHAVIOR = 'allow';
+    public const string DEFAULT_POLICY_BEHAVIOR = 'deny';
 
     public const false ALLOW_IF_UNMATCHED_ROUTE = false;
 
@@ -47,6 +49,7 @@ final class AbacDefaults
             'ABAC_CACHE_TTL' => self::CACHE_TTL,
             'ABAC_CACHE_PREFIX' => self::CACHE_PREFIX,
             'ABAC_CACHE_INCLUDE_CONTEXT' => self::CACHE_INCLUDE_CONTEXT,
+            'ABAC_CACHE_FLUSH_ON_WRITE' => self::CACHE_FLUSH_ON_WRITE,
             'ABAC_LOGGING_ENABLED' => self::LOGGING_ENABLED,
             'ABAC_LOG_CHANNEL' => self::LOG_CHANNEL,
             'ABAC_DETAILED_LOGGING' => self::DETAILED_LOGGING,

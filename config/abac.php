@@ -21,6 +21,7 @@ return [
         'ttl' => env('ABAC_CACHE_TTL', AbacDefaults::CACHE_TTL),
         'prefix' => env('ABAC_CACHE_PREFIX', AbacDefaults::CACHE_PREFIX),
         'include_context' => env('ABAC_CACHE_INCLUDE_CONTEXT', AbacDefaults::CACHE_INCLUDE_CONTEXT),
+        'flush_on_write' => env('ABAC_CACHE_FLUSH_ON_WRITE', AbacDefaults::CACHE_FLUSH_ON_WRITE),
     ],
 
     /*
@@ -63,6 +64,7 @@ return [
     ],
 
     'policy' => [
+        // Valid values: allow|deny
         'default_policy_behavior' => env('ABAC_DEFAULT_POLICY_BEHAVIOR', AbacDefaults::DEFAULT_POLICY_BEHAVIOR),
     ],
 

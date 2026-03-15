@@ -33,6 +33,14 @@ For strict environments, use:
 - `ABAC_CACHE_INCLUDE_CONTEXT=true`
 - `ABAC_CACHE_STORE=redis` (or `database` when Redis is unavailable)
 
+## Bulk writes and cache invalidation
+
+During large seed/import operations, frequent ABAC model writes can trigger repeated cache flushes.
+
+- Default behavior: `ABAC_CACHE_FLUSH_ON_WRITE=true` (flush after create/update/delete on ABAC models).
+- Bulk mode: set `ABAC_CACHE_FLUSH_ON_WRITE=false` for the batch window to avoid flush storms.
+- After bulk updates: re-enable write flushes and perform a single cache flush through your app service container.
+
 ## Optional metrics hooks
 
 For custom telemetry (evaluation count/latency/cache hit ratio), bind your own

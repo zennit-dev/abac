@@ -13,6 +13,7 @@ use zennit\ABAC\Contracts\PolicyRepository;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\DTO\AccessResult;
 use zennit\ABAC\DTO\PermissionGrant;
+use zennit\ABAC\Enums\PolicyMethod;
 use zennit\ABAC\Logging\AbacAuditLogger;
 use zennit\ABAC\Models\AbacChain;
 use zennit\ABAC\Services\Evaluators\AbacChainEvaluator;
@@ -233,6 +234,10 @@ readonly class AbacService implements AbacManager
         $resourceQuery = $this->evaluator->apply($context->resource, $chain, $context);
         $allowed = $resourceQuery->exists();
 
+        if (! $allowed && $this->isCollectionReadRequest($context)) {
+            $allowed = true;
+        }
+
         $this->logger->logChainOutcome($context, $allowed, $policy->id, $chain->id);
 
         return new AccessResult(
@@ -241,6 +246,60 @@ readonly class AbacService implements AbacManager
             $context,
             $allowed,
         );
+    }
+
+    private function isCollectionReadRequest(AccessContext $context): bool
+    {
+        if ($context->method !== PolicyMethod::READ) {
+            return false;
+        }
+
+        $model = $context->resource->getModel();
+        $primaryKeyCandidates = $this->getPrimaryKeyCandidates($model);
+        $primaryKeyColumns = array_values(array_unique(array_merge(
+            $primaryKeyCandidates,
+            array_map(
+                static fn (string $key): string => $model->qualifyColumn($key),
+                $primaryKeyCandidates,
+            ),
+        )));
+
+        return ! $this->queryHasPrimaryKeyConstraint($context->resource->getQuery()->wheres, $primaryKeyColumns);
+    }
+
+    /**
+     * @param  array<int, mixed>  $wheres
+     * @param  array<int, string>  $primaryKeyColumns
+     */
+    private function queryHasPrimaryKeyConstraint(array $wheres, array $primaryKeyColumns): bool
+    {
+        foreach ($wheres as $where) {
+            if (! is_array($where)) {
+                continue;
+            }
+
+            $column = $where['column'] ?? null;
+
+            if (is_string($column) && in_array($column, $primaryKeyColumns, true)) {
+                return true;
+            }
+
+            if (($where['type'] ?? null) !== 'Nested') {
+                continue;
+            }
+
+            $nested = $where['query'] ?? null;
+
+            $nestedWheres = is_object($nested) && property_exists($nested, 'wheres')
+                ? ($nested->wheres ?? [])
+                : [];
+
+            if ($this->queryHasPrimaryKeyConstraint($nestedWheres, $primaryKeyColumns)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function makeCacheKey(AccessContext $context): string

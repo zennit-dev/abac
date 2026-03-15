@@ -4,6 +4,7 @@ namespace zennit\ABAC\Services;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use zennit\ABAC\Models\AbacActorAdditionalAttribute;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
@@ -24,6 +25,8 @@ readonly class AbacAttributeLoader
      */
     public function loadAllActorAttributes(Model $actor): Model
     {
+        $this->validateConfiguredActorModelClass();
+
         $actorId = $actor->getKey();
 
         if (is_null($actorId)) {
@@ -45,11 +48,40 @@ readonly class AbacAttributeLoader
     {
         $attributes = AbacActorAdditionalAttribute::where('_id', $id)->get();
 
+        if ($attributes->isEmpty() && ! AbacActorAdditionalAttribute::query()->exists()) {
+            Log::warning('ABAC actor additional attributes table is empty.', [
+                'event' => 'abac.actor_attributes_empty',
+            ]);
+        }
+
         $resolved = [];
         foreach ($attributes as $attribute) {
             $resolved[$attribute->key] = $attribute->value;
         }
 
         return $resolved;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateConfiguredActorModelClass(): void
+    {
+        $actorModelClass = $this->getActorAdditionalAttributes();
+
+        if (! class_exists($actorModelClass)) {
+            throw new Exception(sprintf(
+                'Configured ABAC actor model class "%s" does not exist.',
+                $actorModelClass
+            ));
+        }
+
+        if (! is_subclass_of($actorModelClass, Model::class)) {
+            throw new Exception(sprintf(
+                'Configured ABAC actor model class "%s" must extend %s.',
+                $actorModelClass,
+                Model::class
+            ));
+        }
     }
 }

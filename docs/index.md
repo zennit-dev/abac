@@ -19,7 +19,7 @@ A flexible Attribute-Based Access Control (ABAC) implementation for Laravel 12+.
 - **Widening Behavior** — Each grant adds an OR branch for additive access
 - **Idempotent Operations** — Duplicate constraints are automatically deduplicated
 - **Middleware Protection** — Route protection via `abac` middleware
-- **Cache Invalidation** — Automatic cache clearing on policy updates
+- **Cache Invalidation** — Automatic cache clearing on policy updates with optional write-flush toggle for bulk operations
 
 ## Installation
 
