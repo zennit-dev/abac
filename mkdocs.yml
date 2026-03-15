@@ -1,8 +1,10 @@
 site_name: Laravel ABAC
 site_description: Attribute-Based Access Control for Laravel
-site_url: https://zennit-dev.github.io/laravel-abac
 
 docs_dir: docs
+
+# Note: MkDocs 2.0 warning from Material for MkDocs is a known tooling issue
+# See: https://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/
 
 theme:
   name: material

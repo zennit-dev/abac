@@ -1,4 +1,4 @@
-# TODO - Production Readiness (`laravel-abac`)
+# TODO - Production Readiness (`abac`)
 
 ## P0 - Must Fix Before Calling It Production
 
