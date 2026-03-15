@@ -82,3 +82,17 @@ You can override internals by binding these contracts in your app container:
 - `zennit\ABAC\Contracts\ResourceResolver`
 - `zennit\ABAC\Contracts\ActorResolver`
 - `zennit\ABAC\Contracts\CacheKeyStrategy`
+
+## 8) Available artisan commands
+
+```bash
+php artisan abac:publish
+php artisan abac:publish-config
+php artisan abac:publish-env
+php artisan abac:scaffold --from-routes
+```
+
+- `abac:publish` publishes config and env variables together.
+- `abac:publish-config` publishes the package config file.
+- `abac:publish-env` appends missing ABAC variables to a target env file.
+- `abac:scaffold --from-routes` generates a starter JSON policy scaffold from configured route resource mappings.

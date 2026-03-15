@@ -1,49 +1,51 @@
-# Seeding JSON Schema
+# Seeding Permissions in Consumer Apps
 
-The package storage is still `policies + chains + checks`, but grants are now the preferred conceptual model.
+Package-level seeders are intentionally not used. Seed ABAC permissions from your consuming application's own seeders so policy lifecycle stays with your domain code.
 
-## Preferred grant shape
+## Recommended approach
 
-```json
+Create a dedicated app seeder (for example `Database\\Seeders\\AbacPermissionSeeder`) and use the facade API.
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use zennit\ABAC\Facades\Abac;
+
+class AbacPermissionSeeder extends Seeder
 {
-  "grants": [
+    public function run(): void
     {
-      "method": "read",
-      "resource": "App\\Models\\Post",
-      "constraints": [
-        { "key": "actor.role", "operator": "equals", "value": "editor" },
-        { "key": "resource.owner_id", "operator": "equals", "value": "123" }
-      ]
+        Abac::addPermission('read', App\Models\Post::class, [
+            'role' => 'editor',
+            'resource.owner_id' => '123',
+        ]);
+
+        Abac::addPermission('update', App\Models\Post::class, [
+            'actor.role' => 'admin',
+        ]);
     }
-  ]
 }
+```
+
+Register it in your app `DatabaseSeeder`:
+
+```php
+$this->call([
+    AbacPermissionSeeder::class,
+]);
 ```
 
 ## Constraint rules
 
-- Use only `actor.*`, `resource.*`, and `environment.*` prefixes.
-- Shorthand keys (when using facade API, not JSON) default to `actor.*`.
-- `method` must match supported policy methods (`read`, `create`, `update`, `delete`).
+- Use `actor.*`, `resource.*`, or `environment.*` keys.
+- Shorthand keys default to `actor.*` (`'role' => 'editor'` means `actor.role`).
+- Methods should match supported policy methods (`read`, `create`, `update`, `delete`).
 
-## Storage mapping
+## Why this is preferred
 
-- One policy per `(method, resource)`.
-- One root OR chain per policy.
-- Each grant becomes one AND child chain.
-- Each constraint becomes one check row.
-
-## Seeder mapping diagram
-
-```mermaid
-erDiagram
-    GRANTS_JSON ||--o{ ABAC_POLICIES : "group by method+resource"
-    ABAC_POLICIES ||--|| ABAC_CHAINS : "root OR chain"
-    ABAC_CHAINS ||--o{ ABAC_CHAINS : "grant AND chains"
-    ABAC_CHAINS ||--o{ ABAC_CHECKS : "constraint rows"
-
-    GRANTS_JSON {
-        string method
-        string resource
-        json constraints
-    }
-```
+- Keeps permissions versioned alongside your app modules.
+- Makes environment-specific seeding straightforward.
+- Avoids package-owned seed state and cross-project coupling.

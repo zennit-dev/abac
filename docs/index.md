@@ -6,7 +6,7 @@ A flexible Attribute-Based Access Control (ABAC) implementation for Laravel 12+.
 
 - [Installation & Setup](CONSUMER_SETUP.md)
 - [Permission Management API](MANAGING_ABAC.md)
-- [Seeding Schema](SEEDING_SCHEMA.md)
+- [Seeding Permissions](SEEDING_SCHEMA.md)
 - [Architecture Diagrams](ARCHITECTURE_DIAGRAMS.md)
 - [Operations Guide](OPERATIONS.md)
 - [Benchmarking](BENCHMARKING.md)

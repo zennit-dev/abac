@@ -1,7 +1,7 @@
 {
     "name": "zennit/abac",
     "description": "Attribute-Based Access Control (ABAC) for Laravel",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -48,8 +48,7 @@
     "autoload": {
         "psr-4": {
             "zennit\\ABAC\\": "src/",
-            "zennit\\ABAC\\Database\\Factories\\": "database/factories/",
-            "zennit\\ABAC\\Database\\Seeders\\": "database/seeders/"
+            "zennit\\ABAC\\Database\\Factories\\": "database/factories/"
         },
         "files": [
             "src/helpers.php"

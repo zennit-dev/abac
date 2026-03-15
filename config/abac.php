@@ -66,20 +66,6 @@ return [
         'default_policy_behavior' => env('ABAC_DEFAULT_POLICY_BEHAVIOR', AbacDefaults::DEFAULT_POLICY_BEHAVIOR),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | ABAC Seeders Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This section defines the paths to the JSON files used by the ABAC seeders.
-    | These paths are relative to the resources' directory.
-    */
-    'seeders' => [
-        'actor_attribute_path' => 'stubs/abac/actor_attribute_path.json',
-        'resource_attribute_path' => 'stubs/abac/resource_attribute_path.json',
-        'policy_file_path' => 'stubs/abac/abac_policy_file_path.json',
-    ],
-
     'permissions' => [
         'resources' => [], // alias => model class
     ],
