@@ -26,7 +26,7 @@ class DefaultCacheKeyStrategy implements CacheKeyStrategy
             $parts[] = $this->normalizeEnvironment($context->environment);
         }
 
-        return 'abac:'.sha1(implode('|', $parts));
+        return sha1(implode('|', $parts));
     }
 
     /**
