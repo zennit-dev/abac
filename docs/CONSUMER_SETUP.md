@@ -42,12 +42,11 @@ If your models use UUID/custom PKs:
 
 ```dotenv
 ABAC_PRIMARY_KEY=id
-ABAC_FALLBACK_PRIMARY_KEY=_id
 ABAC_DEFAULT_POLICY_BEHAVIOR=deny
 ABAC_CACHE_FLUSH_ON_WRITE=true
 ```
 
-Set the model PK normally (`$primaryKey`, `$incrementing`, `$keyType`).
+Set the model PK normally (`$primaryKey`, `$incrementing`, `$keyType`). The package reads `ABAC_PRIMARY_KEY` and falls back to `id` when it is not set.
 
 `ABAC_CACHE_FLUSH_ON_WRITE` controls automatic ABAC cache invalidation on policy/check/chain writes.
 Keep it `true` for standard behavior, or set it to `false` during large bulk imports and flush cache manually after the batch.
