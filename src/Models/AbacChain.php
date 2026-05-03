@@ -16,12 +16,11 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
  * @property string $operator
  * @property string|null $chain_id
  * @property string|null $policy_id
- *
- * @use HasFactory<AbacChainFactory>
  */
 class AbacChain extends Model
 {
     use FlushesAbacCache;
+
     /** @use HasFactory<AbacChainFactory> */
     use HasFactory;
 

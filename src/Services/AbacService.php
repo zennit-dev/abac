@@ -54,7 +54,7 @@ readonly class AbacService implements AbacManager
         return $this->permissions->getPermissions($method, $resource, $filters);
     }
 
-    public function getPermission(int $grantId): ?PermissionGrant
+    public function getPermission(string $grantId): ?PermissionGrant
     {
         return $this->permissions->getPermission($grantId);
     }
@@ -64,12 +64,12 @@ readonly class AbacService implements AbacManager
      *
      * @throws Throwable
      */
-    public function updatePermission(int $grantId, array|string $constraints): PermissionGrant
+    public function updatePermission(string $grantId, array|string $constraints): PermissionGrant
     {
         return $this->permissions->updatePermission($grantId, $constraints);
     }
 
-    public function removePermission(int $grantId): bool
+    public function removePermission(string $grantId): bool
     {
         return $this->permissions->removePermission($grantId);
     }

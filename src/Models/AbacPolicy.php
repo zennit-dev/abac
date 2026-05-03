@@ -13,12 +13,11 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
  * @property string $_id
  * @property string $resource
  * @property string $method
- *
- * @use HasFactory<AbacPolicyFactory>
  */
 class AbacPolicy extends Model
 {
     use FlushesAbacCache;
+
     /** @use HasFactory<AbacPolicyFactory> */
     use HasFactory;
 

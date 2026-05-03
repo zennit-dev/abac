@@ -14,13 +14,14 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
  * @property string $operator
  * @property string $key
  * @property string $value
- *
- * @use HasFactory<AbacCheckFactory>
  */
 class AbacCheck extends Model
 {
     use FlushesAbacCache;
+
+    /** @use HasFactory<AbacCheckFactory> */
     use HasFactory;
+
     use HasUuids;
 
     protected $primaryKey = '_id';

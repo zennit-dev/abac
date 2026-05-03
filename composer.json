@@ -1,7 +1,7 @@
 {
     "name": "zennit/abac",
     "description": "Attribute-Based Access Control (ABAC) for Laravel",
-    "version": "1.0.9",
+    "version": "2.0.0",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -92,10 +92,16 @@
             "vendor/bin/phpstan analyse --memory-limit=1G"
         ],
         "bench": [
-            "vendor/bin/phpbench run --config=phpbench.json"
+            "vendor/bin/phpbench run --config=phpbench.normal.json"
+        ],
+        "bench-latency": [
+            "vendor/bin/phpbench run --config=phpbench.latency.json"
         ],
         "bench:quick": [
-            "vendor/bin/phpbench run --config=phpbench.json --revs=10 --iterations=2"
+            "vendor/bin/phpbench run --config=phpbench.normal.json --revs=10 --iterations=2"
+        ],
+        "bench-latency:quick": [
+            "vendor/bin/phpbench run --config=phpbench.latency.json --revs=10 --iterations=2"
         ]
     },
     "config": {

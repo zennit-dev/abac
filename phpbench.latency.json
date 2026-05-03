@@ -1,0 +1,5 @@
+{
+    "$schema": "https://phpbench.readthedocs.io/en/latest/_static/schema.json",
+    "runner.bootstrap": "benchmarks/bootstrap-latency.php",
+    "runner.path": "benchmarks/AbacLatencyEvaluationBench.php"
+}
