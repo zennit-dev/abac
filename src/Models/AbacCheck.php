@@ -2,14 +2,15 @@
 
 namespace zennit\ABAC\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use zennit\ABAC\Database\Factories\AbacCheckFactory;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 /**
- * @property int $id
- * @property int $chain_id
+ * @property string $_id
+ * @property string $chain_id
  * @property string $operator
  * @property string $key
  * @property string $value
@@ -19,9 +20,14 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 class AbacCheck extends Model
 {
     use FlushesAbacCache;
-
-    /** @use HasFactory<AbacCheckFactory> */
     use HasFactory;
+    use HasUuids;
+
+    protected $primaryKey = '_id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'chain_id',
@@ -31,8 +37,8 @@ class AbacCheck extends Model
     ];
 
     protected $casts = [
-        'id' => 'integer',
-        'chain_id' => 'integer',
+        '_id' => 'string',
+        'chain_id' => 'string',
         'operator' => 'string',
         'key' => 'string',
         'value' => 'string',

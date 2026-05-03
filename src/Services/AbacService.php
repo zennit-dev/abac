@@ -216,7 +216,7 @@ readonly class AbacService implements AbacManager
             return $result;
         }
 
-        $chain = AbacChain::where('policy_id', $policy->id)->first();
+        $chain = AbacChain::where('policy_id', $policy->getKey())->first();
 
         if (is_null($chain)) {
             $result = new AccessResult(
@@ -226,7 +226,7 @@ readonly class AbacService implements AbacManager
                 false,
             );
 
-            $this->logger->logChainOutcome($context, false, $policy->id, null, $result->reason);
+            $this->logger->logChainOutcome($context, false, $policy->getKey(), null, $result->reason);
 
             return $result;
         }
@@ -238,7 +238,7 @@ readonly class AbacService implements AbacManager
             $allowed = true;
         }
 
-        $this->logger->logChainOutcome($context, $allowed, $policy->id, $chain->id);
+        $this->logger->logChainOutcome($context, $allowed, $policy->getKey(), $chain->getKey());
 
         return new AccessResult(
             $resourceQuery,
@@ -255,14 +255,10 @@ readonly class AbacService implements AbacManager
         }
 
         $model = $context->resource->getModel();
-        $primaryKeyCandidates = $this->getPrimaryKeyCandidates($model);
-        $primaryKeyColumns = array_values(array_unique(array_merge(
-            $primaryKeyCandidates,
-            array_map(
-                static fn (string $key): string => $model->qualifyColumn($key),
-                $primaryKeyCandidates,
-            ),
-        )));
+        $primaryKeyColumns = [
+            $this->getPrimaryKey(),
+            $model->qualifyColumn($this->getPrimaryKey()),
+        ];
 
         return ! $this->queryHasPrimaryKeyConstraint($context->resource->getQuery()->wheres, $primaryKeyColumns);
     }

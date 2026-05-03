@@ -3,6 +3,7 @@
 namespace zennit\ABAC\Models;
 
 use Exception;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,19 +12,26 @@ use zennit\ABAC\Database\Factories\AbacChainFactory;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 /**
- * @property int $id
+ * @property string $_id
  * @property string $operator
- * @property int|null $chain_id
- * @property int|null $policy_id
+ * @property string|null $chain_id
+ * @property string|null $policy_id
  *
  * @use HasFactory<AbacChainFactory>
  */
 class AbacChain extends Model
 {
     use FlushesAbacCache;
-
     /** @use HasFactory<AbacChainFactory> */
     use HasFactory;
+
+    use HasUuids;
+
+    protected $primaryKey = '_id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'operator',
@@ -32,10 +40,10 @@ class AbacChain extends Model
     ];
 
     protected $casts = [
-        'id' => 'integer',
+        '_id' => 'string',
         'operator' => 'string',
-        'chain_id' => 'integer',
-        'policy_id' => 'integer',
+        'chain_id' => 'string',
+        'policy_id' => 'string',
     ];
 
     protected static function booted(): void

@@ -59,7 +59,6 @@ return [
     'database' => [
         'actor_additional_attributes' => env('ABAC_ACTOR_ADDITIONAL_ATTRIBUTES', AbacDefaults::ACTOR_ADDITIONAL_ATTRIBUTES),
         'primary_key' => env('ABAC_PRIMARY_KEY', AbacDefaults::PRIMARY_KEY),
-        'fallback_primary_key' => env('ABAC_FALLBACK_PRIMARY_KEY', AbacDefaults::FALLBACK_PRIMARY_KEY),
         'soft_deletes_column' => 'deleted_at',
     ],
 

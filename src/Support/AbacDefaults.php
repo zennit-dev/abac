@@ -30,8 +30,6 @@ final class AbacDefaults
 
     public const string PRIMARY_KEY = 'id';
 
-    public const string FALLBACK_PRIMARY_KEY = '_id';
-
     public const string DEFAULT_POLICY_BEHAVIOR = 'deny';
 
     public const false ALLOW_IF_UNMATCHED_ROUTE = false;
@@ -57,7 +55,6 @@ final class AbacDefaults
             'ABAC_SLOW_EVALUATION_THRESHOLD' => self::SLOW_EVALUATION_THRESHOLD,
             'ABAC_ACTOR_ADDITIONAL_ATTRIBUTES' => self::ACTOR_ADDITIONAL_ATTRIBUTES,
             'ABAC_PRIMARY_KEY' => self::PRIMARY_KEY,
-            'ABAC_FALLBACK_PRIMARY_KEY' => self::FALLBACK_PRIMARY_KEY,
             'ABAC_DEFAULT_POLICY_BEHAVIOR' => self::DEFAULT_POLICY_BEHAVIOR,
             'ABAC_ALLOW_IF_UNMATCHED_ROUTE' => self::ALLOW_IF_UNMATCHED_ROUTE,
             'ABAC_MIDDLEWARE_ACTOR_METHOD' => self::ACTOR_METHOD,

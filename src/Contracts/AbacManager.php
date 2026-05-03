@@ -24,14 +24,14 @@ interface AbacManager
      */
     public function getPermissions(?string $method = null, ?string $resource = null, array $filters = []): Collection;
 
-    public function getPermission(int $grantId): ?PermissionGrant;
+    public function getPermission(string $grantId): ?PermissionGrant;
 
     /**
      * @param  array<string, mixed>|array<int, array<string, mixed>>|string  $constraints
      */
-    public function updatePermission(int $grantId, array|string $constraints): PermissionGrant;
+    public function updatePermission(string $grantId, array|string $constraints): PermissionGrant;
 
-    public function removePermission(int $grantId): bool;
+    public function removePermission(string $grantId): bool;
 
     /**
      * @param  array<string, mixed>|array<int, array<string, mixed>>|string|null  $constraints

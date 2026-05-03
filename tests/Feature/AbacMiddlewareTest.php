@@ -11,6 +11,10 @@ use zennit\ABAC\Services\AbacCacheManager;
 use zennit\ABAC\Tests\Fixtures\Models\Post;
 use zennit\ABAC\Tests\Fixtures\Models\User;
 
+beforeEach(function () {
+    config()->set('abac.database.primary_key', '_id');
+});
+
 function createTitlePolicy(string $value): void
 {
     $policy = AbacPolicy::query()->create([
@@ -20,11 +24,11 @@ function createTitlePolicy(string $value): void
 
     $chain = AbacChain::query()->create([
         'operator' => LogicalOperators::AND->value,
-        'policy_id' => $policy->id,
+        'policy_id' => $policy->getKey(),
     ]);
 
     AbacCheck::query()->create([
-        'chain_id' => $chain->id,
+        'chain_id' => $chain->getKey(),
         'operator' => ArithmeticOperators::EQUALS->value,
         'key' => 'resource.title',
         'value' => $value,
@@ -144,8 +148,6 @@ it('denies access when actor attributes do not satisfy policy checks', function 
 });
 
 it('supports route model binding with custom primary keys and route keys', function () {
-    config()->set('abac.database.primary_key', 'id');
-    config()->set('abac.database.fallback_primary_key', '_id');
     config()->set('abac.middleware.resource_patterns', [
         'users/([^/]+)/posts/([^/]+)' => Post::class,
     ]);
@@ -169,9 +171,7 @@ it('supports route model binding with custom primary keys and route keys', funct
     $this->actingAs($user)->getJson('/users/bound-user/posts/bound-post')->assertOk();
 });
 
-it('uses fallback key for path-pattern resolution when primary key differs', function () {
-    config()->set('abac.database.primary_key', 'id');
-    config()->set('abac.database.fallback_primary_key', '_id');
+it('uses the configured key for path-pattern resolution', function () {
     config()->set('abac.middleware.resource_patterns', [
         'manual-posts/([^/]+)' => Post::class,
     ]);

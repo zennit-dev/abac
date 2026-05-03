@@ -13,7 +13,6 @@ class AbacResourceAdditionalAttributeFactory extends Factory
     {
         return [
             'model' => $this->faker->word,
-            '_id' => (string) $this->faker->numberBetween(1, 10),
             'key' => $this->faker->word,
             'value' => $this->faker->word,
         ];

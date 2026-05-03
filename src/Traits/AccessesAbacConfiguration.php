@@ -2,7 +2,6 @@
 
 namespace zennit\ABAC\Traits;
 
-use Illuminate\Database\Eloquent\Model;
 use zennit\ABAC\Support\AbacDefaults;
 
 trait AccessesAbacConfiguration
@@ -72,34 +71,9 @@ trait AccessesAbacConfiguration
 
     public function getPrimaryKey(): string
     {
-        return config('abac.database.primary_key', AbacDefaults::PRIMARY_KEY);
-    }
+        $primaryKey = config('abac.database.primary_key');
 
-    public function getFallbackPrimaryKey(): ?string
-    {
-        $fallback = config('abac.database.fallback_primary_key');
-
-        return is_string($fallback) && $fallback !== '' ? $fallback : null;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function getPrimaryKeyCandidates(?Model $model = null): array
-    {
-        $keys = [];
-
-        if ($model instanceof Model) {
-            $keys[] = $model->getKeyName();
-        }
-
-        $keys[] = $this->getPrimaryKey();
-
-        if (! is_null($this->getFallbackPrimaryKey())) {
-            $keys[] = $this->getFallbackPrimaryKey();
-        }
-
-        return array_values(array_unique(array_filter($keys)));
+        return is_string($primaryKey) && $primaryKey !== '' ? $primaryKey : AbacDefaults::PRIMARY_KEY;
     }
 
     public function getDefaultPolicyBehavior(): string

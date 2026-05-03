@@ -12,20 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('abac_actor_additional_attributes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->timestamps();
-            $table->string('_id');
             $table->string('key');
             $table->string('value');
-
-            $table->index(['_id']);
         });
 
         Schema::create('abac_resource_additional_attributes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->timestamps();
             $table->string('model');
-            $table->string('_id')->nullable();
             $table->string('key');
             $table->string('value');
 
@@ -33,7 +29,7 @@ return new class extends Migration
         });
 
         Schema::create('abac_policies', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->timestamps();
             $table->string('resource');
             $table->enum('method', PolicyMethod::values());
@@ -42,17 +38,17 @@ return new class extends Migration
         });
 
         Schema::create('abac_chains', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->timestamps();
             $table->enum('operator', LogicalOperators::values());
-            $table->foreignId('chain_id')->nullable()->constrained('abac_chains')->cascadeOnDelete();
-            $table->foreignId('policy_id')->unique()->nullable()->constrained('abac_policies')->cascadeOnDelete();
+            $table->foreignUuid('chain_id')->nullable()->constrained('abac_chains', '_id')->cascadeOnDelete();
+            $table->foreignUuid('policy_id')->unique()->nullable()->constrained('abac_policies', '_id')->cascadeOnDelete();
         });
 
         Schema::create('abac_checks', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->timestamps();
-            $table->foreignId('chain_id')->constrained('abac_chains')->cascadeOnDelete();
+            $table->foreignUuid('chain_id')->constrained('abac_chains', '_id')->cascadeOnDelete();
             $table->enum('operator', AllOperators::values([LogicalOperators::class]));
             $table->string('key');
             $table->string('value');

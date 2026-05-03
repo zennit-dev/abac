@@ -22,9 +22,9 @@ use zennit\ABAC\Services\AbacService;
  * @method static bool can(AccessContext $context)
  * @method static PermissionGrant addPermission(string $method, string $resource, array<string, mixed>|array<int, array<string, mixed> >|string $constraints)
  * @method static Collection<int, PermissionGrant> getPermissions(?string $method = null, ?string $resource = null, array<string, mixed> $filters = [])
- * @method static PermissionGrant|null getPermission(int $grantId)
- * @method static PermissionGrant updatePermission(int $grantId, array<string, mixed>|array<int, array<string, mixed> >|string $constraints)
- * @method static bool removePermission(int $grantId)
+ * @method static PermissionGrant|null getPermission(string $grantId)
+ * @method static PermissionGrant updatePermission(string $grantId, array<string, mixed>|array<int, array<string, mixed> >|string $constraints)
+ * @method static bool removePermission(string $grantId)
  * @method static int removePermissions(string $method, string $resource, array<string, mixed>|array<int, array<string, mixed> >|string|null $constraints = null)
  *
  * @throws ValidationException If the access context is invalid

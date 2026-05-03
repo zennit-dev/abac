@@ -21,7 +21,7 @@ describe('addPermission', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy?->id)->first();
+        $rootChain = AbacChain::query()->where('policy_id', $policy?->getKey())->first();
 
         expect($policy)->not->toBeNull()
             ->and($rootChain)->not->toBeNull()
@@ -174,9 +174,9 @@ describe('getPermission', function () {
     it('returns null for root chain (not a grant)', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
 
-        $fetched = Abac::getPermission($rootChain->id);
+        $fetched = Abac::getPermission($rootChain->getKey());
 
         expect($fetched)->toBeNull();
     });
@@ -202,10 +202,10 @@ describe('updatePermission', function () {
     it('throws on root chain id', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
 
-        expect(fn () => Abac::updatePermission($rootChain->id, ['role' => 'admin']))
-            ->toThrow(InvalidArgumentException::class, "Permission grant $rootChain->id does not exist");
+        expect(fn () => Abac::updatePermission($rootChain->getKey(), ['role' => 'admin']))
+            ->toThrow(InvalidArgumentException::class, "Permission grant {$rootChain->getKey()} does not exist");
     });
 });
 
@@ -229,9 +229,9 @@ describe('removePermission', function () {
     it('returns false for root chain', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
 
-        $result = Abac::removePermission($rootChain->id);
+        $result = Abac::removePermission($rootChain->getKey());
 
         expect($result)->toBeFalse();
     });
@@ -280,8 +280,8 @@ describe('widening behavior', function () {
         Abac::addPermission('read', Post::class, ['role' => 'editor']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
-        $branches = AbacChain::query()->where('chain_id', $rootChain->id)->get();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $branches = AbacChain::query()->where('chain_id', $rootChain->getKey())->get();
 
         expect($rootChain->operator)->toBe('or')
             ->and($branches->count())->toBe(2);
@@ -294,8 +294,8 @@ describe('widening behavior', function () {
         expect($second->id)->toBe($first->id);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
-        $branches = AbacChain::query()->where('chain_id', $rootChain->id)->count();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $branches = AbacChain::query()->where('chain_id', $rootChain->getKey())->count();
 
         expect($branches)->toBe(1);
     });
@@ -346,7 +346,7 @@ describe('edge cases', function () {
         Abac::addPermission('read', Post::class, ['role' => 'editor']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->id)->first();
+        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
 
         expect($rootChain->operator)->toBe('or');
     });

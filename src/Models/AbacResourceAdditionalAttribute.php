@@ -2,22 +2,29 @@
 
 namespace zennit\ABAC\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 use zennit\ABAC\Traits\IntegratesAbacAdditionalAttributes;
 
 /**
- * @property int $id
+ * @property string $_id
  * @property string $model
- * @property string|null $_id
  * @property string $key
  * @property string $value
  */
 class AbacResourceAdditionalAttribute extends Model
 {
     use FlushesAbacCache;
+    use HasUuids;
     use IntegratesAbacAdditionalAttributes;
+
+    protected $primaryKey = '_id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'model',
@@ -27,7 +34,7 @@ class AbacResourceAdditionalAttribute extends Model
     ];
 
     protected $casts = [
-        'id' => 'integer',
+        '_id' => 'string',
         'model' => 'string',
         'key' => 'string',
         'value' => 'string',

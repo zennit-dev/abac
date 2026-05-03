@@ -2,12 +2,12 @@
 
 namespace zennit\ABAC\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 /**
- * @property int $id
  * @property string $_id
  * @property string $key
  * @property string $value
@@ -15,6 +15,13 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 class AbacActorAdditionalAttribute extends Model
 {
     use FlushesAbacCache;
+    use HasUuids;
+
+    protected $primaryKey = '_id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         '_id',
@@ -23,7 +30,7 @@ class AbacActorAdditionalAttribute extends Model
     ];
 
     protected $casts = [
-        'id' => 'integer',
+        '_id' => 'string',
         'key' => 'string',
         'value' => 'string',
     ];

@@ -1,15 +1,18 @@
 <?php
 
 use zennit\ABAC\Services\AbacService;
-use zennit\ABAC\Tests\Fixtures\Models\Post;
 
-it('builds primary key candidates from model and fallback config', function () {
-    config()->set('abac.database.primary_key', 'id');
-    config()->set('abac.database.fallback_primary_key', '_id');
+it('falls back to id when no primary key is configured', function () {
+    config()->offsetUnset('abac.database.primary_key');
 
     $service = app(AbacService::class);
-    $keys = $service->getPrimaryKeyCandidates(new Post);
+    expect($service->getPrimaryKey())->toBe('id');
+});
 
-    expect($keys)->toContain('_id')
-        ->and($keys)->toContain('id');
+it('uses the configured primary key when present', function () {
+    config()->set('abac.database.primary_key', '_id');
+
+    $service = app(AbacService::class);
+
+    expect($service->getPrimaryKey())->toBe('_id');
 });

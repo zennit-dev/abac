@@ -37,7 +37,7 @@ readonly class AbacCheckEvaluator
                 return 'environment';
             }
 
-            throw new Exception("Check of id $check->id has invalid key of type $check->key. Key must start with 'resource.', 'actor.', or 'environment.'");
+            throw new Exception('Check of id '.$check->getKey().' has invalid key of type '.$check->key.". Key must start with 'resource.', 'actor.', or 'environment.'");
         })();
 
         if ($type === 'resource') {

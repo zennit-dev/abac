@@ -5,7 +5,6 @@ namespace zennit\ABAC\Services\Resolution;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use zennit\ABAC\Contracts\ResourceResolver;
 use zennit\ABAC\Traits\AccessesAbacConfiguration;
 
@@ -108,20 +107,8 @@ class DefaultResourceResolver implements ResourceResolver
      */
     private function applyPrimaryKeyFilter(Builder $query, Model $model, string $id): Builder
     {
-        $keys = array_values(array_filter(
-            $this->getPrimaryKeyCandidates($model),
-            fn (string $key): bool => Schema::hasColumn($model->getTable(), $key)
-        ));
-
-        if ($keys === []) {
-            $keys = [$model->getKeyName()];
-        }
-
-        return $query->where(function (Builder $scopedQuery) use ($model, $keys, $id) {
-            foreach ($keys as $index => $key) {
-                $method = $index === 0 ? 'where' : 'orWhere';
-                $scopedQuery->{$method}($model->qualifyColumn($key), $id);
-            }
+        return $query->where(function (Builder $scopedQuery) use ($model, $id) {
+            $scopedQuery->where($model->qualifyColumn($this->getPrimaryKey()), $id);
         });
     }
 

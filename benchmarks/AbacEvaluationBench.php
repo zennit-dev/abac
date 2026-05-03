@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use PhpBench\Benchmark\Metadata\Annotations\Iterations;
+use PhpBench\Benchmark\Metadata\Annotations\Revs;
 use zennit\ABAC\DTO\AccessContext;
 use zennit\ABAC\Enums\Operators\ArithmeticOperators;
 use zennit\ABAC\Enums\Operators\LogicalOperators;
@@ -81,12 +83,12 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 1,
+            'policy_id' => 'policy-1',
         ]);
 
-        $this->createCheck($this->rootChain->id, ArithmeticOperators::EQUALS->value, 'resource.category', 'public');
-        $this->createCheck($this->rootChain->id, ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
-        $this->createCheck($this->rootChain->id, ArithmeticOperators::GREATER_THAN_EQUALS->value, 'resource.sensitivity', '2');
+        $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.category', 'public');
+        $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
+        $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::GREATER_THAN_EQUALS->value, 'resource.sensitivity', '2');
     }
 
     public function setUpNestedOrScenario(): void
@@ -96,22 +98,22 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => 1,
+            'policy_id' => 'policy-1',
         ]);
 
         $left = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $this->rootChain->id,
+            'chain_id' => $this->rootChain->getKey(),
         ]);
 
         $right = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $this->rootChain->id,
+            'chain_id' => $this->rootChain->getKey(),
         ]);
 
-        $this->createCheck($left->id, ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
-        $this->createCheck($left->id, ArithmeticOperators::EQUALS->value, 'resource.category', 'internal');
-        $this->createCheck($right->id, ArithmeticOperators::EQUALS->value, 'resource.owner_id', 'owner-1');
+        $this->createCheck($left->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
+        $this->createCheck($left->getKey(), ArithmeticOperators::EQUALS->value, 'resource.category', 'internal');
+        $this->createCheck($right->getKey(), ArithmeticOperators::EQUALS->value, 'resource.owner_id', 'owner-1');
     }
 
     public function setUpActorCheckScenario(): void
@@ -121,11 +123,11 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 1,
+            'policy_id' => 'policy-1',
         ]);
 
-        $this->createCheck($this->rootChain->id, ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
-        $this->createCheck($this->rootChain->id, ArithmeticOperators::EQUALS->value, 'actor.role', 'admin');
+        $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
+        $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'actor.role', 'admin');
     }
 
     private function setUpEnvironment(): void
@@ -170,16 +172,16 @@ class AbacEvaluationBench
         $schema = $capsule->schema();
 
         $schema->create('abac_chains', function (Blueprint $table): void {
-            $table->id();
+            $table->uuid('_id')->primary();
             $table->string('operator');
-            $table->unsignedBigInteger('chain_id')->nullable();
-            $table->unsignedBigInteger('policy_id')->nullable();
+            $table->uuid('chain_id')->nullable();
+            $table->uuid('policy_id')->nullable();
             $table->timestamps();
         });
 
         $schema->create('abac_checks', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('chain_id');
+            $table->uuid('_id')->primary();
+            $table->uuid('chain_id');
             $table->string('operator');
             $table->string('key');
             $table->string('value');
@@ -225,7 +227,7 @@ class AbacEvaluationBench
         BenchPost::query()->insert($rows);
     }
 
-    private function createCheck(int $chainId, string $operator, string $key, string $value): void
+    private function createCheck(string $chainId, string $operator, string $key, string $value): void
     {
         AbacCheck::query()->create([
             'chain_id' => $chainId,

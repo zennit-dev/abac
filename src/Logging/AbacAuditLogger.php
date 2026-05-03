@@ -42,7 +42,7 @@ readonly class AbacAuditLogger
         );
     }
 
-    public function logChainOutcome(AccessContext $context, bool $allowed, ?int $policyId, ?int $chainId, ?string $reason = null): void
+    public function logChainOutcome(AccessContext $context, bool $allowed, ?string $policyId, ?string $chainId, ?string $reason = null): void
     {
         $level = $allowed ? 'info' : 'warning';
 

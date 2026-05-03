@@ -24,11 +24,11 @@ function createActorAttributePolicy(string $tenantId): void
 
     $chain = AbacChain::query()->create([
         'operator' => LogicalOperators::AND->value,
-        'policy_id' => $policy->id,
+        'policy_id' => $policy->getKey(),
     ]);
 
     AbacCheck::query()->create([
-        'chain_id' => $chain->id,
+        'chain_id' => $chain->getKey(),
         'operator' => ArithmeticOperators::EQUALS->value,
         'key' => 'actor.tenant_id',
         'value' => $tenantId,
@@ -44,11 +44,11 @@ function createTitlePolicyFor(string $title): void
 
     $chain = AbacChain::query()->create([
         'operator' => LogicalOperators::AND->value,
-        'policy_id' => $policy->id,
+        'policy_id' => $policy->getKey(),
     ]);
 
     AbacCheck::query()->create([
-        'chain_id' => $chain->id,
+        'chain_id' => $chain->getKey(),
         'operator' => ArithmeticOperators::EQUALS->value,
         'key' => 'resource.title',
         'value' => $title,

@@ -12,7 +12,6 @@ class AbacActorAdditionalAttributeFactory extends Factory
     public function definition(): array
     {
         return [
-            '_id' => (string) $this->faker->numberBetween(1, 10),
             'key' => $this->faker->word,
             'value' => $this->faker->word,
         ];
