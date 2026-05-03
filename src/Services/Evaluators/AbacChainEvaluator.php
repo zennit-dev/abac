@@ -44,8 +44,8 @@ readonly class AbacChainEvaluator
      */
     private function applyWithLinkMethod(Builder $query, AbacChain $chain, AccessContext $context, string $linkMethod): Builder
     {
-        $relatedChains = AbacChain::where('chain_id', $chain->getKey())->get();
-        $relatedChecks = AbacCheck::where('chain_id', $chain->getKey())->get();
+        $relatedChains = AbacChain::where('_chain', $chain->getKey())->get();
+        $relatedChecks = AbacCheck::where('_chain', $chain->getKey())->get();
         $childLinkMethod = $this->resolveLinkMethod($chain->operator);
 
         return $query->{$linkMethod}(function (Builder $subQuery) use ($relatedChains, $relatedChecks, $context, $childLinkMethod): void {

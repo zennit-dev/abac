@@ -216,7 +216,7 @@ readonly class AbacService implements AbacManager
             return $result;
         }
 
-        $chain = AbacChain::where('policy_id', $policy->getKey())->first();
+        $chain = AbacChain::where('_policy', $policy->getKey())->first();
 
         if (is_null($chain)) {
             $result = new AccessResult(

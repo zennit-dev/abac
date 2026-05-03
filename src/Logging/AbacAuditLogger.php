@@ -42,7 +42,7 @@ readonly class AbacAuditLogger
         );
     }
 
-    public function logChainOutcome(AccessContext $context, bool $allowed, ?string $policyId, ?string $chainId, ?string $reason = null): void
+    public function logChainOutcome(AccessContext $context, bool $allowed, ?string $policyKey, ?string $chainKey, ?string $reason = null): void
     {
         $level = $allowed ? 'info' : 'warning';
 
@@ -51,8 +51,8 @@ readonly class AbacAuditLogger
             $this->buildContext($context) + [
                 'event' => 'abac.chain_outcome',
                 'allowed' => $allowed,
-                'policy_id' => $policyId,
-                'chain_id' => $chainId,
+                '_policy' => $policyKey,
+                '_chain' => $chainKey,
                 'reason' => $reason,
             ]
         );

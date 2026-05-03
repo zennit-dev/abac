@@ -24,11 +24,11 @@ function createTitlePolicy(string $value): void
 
     $chain = AbacChain::query()->create([
         'operator' => LogicalOperators::AND->value,
-        'policy_id' => $policy->getKey(),
+        '_policy' => $policy->getKey(),
     ]);
 
     AbacCheck::query()->create([
-        'chain_id' => $chain->getKey(),
+        '_chain' => $chain->getKey(),
         'operator' => ArithmeticOperators::EQUALS->value,
         'key' => 'resource.title',
         'value' => $value,

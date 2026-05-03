@@ -46,7 +46,7 @@ class PermissionManager
 
             $grantChain = AbacChain::query()->create([
                 'operator' => LogicalOperators::AND->value,
-                'chain_id' => $rootChain->getKey(),
+                '_chain' => $rootChain->getKey(),
             ]);
 
             $this->createChecks($grantChain->getKey(), $normalizedConstraints);
@@ -69,12 +69,12 @@ class PermissionManager
         $grants = collect();
 
         foreach ($policies as $policy) {
-            $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+            $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
             if (is_null($rootChain)) {
                 continue;
             }
 
-            $policyGrants = AbacChain::query()->where('chain_id', $rootChain->getKey())->get();
+            $policyGrants = AbacChain::query()->where('_chain', $rootChain->getKey())->get();
             foreach ($policyGrants as $grantChain) {
                 $grants->push($this->toGrant($grantChain, $policy));
             }
@@ -116,7 +116,7 @@ class PermissionManager
             $grantChain = $managedGrant['grant'];
             $policy = $managedGrant['policy'];
 
-            AbacCheck::query()->where('chain_id', $grantChain->getKey())->delete();
+            AbacCheck::query()->where('_chain', $grantChain->getKey())->delete();
             $this->createChecks($grantChain->getKey(), $normalizedConstraints);
 
             $freshGrant = AbacChain::query()->whereKey($grantChain->getKey())->first() ?? $grantChain;
@@ -141,13 +141,13 @@ class PermissionManager
     private function resolveManagedGrant(string $grantId): ?array
     {
         $grantChain = AbacChain::query()->whereKey($grantId)->first();
-        $parentChainId = is_null($grantChain) ? null : $grantChain->getAttribute('chain_id');
+        $parentChainId = is_null($grantChain) ? null : $grantChain->getAttribute('_chain');
         if (is_null($grantChain) || is_null($parentChainId)) {
             return null;
         }
 
         $rootChain = AbacChain::query()->whereKey($parentChainId)->first();
-        $policyId = is_null($rootChain) ? null : $rootChain->getAttribute('policy_id');
+        $policyId = is_null($rootChain) ? null : $rootChain->getAttribute('_policy');
         if (is_null($rootChain) || is_null($policyId)) {
             return null;
         }
@@ -191,12 +191,12 @@ class PermissionManager
             return 0;
         }
 
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
         if (is_null($rootChain)) {
             return 0;
         }
 
-        $grants = AbacChain::query()->where('chain_id', $rootChain->getKey())->get();
+        $grants = AbacChain::query()->where('_chain', $rootChain->getKey())->get();
         $deleted = 0;
 
         foreach ($grants as $grant) {
@@ -217,7 +217,7 @@ class PermissionManager
 
     private function findOrCreateRootChain(AbacPolicy $policy): AbacChain
     {
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
 
         if (! is_null($rootChain)) {
             if ($rootChain->getAttribute('operator') !== LogicalOperators::OR->value) {
@@ -229,7 +229,7 @@ class PermissionManager
 
         return AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => $policy->getKey(),
+            '_policy' => $policy->getKey(),
         ]);
     }
 
@@ -238,7 +238,7 @@ class PermissionManager
      */
     private function findMatchingGrant(string $rootChainId, array $constraints): ?AbacChain
     {
-        $grants = AbacChain::query()->where('chain_id', $rootChainId)->get();
+        $grants = AbacChain::query()->where('_chain', $rootChainId)->get();
 
         foreach ($grants as $grant) {
             if ($this->getNormalizedConstraintsForChain($grant->getKey()) === $constraints) {
@@ -256,7 +256,7 @@ class PermissionManager
     {
         foreach ($constraints as $constraint) {
             AbacCheck::query()->create([
-                'chain_id' => $chainId,
+                '_chain' => $chainId,
                 'operator' => $constraint['operator'],
                 'key' => $constraint['key'],
                 'value' => $constraint['value'],
@@ -267,7 +267,7 @@ class PermissionManager
     private function toGrant(AbacChain $grantChain, AbacPolicy $policy): PermissionGrant
     {
         $checks = AbacCheck::query()
-            ->where('chain_id', $grantChain->getKey())
+            ->where('_chain', $grantChain->getKey())
             ->orderBy('_id')
             ->get();
 
@@ -293,7 +293,7 @@ class PermissionManager
     private function getNormalizedConstraintsForChain(string $chainId): array
     {
         $constraints = AbacCheck::query()
-            ->where('chain_id', $chainId)
+            ->where('_chain', $chainId)
             ->get()
             ->map(function (AbacCheck $check): array {
                 return [

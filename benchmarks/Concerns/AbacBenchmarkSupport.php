@@ -59,13 +59,13 @@ trait AbacBenchmarkSupport
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         for ($i = 0; $i < $branchCount; $i++) {
             $group = AbacChain::query()->create([
                 'operator' => $i % 2 === 0 ? LogicalOperators::AND->value : LogicalOperators::OR->value,
-                'chain_id' => $this->rootChain->getKey(),
+                '_chain' => $this->rootChain->getKey(),
             ]);
 
             $this->attachResourceArithmeticChecks($group->getKey(), $i);
@@ -130,14 +130,14 @@ trait AbacBenchmarkSupport
         $schema->create('abac_chains', function (Blueprint $table): void {
             $table->uuid('_id')->primary();
             $table->string('operator');
-            $table->uuid('chain_id')->nullable();
-            $table->uuid('policy_id')->nullable();
+            $table->uuid('_chain')->nullable();
+            $table->uuid('_policy')->nullable();
             $table->timestamps();
         });
 
         $schema->create('abac_checks', function (Blueprint $table): void {
             $table->uuid('_id')->primary();
-            $table->uuid('chain_id');
+            $table->uuid('_chain');
             $table->string('operator');
             $table->string('key');
             $table->string('value');
@@ -250,7 +250,7 @@ trait AbacBenchmarkSupport
     protected function createCheck(string $chainId, string $operator, string $key, string $value): void
     {
         AbacCheck::query()->create([
-            'chain_id' => $chainId,
+            '_chain' => $chainId,
             'operator' => $operator,
             'key' => $key,
             'value' => $value,

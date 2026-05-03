@@ -22,7 +22,7 @@ class AbacChainFactory extends Factory
 
         return [
             'operator' => $this->faker->randomElement(AllOperators::values()),
-            $isChain ? 'chain_id' : 'policy_id' => $isChain
+            $isChain ? '_chain' : '_policy' => $isChain
                 ? AbacChain::factory()->create()->getKey()
                 : AbacPolicy::factory()->create()->getKey(),
         ];

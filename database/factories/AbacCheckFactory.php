@@ -16,7 +16,7 @@ class AbacCheckFactory extends Factory
     {
         return [
             'operator' => $this->faker->randomElement(AllOperators::values([LogicalOperators::class])),
-            'chain_id' => AbacChain::factory()->create()->getKey(),
+            '_chain' => AbacChain::factory()->create()->getKey(),
             'key' => $this->faker->word,
             'value' => $this->faker->word,
         ];

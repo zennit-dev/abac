@@ -14,8 +14,8 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 /**
  * @property string $_id
  * @property string $operator
- * @property string|null $chain_id
- * @property string|null $policy_id
+ * @property string|null $_chain
+ * @property string|null $_policy
  */
 class AbacChain extends Model
 {
@@ -34,26 +34,26 @@ class AbacChain extends Model
 
     protected $fillable = [
         'operator',
-        'chain_id',
-        'policy_id',
+        '_chain',
+        '_policy',
     ];
 
     protected $casts = [
         '_id' => 'string',
         'operator' => 'string',
-        'chain_id' => 'string',
-        'policy_id' => 'string',
+        '_chain' => 'string',
+        '_policy' => 'string',
     ];
 
     protected static function booted(): void
     {
         static::creating(function (AbacChain $chain) {
-            if ($chain->isDirty('chain_id') && $chain->isDirty('policy_id')) {
-                throw new Exception('You can not set both chain_id and policy_id at the same time');
+            if ($chain->isDirty('_chain') && $chain->isDirty('_policy')) {
+                throw new Exception('You can not set both _chain and _policy at the same time');
             }
 
-            if (! $chain->chain_id && ! $chain->policy_id) {
-                throw new Exception('You must set either chain_id or policy_id');
+            if (! $chain->_chain && ! $chain->_policy) {
+                throw new Exception('You must set either _chain or _policy');
             }
         });
 
@@ -65,7 +65,15 @@ class AbacChain extends Model
      */
     public function chain(): BelongsTo
     {
-        return $this->belongsTo(AbacChain::class, 'chain_id');
+        return $this->belongsTo(AbacChain::class, '_chain');
+    }
+
+    /**
+     * @return BelongsTo<AbacPolicy, $this>
+     */
+    public function policy(): BelongsTo
+    {
+        return $this->belongsTo(AbacPolicy::class, '_policy');
     }
 
     /**
@@ -73,6 +81,6 @@ class AbacChain extends Model
      */
     public function checks(): HasMany
     {
-        return $this->hasMany(AbacCheck::class, 'chain_id');
+        return $this->hasMany(AbacCheck::class, '_chain');
     }
 }

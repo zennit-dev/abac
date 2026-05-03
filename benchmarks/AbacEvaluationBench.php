@@ -302,7 +302,7 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.category', 'public');
@@ -318,7 +318,7 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $this->createCheck($this->rootChain->getKey(), StringOperators::STARTS_WITH->value, 'resource.category', 'pub');
@@ -335,22 +335,22 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $left = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $this->rootChain->getKey(),
+            '_chain' => $this->rootChain->getKey(),
         ]);
 
         $right = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $this->rootChain->getKey(),
+            '_chain' => $this->rootChain->getKey(),
         ]);
 
         $middle = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $this->rootChain->getKey(),
+            '_chain' => $this->rootChain->getKey(),
         ]);
 
         $this->createCheck($left->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
@@ -372,37 +372,37 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $leftGroup = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'chain_id' => $this->rootChain->getKey(),
+            '_chain' => $this->rootChain->getKey(),
         ]);
 
         $rightGroup = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'chain_id' => $this->rootChain->getKey(),
+            '_chain' => $this->rootChain->getKey(),
         ]);
 
         $leftA = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $leftGroup->getKey(),
+            '_chain' => $leftGroup->getKey(),
         ]);
 
         $leftB = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $leftGroup->getKey(),
+            '_chain' => $leftGroup->getKey(),
         ]);
 
         $rightA = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $rightGroup->getKey(),
+            '_chain' => $rightGroup->getKey(),
         ]);
 
         $rightB = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'chain_id' => $rightGroup->getKey(),
+            '_chain' => $rightGroup->getKey(),
         ]);
 
         $this->createCheck($leftA->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
@@ -425,7 +425,7 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.region', 'emea');
@@ -441,7 +441,7 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::AND->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         $this->createCheck($this->rootChain->getKey(), ArithmeticOperators::EQUALS->value, 'resource.category', 'public');
@@ -541,13 +541,13 @@ class AbacEvaluationBench
 
         $this->rootChain = AbacChain::query()->create([
             'operator' => LogicalOperators::OR->value,
-            'policy_id' => 'policy-1',
+            '_policy' => 'policy-1',
         ]);
 
         for ($i = 0; $i < $branchCount; $i++) {
             $group = AbacChain::query()->create([
                 'operator' => $i % 2 === 0 ? LogicalOperators::AND->value : LogicalOperators::OR->value,
-                'chain_id' => $this->rootChain->getKey(),
+                '_chain' => $this->rootChain->getKey(),
             ]);
 
             $this->attachResourceArithmeticChecks($group->getKey(), $i);
@@ -612,14 +612,14 @@ class AbacEvaluationBench
         $schema->create('abac_chains', function (Blueprint $table): void {
             $table->uuid('_id')->primary();
             $table->string('operator');
-            $table->uuid('chain_id')->nullable();
-            $table->uuid('policy_id')->nullable();
+            $table->uuid('_chain')->nullable();
+            $table->uuid('_policy')->nullable();
             $table->timestamps();
         });
 
         $schema->create('abac_checks', function (Blueprint $table): void {
             $table->uuid('_id')->primary();
-            $table->uuid('chain_id');
+            $table->uuid('_chain');
             $table->string('operator');
             $table->string('key');
             $table->string('value');
@@ -732,7 +732,7 @@ class AbacEvaluationBench
     protected function createCheck(string $chainId, string $operator, string $key, string $value): void
     {
         AbacCheck::query()->create([
-            'chain_id' => $chainId,
+            '_chain' => $chainId,
             'operator' => $operator,
             'key' => $key,
             'value' => $value,

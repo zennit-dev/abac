@@ -21,12 +21,12 @@ describe('addPermission', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy?->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy?->getKey())->first();
 
         expect($policy)->not->toBeNull()
             ->and($rootChain)->not->toBeNull()
             ->and($rootChain->operator)->toBe('or')
-            ->and($rootChain->chain_id)->toBeNull();
+            ->and($rootChain->_chain)->toBeNull();
     });
 
     it('defaults shorthand keys to actor prefix', function () {
@@ -174,7 +174,7 @@ describe('getPermission', function () {
     it('returns null for root chain (not a grant)', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
 
         $fetched = Abac::getPermission($rootChain->getKey());
 
@@ -202,7 +202,7 @@ describe('updatePermission', function () {
     it('throws on root chain id', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
 
         expect(fn () => Abac::updatePermission($rootChain->getKey(), ['role' => 'admin']))
             ->toThrow(InvalidArgumentException::class, "Permission grant {$rootChain->getKey()} does not exist");
@@ -229,7 +229,7 @@ describe('removePermission', function () {
     it('returns false for root chain', function () {
         Abac::addPermission('read', Post::class, ['role' => 'admin']);
         $policy = AbacPolicy::query()->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
 
         $result = Abac::removePermission($rootChain->getKey());
 
@@ -280,8 +280,8 @@ describe('widening behavior', function () {
         Abac::addPermission('read', Post::class, ['role' => 'editor']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
-        $branches = AbacChain::query()->where('chain_id', $rootChain->getKey())->get();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
+        $branches = AbacChain::query()->where('_chain', $rootChain->getKey())->get();
 
         expect($rootChain->operator)->toBe('or')
             ->and($branches->count())->toBe(2);
@@ -294,8 +294,8 @@ describe('widening behavior', function () {
         expect($second->id)->toBe($first->id);
 
         $policy = AbacPolicy::query()->where('method', 'read')->where('resource', Post::class)->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
-        $branches = AbacChain::query()->where('chain_id', $rootChain->getKey())->count();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
+        $branches = AbacChain::query()->where('_chain', $rootChain->getKey())->count();
 
         expect($branches)->toBe(1);
     });
@@ -346,7 +346,7 @@ describe('edge cases', function () {
         Abac::addPermission('read', Post::class, ['role' => 'editor']);
 
         $policy = AbacPolicy::query()->where('method', 'read')->first();
-        $rootChain = AbacChain::query()->where('policy_id', $policy->getKey())->first();
+        $rootChain = AbacChain::query()->where('_policy', $policy->getKey())->first();
 
         expect($rootChain->operator)->toBe('or');
     });

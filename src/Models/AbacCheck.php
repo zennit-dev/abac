@@ -10,7 +10,7 @@ use zennit\ABAC\Models\Concerns\FlushesAbacCache;
 
 /**
  * @property string $_id
- * @property string $chain_id
+ * @property string $_chain
  * @property string $operator
  * @property string $key
  * @property string $value
@@ -31,7 +31,7 @@ class AbacCheck extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'chain_id',
+        '_chain',
         'operator',
         'key',
         'value',
@@ -39,7 +39,7 @@ class AbacCheck extends Model
 
     protected $casts = [
         '_id' => 'string',
-        'chain_id' => 'string',
+        '_chain' => 'string',
         'operator' => 'string',
         'key' => 'string',
         'value' => 'string',

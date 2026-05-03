@@ -50,6 +50,6 @@ class AbacPolicy extends Model
      */
     public function chains(): HasMany
     {
-        return $this->hasMany(AbacChain::class, 'policy_id');
+        return $this->hasMany(AbacChain::class, '_policy');
     }
 }

@@ -41,14 +41,14 @@ return new class extends Migration
             $table->uuid('_id')->primary();
             $table->timestamps();
             $table->enum('operator', LogicalOperators::values());
-            $table->foreignUuid('chain_id')->nullable()->constrained('abac_chains', '_id')->cascadeOnDelete();
-            $table->foreignUuid('policy_id')->unique()->nullable()->constrained('abac_policies', '_id')->cascadeOnDelete();
+            $table->foreignUuid('_chain')->nullable()->constrained('abac_chains', '_id')->cascadeOnDelete();
+            $table->foreignUuid('_policy')->unique()->nullable()->constrained('abac_policies', '_id')->cascadeOnDelete();
         });
 
         Schema::create('abac_checks', function (Blueprint $table) {
             $table->uuid('_id')->primary();
             $table->timestamps();
-            $table->foreignUuid('chain_id')->constrained('abac_chains', '_id')->cascadeOnDelete();
+            $table->foreignUuid('_chain')->constrained('abac_chains', '_id')->cascadeOnDelete();
             $table->enum('operator', AllOperators::values([LogicalOperators::class]));
             $table->string('key');
             $table->string('value');
