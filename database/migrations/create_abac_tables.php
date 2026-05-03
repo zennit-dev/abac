@@ -41,8 +41,12 @@ return new class extends Migration
             $table->uuid('_id')->primary();
             $table->timestamps();
             $table->enum('operator', LogicalOperators::values());
-            $table->foreignUuid('_chain')->nullable()->constrained('abac_chains', '_id')->cascadeOnDelete();
+            $table->uuid('_chain')->nullable();
             $table->foreignUuid('_policy')->unique()->nullable()->constrained('abac_policies', '_id')->cascadeOnDelete();
+        });
+
+        Schema::table('abac_chains', function (Blueprint $table) {
+            $table->foreign('_chain')->references('_id')->on('abac_chains')->cascadeOnDelete();
         });
 
         Schema::create('abac_checks', function (Blueprint $table) {
