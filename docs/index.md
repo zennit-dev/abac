@@ -1,6 +1,6 @@
 # Laravel ABAC
 
-A flexible Attribute-Based Access Control (ABAC) implementation for Laravel 12+.
+A flexible Attribute-Based Access Control (ABAC) implementation for Laravel 13+.
 
 ## Quick Links
 
